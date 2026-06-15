@@ -7,3 +7,8 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+
+# Default warehouse — idempotent, safe to run in any environment.
+Warehouse.find_or_create_by!(name: 'Almacén Principal') do |w|
+  w.location = 'Lima, Peru'
+end
