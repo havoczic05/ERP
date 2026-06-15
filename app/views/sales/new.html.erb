@@ -1,0 +1,59 @@
+<h1>New Sales Document</h1>
+
+<% if @errors.present? %>
+  <div id="sale-errors">
+    <ul>
+      <% @errors.each do |error| %>
+        <li><%= error %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<%= form_with url: sales_path, method: :post do |f| %>
+  <div>
+    <%= label_tag :client_id, 'Client' %>
+    <%= hidden_field_tag 'sale[client_id]', @sale.client_id %>
+  </div>
+
+  <div>
+    <%= label_tag :warehouse_id, 'Warehouse' %>
+    <%= hidden_field_tag 'sale[warehouse_id]', @sale.warehouse_id %>
+  </div>
+
+  <div>
+    <%= label_tag :document_type, 'Document Type' %>
+    <%= select_tag 'sale[document_type]', options_for_select([['Cotizacion', 'cotizacion'], ['Venta', 'venta']], @sale.document_type) %>
+  </div>
+
+  <div>
+    <%= label_tag :num_installments, 'Number of Installments' %>
+    <%= number_field_tag 'sale[num_installments]', 1, min: 1, max: 4 %>
+  </div>
+
+  <div>
+    <%= label_tag :interval_days, 'Interval (days)' %>
+    <%= select_tag 'sale[interval_days]', options_for_select([7, 10, 15, 30, 45], 30) %>
+  </div>
+
+  <div>
+    <%= label_tag :notes, 'Notes' %>
+    <%= text_area_tag 'sale[notes]', @sale.notes %>
+  </div>
+
+  <div id="line-items">
+    <h3>Line Items</h3>
+    <div class="line-item">
+      <%= label_tag :product_id, 'Product ID' %>
+      <%= number_field_tag 'sale[items][][product_id]' %>
+      <%= label_tag :quantity, 'Quantity' %>
+      <%= number_field_tag 'sale[items][][quantity]', 1, min: 1 %>
+      <%= label_tag :unit_price_usd, 'Unit Price (USD)' %>
+      <%= number_field_tag 'sale[items][][unit_price_usd]', '0.00', step: '0.01' %>
+    </div>
+  </div>
+
+  <%= f.submit 'Create Document' %>
+<% end %>
+
+<%= link_to 'Back to Sales', sales_path %>

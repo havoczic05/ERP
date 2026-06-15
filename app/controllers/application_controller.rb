@@ -2,6 +2,8 @@ class ApplicationController < ActionController::Base
   include Pundit::Authorization
   include Pagy::Method
 
+  rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
+
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 
@@ -19,4 +21,10 @@ class ApplicationController < ActionController::Base
     @current_user ||= session[:user_id] && User.find_by(id: session[:user_id])
   end
   helper_method :current_user
+
+  private
+
+  def user_not_authorized
+    head :forbidden
+  end
 end

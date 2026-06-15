@@ -17,4 +17,11 @@ Rails.application.routes.draw do
       get :search
     end
   end
+
+  resources :sales do
+    member do
+      post :annul
+      post :convert_to_sale
+    end
+  end
 end
