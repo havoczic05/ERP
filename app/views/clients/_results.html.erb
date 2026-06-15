@@ -1,0 +1,13 @@
+<%= turbo_frame_tag "client_search_results" do %>
+  <% if @clients.empty? %>
+    <p>No clients found.</p>
+  <% else %>
+    <ul>
+      <% @clients.each do |client| %>
+        <li id="<%= dom_id(client) %>">
+          <%= client.full_name %> — <%= client.document_type.upcase %> <%= client.document_number %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+<% end %>

@@ -6,6 +6,14 @@ class ClientsController < ApplicationController
     @clients = search_clients(@clients, params[:q]) if params[:q].present?
   end
 
+  def search
+    authorize Client, :search?
+    term = params[:q].to_s.strip
+    scope = Client.kept
+    @clients = term.present? ? search_clients(scope, term) : scope.none
+    render partial: 'clients/results'
+  end
+
   def show
     authorize @client
   end

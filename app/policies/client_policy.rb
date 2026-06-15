@@ -8,6 +8,7 @@ class ClientPolicy < ApplicationPolicy
   def edit?     = allowed?
   def update?   = allowed?
   def destroy?  = allowed?
+  def search?   = allowed?
 
   private
 
