@@ -2,8 +2,9 @@ class ClientsController < ApplicationController
   before_action :set_client, only: %i[show edit update destroy]
 
   def index
-    @clients = Client.kept.order(:full_name)
-    @clients = search_clients(@clients, params[:q]) if params[:q].present?
+    scope = Client.kept.order(:full_name)
+    scope = search_clients(scope, params[:q]) if params[:q].present?
+    @pagy, @clients = pagy(:offset, scope)
   end
 
   def search

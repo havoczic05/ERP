@@ -22,3 +22,5 @@
 </table>
 
 <%= link_to 'New Client', new_client_path %>
+
+<%== @pagy.series_nav if @pagy.pages > 1 %>
