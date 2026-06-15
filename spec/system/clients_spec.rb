@@ -74,6 +74,8 @@ RSpec.describe 'Clients', type: :system do
       visit clients_path(q: 'ZZZNOMATCH')
       # Table is present but has no client rows
       expect(page).not_to have_css('table tbody tr[id^="client_"]')
+      # Spec requires a visible "no records found" message
+      expect(page).to have_content('No clients found.')
     end
   end
 

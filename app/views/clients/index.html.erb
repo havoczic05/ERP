@@ -21,6 +21,10 @@
   </tbody>
 </table>
 
+<% if @clients.empty? %>
+  <p id="no-clients-message">No clients found.</p>
+<% end %>
+
 <%= link_to 'New Client', new_client_path %>
 
 <%== @pagy.series_nav if @pagy.pages > 1 %>
