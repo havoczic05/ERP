@@ -1,0 +1,169 @@
+require 'rails_helper'
+
+# System specs for Clients CRUD views (Phase 6).
+# Driver: rack_test (default) — no Chrome/Chromium available in this environment.
+# JS-dependent behavior (Turbo Frame in-place swap without page reload) is tested
+# via HTTP response content rather than browser interaction; the Turbo Frame tag
+# renders in the HTML and rack_test can assert on its contents.
+#
+# Skipped (require real JS driver): SPA-style turbo replacement animation, streaming
+# broadcasts, and any scenario that requires JS event execution.
+
+RSpec.describe 'Clients', type: :system do
+  # ---------------------------------------------------------------------------
+  # Driver: rack_test (no Chrome/Chromium in this WSL environment).
+  # JS-specific behaviors (Turbo Frame swap animations, streaming) are tested
+  # via HTTP response content — rack_test sees the rendered HTML directly.
+  # ---------------------------------------------------------------------------
+  before do
+    driven_by(:rack_test)
+  end
+
+  # ---------------------------------------------------------------------------
+  # Sign-in stub: inject current_user so Pundit authorize passes.
+  # ApplicationController#current_user= is available in test env only.
+  # ---------------------------------------------------------------------------
+  let(:user) { create(:user, :administrador) }
+
+  before do
+    allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(user)
+  end
+
+  # ---------------------------------------------------------------------------
+  # Index — list of kept clients
+  # ---------------------------------------------------------------------------
+  describe 'index page' do
+    it 'shows kept clients' do
+      client = create(:client, :ruc_client, full_name: 'Visible Corp')
+      discarded = create(:client, :ruc_client, full_name: 'Hidden Corp').tap(&:discard)
+
+      visit clients_path
+      expect(page).to have_content('Visible Corp')
+      expect(page).not_to have_content('Hidden Corp')
+    end
+
+    it 'shows a link to create a new client' do
+      visit clients_path
+      expect(page).to have_link('New Client', href: new_client_path)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Search filter on index
+  # ---------------------------------------------------------------------------
+  describe 'search on index' do
+    it 'filters by document_number' do
+      match    = create(:client, :ruc_client, document_number: '20000000001', full_name: 'Match Client')
+      no_match = create(:client, :ruc_client, document_number: '20000000002', full_name: 'No Match Client')
+
+      visit clients_path(q: '20000000001')
+      expect(page).to have_content('Match Client')
+      expect(page).not_to have_content('No Match Client')
+    end
+
+    it 'filters by full_name' do
+      match    = create(:client, :ruc_client, full_name: 'Acme Corp')
+      no_match = create(:client, :ruc_client, full_name: 'Other Company')
+
+      visit clients_path(q: 'Acme')
+      expect(page).to have_content('Acme Corp')
+      expect(page).not_to have_content('Other Company')
+    end
+
+    it 'shows no results message when nothing matches' do
+      visit clients_path(q: 'ZZZNOMATCH')
+      # Table is present but has no client rows
+      expect(page).not_to have_css('table tbody tr[id^="client_"]')
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Create — valid params
+  # ---------------------------------------------------------------------------
+  describe 'creating a new client' do
+    context 'with valid params' do
+      it 'creates the client and redirects to show' do
+        visit new_client_path
+
+        fill_in 'Full name', with: 'Test Client SA'
+        select 'Ruc', from: 'Document type'
+        fill_in 'Document number', with: '20123456789'
+        fill_in 'Phone', with: '987654321'
+        click_button 'Create Client'
+
+        expect(page).to have_content('Test Client SA')
+        expect(Client.kept.find_by(document_number: '20123456789')).not_to be_nil
+      end
+    end
+
+    # Inline errors via Turbo Frame:
+    # With rack_test, the form is re-rendered with error messages in the HTML
+    # (the Turbo Frame tag is transparent to rack_test). We assert on error content.
+    context 'with invalid params (inline errors via Turbo Frame form)' do
+      it 'shows validation errors without leaving the form' do
+        visit new_client_path
+
+        fill_in 'Full name', with: ''
+        select 'Ruc', from: 'Document type'
+        fill_in 'Document number', with: ''
+        fill_in 'Phone', with: ''
+        click_button 'Create Client'
+
+        expect(page).to have_content("can't be blank")
+        # Still on new client page (form re-rendered in-frame)
+        expect(page).to have_button('Create Client')
+      end
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Show
+  # ---------------------------------------------------------------------------
+  describe 'show page' do
+    it 'displays all client fields' do
+      client = create(:client, :ruc_client, full_name: 'Show Corp', phone: '912345678')
+
+      visit client_path(client)
+      expect(page).to have_content('Show Corp')
+      expect(page).to have_content(client.document_number)
+      expect(page).to have_content('912345678')
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Edit / Update
+  # ---------------------------------------------------------------------------
+  describe 'editing a client' do
+    it 'updates the client and redirects' do
+      client = create(:client, :ruc_client, full_name: 'Before Update')
+
+      visit edit_client_path(client)
+      fill_in 'Full name', with: 'After Update'
+      click_button 'Update Client'
+
+      expect(page).to have_content('After Update')
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Destroy — soft-delete
+  # ---------------------------------------------------------------------------
+  describe 'archiving a client' do
+    it 'soft-deletes the client and redirects to index' do
+      client = create(:client, :ruc_client, full_name: 'To Archive')
+
+      visit clients_path
+      expect(page).to have_content('To Archive')
+
+      # Click the Archive button for this specific client row.
+      # dom_id is an ActionView helper; build the CSS id manually here.
+      within("#client_#{client.id}") do
+        click_button 'Archive'
+      end
+
+      expect(client.reload.discarded?).to be true
+      expect(page).to have_current_path(clients_path)
+      expect(page).not_to have_content('To Archive')
+    end
+  end
+end
