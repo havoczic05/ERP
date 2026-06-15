@@ -1,0 +1,27 @@
+<h1>Client Details</h1>
+
+<dl>
+  <dt>Full Name</dt>
+  <dd><%= @client.full_name %></dd>
+
+  <dt>Document Type</dt>
+  <dd><%= @client.document_type&.humanize %></dd>
+
+  <dt>Document Number</dt>
+  <dd><%= @client.document_number %></dd>
+
+  <dt>Phone</dt>
+  <dd><%= @client.phone %></dd>
+</dl>
+
+<p>
+  <%= link_to 'Edit', edit_client_path(@client) %>
+  <%= button_to 'Archive', @client, method: :delete,
+                data: { confirm: 'Archive this client?' } %>
+</p>
+
+<% if flash[:alert].present? %>
+  <div id="alert"><%= flash[:alert] %></div>
+<% end %>
+
+<%= link_to 'Back to Clients', clients_path %>

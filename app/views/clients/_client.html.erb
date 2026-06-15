@@ -1,0 +1,13 @@
+<tr id="<%= dom_id(client) %>">
+  <td><%= client.full_name %></td>
+  <td><%= client.document_type %></td>
+  <td><%= client.document_number %></td>
+  <td><%= client.phone %></td>
+  <td>
+    <%= link_to 'Show', client %>
+    <%= link_to 'Edit', edit_client_path(client) %>
+    <%= button_to 'Archive', client, method: :delete,
+                  data: { confirm: 'Archive this client?' },
+                  form: { style: 'display:inline' } %>
+  </td>
+</tr>

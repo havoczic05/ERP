@@ -1,0 +1,51 @@
+<%= turbo_frame_tag "client_form" do %>
+  <%= form_with model: client, local: false do |f| %>
+    <% if client.errors.any? %>
+      <div id="error_explanation">
+        <h2><%= pluralize(client.errors.count, 'error') %> prohibited this client from being saved:</h2>
+        <ul>
+          <% client.errors.each do |error| %>
+            <li><%= error.full_message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div>
+      <%= f.label :full_name %>
+      <%= f.text_field :full_name %>
+      <% if client.errors[:full_name].any? %>
+        <span class="error"><%= client.errors[:full_name].join(', ') %></span>
+      <% end %>
+    </div>
+
+    <div>
+      <%= f.label :document_type %>
+      <%= f.select :document_type, Client.document_types.keys.map { |k| [k.humanize, k] },
+                   { include_blank: 'Select type' } %>
+      <% if client.errors[:document_type].any? %>
+        <span class="error"><%= client.errors[:document_type].join(', ') %></span>
+      <% end %>
+    </div>
+
+    <div>
+      <%= f.label :document_number %>
+      <%= f.text_field :document_number %>
+      <% if client.errors[:document_number].any? %>
+        <span class="error"><%= client.errors[:document_number].join(', ') %></span>
+      <% end %>
+    </div>
+
+    <div>
+      <%= f.label :phone %>
+      <%= f.text_field :phone %>
+      <% if client.errors[:phone].any? %>
+        <span class="error"><%= client.errors[:phone].join(', ') %></span>
+      <% end %>
+    </div>
+
+    <div>
+      <%= f.submit %>
+    </div>
+  <% end %>
+<% end %>

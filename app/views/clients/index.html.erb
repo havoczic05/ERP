@@ -1,0 +1,24 @@
+<h1>Clients</h1>
+
+<%= form_with url: clients_path, method: :get, local: true do |f| %>
+  <%= f.label :q, 'Search' %>
+  <%= f.text_field :q, value: params[:q], placeholder: 'Name or document number' %>
+  <%= f.submit 'Search' %>
+<% end %>
+
+<table>
+  <thead>
+    <tr>
+      <th>Full Name</th>
+      <th>Document Type</th>
+      <th>Document Number</th>
+      <th>Phone</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= render @clients %>
+  </tbody>
+</table>
+
+<%= link_to 'New Client', new_client_path %>
