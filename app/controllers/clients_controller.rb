@@ -62,6 +62,7 @@ class ClientsController < ApplicationController
       @client.discard
       redirect_to clients_path, notice: 'Client was successfully archived.'
     else
+      flash.now[:alert] = 'This client cannot be deleted because it has associated sales.'
       render :show, status: :unprocessable_entity
     end
   end
