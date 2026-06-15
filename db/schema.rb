@@ -10,9 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_15_063838) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_15_063948) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "clients", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "discarded_at"
+    t.string "document_number", null: false
+    t.string "document_type", null: false
+    t.string "full_name", null: false
+    t.string "phone", null: false
+    t.datetime "updated_at", null: false
+    t.index ["document_number"], name: "index_clients_on_document_number", unique: true, where: "(discarded_at IS NULL)"
+  end
 
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
