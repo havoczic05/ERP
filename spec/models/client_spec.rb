@@ -183,5 +183,22 @@ RSpec.describe Client, type: :model do
         expect(client.destroyable?).to be(true)
       end
     end
+
+    context 'when the client has a real sale (S-1 debt closure)' do
+      it 'returns false' do
+        client = create(:client, :ruc_client)
+        create(:sale, client: client)
+        expect(client.destroyable?).to be(false)
+      end
+
+      it 'prevents hard-delete via dependent: :restrict_with_error' do
+        client = create(:client, :ruc_client)
+        create(:sale, client: client)
+        result = client.destroy
+        expect(result).to be(false)
+        expect(client.errors[:base]).to be_present
+        expect(Client.exists?(client.id)).to be(true)
+      end
+    end
   end
 end
