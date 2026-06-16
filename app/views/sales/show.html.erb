@@ -1,3 +1,11 @@
+<% if flash[:notice].present? %>
+  <div id="notice"><%= flash[:notice] %></div>
+<% end %>
+
+<% if flash[:alert].present? %>
+  <div id="alert"><%= flash[:alert] %></div>
+<% end %>
+
 <h1>Sale <%= @sale.correlative %></h1>
 
 <dl>
@@ -78,7 +86,10 @@
 
 <% if @sale.credit_note %>
   <h2>Credit Note</h2>
-  <p>Issued: <%= @sale.credit_note.issued_at %> — Total: <%= number_to_currency(@sale.credit_note.total_usd, unit: 'USD ') %></p>
+  <p>
+    Issued: <%= @sale.credit_note.issued_at %> —
+    Total: <%= number_to_currency(@sale.credit_note.total_usd, unit: 'USD ') %>
+  </p>
 <% end %>
 
 <div>
@@ -92,13 +103,5 @@
                   data: { confirm: 'Annul this sale? This cannot be undone.' } %>
   <% end %>
 </div>
-
-<% if flash[:notice].present? %>
-  <div id="notice"><%= flash[:notice] %></div>
-<% end %>
-
-<% if flash[:alert].present? %>
-  <div id="alert"><%= flash[:alert] %></div>
-<% end %>
 
 <%= link_to 'Back to Sales', sales_path %>

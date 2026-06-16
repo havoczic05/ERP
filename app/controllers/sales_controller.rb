@@ -1,5 +1,6 @@
 class SalesController < ApplicationController
-  before_action :set_sale, only: %i[show annul convert_to_sale]
+  before_action :set_sale,        only: %i[show]
+  before_action :set_kept_sale,   only: %i[annul convert_to_sale]
 
   # GET /sales
   def index
@@ -72,7 +73,13 @@ class SalesController < ApplicationController
 
   private
 
+  # Show allows viewing annulled (discarded) sales for audit purposes.
   def set_sale
+    @sale = Sale.find(params[:id])
+  end
+
+  # Annul and convert_to_sale operate only on kept (non-discarded) sales.
+  def set_kept_sale
     @sale = Sale.kept.find(params[:id])
   end
 

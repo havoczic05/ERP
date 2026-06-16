@@ -11,46 +11,92 @@
 <% end %>
 
 <%= form_with url: sales_path, method: :post do |f| %>
+  <%# Client picker — Turbo Frame renders /clients/search results inline.
+      The hidden field carries the selected client_id on submit.
+      JS-dependent inline swap (W-3 debt): live swap requires a real JS driver. %>
   <div>
-    <%= label_tag :client_id, 'Client' %>
+    <%= label_tag :q, 'Search Client' %>
+    <%= text_field_tag :q, '', placeholder: 'Name or document number',
+        data: { action: 'input->sale-form#searchClient' } %>
     <%= hidden_field_tag 'sale[client_id]', @sale.client_id %>
+
+    <%= turbo_frame_tag 'client-picker',
+        src: search_clients_path,
+        loading: 'lazy' do %>
+      <p>Type to search for a client.</p>
+    <% end %>
   </div>
 
   <div>
-    <%= label_tag :warehouse_id, 'Warehouse' %>
+    <%= label_tag 'sale[warehouse_id]', 'Warehouse' %>
     <%= hidden_field_tag 'sale[warehouse_id]', @sale.warehouse_id %>
   </div>
 
   <div>
-    <%= label_tag :document_type, 'Document Type' %>
-    <%= select_tag 'sale[document_type]', options_for_select([['Cotizacion', 'cotizacion'], ['Venta', 'venta']], @sale.document_type) %>
+    <%= label_tag 'sale[document_type]', 'Document Type' %>
+    <%= select_tag 'sale[document_type]',
+        options_for_select([['Cotizacion', 'cotizacion'], ['Venta', 'venta']],
+                           @sale.document_type) %>
   </div>
 
   <div>
-    <%= label_tag :num_installments, 'Number of Installments' %>
-    <%= number_field_tag 'sale[num_installments]', 1, min: 1, max: 4 %>
+    <%= label_tag 'sale[num_installments]', 'Number of Installments' %>
+    <%= number_field_tag 'sale[num_installments]', 1, min: 1, max: 4,
+        data: { 'sale-form-target': 'numInstallments' } %>
   </div>
 
   <div>
-    <%= label_tag :interval_days, 'Interval (days)' %>
-    <%= select_tag 'sale[interval_days]', options_for_select([7, 10, 15, 30, 45], 30) %>
+    <%= label_tag 'sale[interval_days]', 'Interval (days)' %>
+    <%= select_tag 'sale[interval_days]',
+        options_for_select([7, 10, 15, 30, 45].map { |d| [d.to_s, d] }, 30),
+        data: { 'sale-form-target': 'intervalDays' } %>
   </div>
 
   <div>
-    <%= label_tag :notes, 'Notes' %>
+    <%= label_tag 'sale[notes]', 'Notes' %>
     <%= text_area_tag 'sale[notes]', @sale.notes %>
   </div>
 
-  <div id="line-items">
+  <%# Line items — Stimulus sale-form controller manages add/remove rows
+      and computes line totals client-side. Requires a real JS driver to
+      exercise those behaviors (W-3 debt). The server always sees the
+      submitted fields regardless. %>
+  <div id="line-items"
+       data-controller="sale-form"
+       data-sale-form-search-url-value="<%= search_clients_path %>">
     <h3>Line Items</h3>
-    <div class="line-item">
-      <%= label_tag :product_id, 'Product ID' %>
-      <%= number_field_tag 'sale[items][][product_id]' %>
-      <%= label_tag :quantity, 'Quantity' %>
-      <%= number_field_tag 'sale[items][][quantity]', 1, min: 1 %>
-      <%= label_tag :unit_price_usd, 'Unit Price (USD)' %>
-      <%= number_field_tag 'sale[items][][unit_price_usd]', '0.00', step: '0.01' %>
-    </div>
+
+    <table id="line-items-table">
+      <thead>
+        <tr>
+          <th>Product ID</th>
+          <th>Quantity</th>
+          <th>Unit Price (USD)</th>
+          <th>Line Total (USD)</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody data-sale-form-target="lineItemsBody">
+        <tr class="line-item">
+          <td><%= number_field_tag 'sale[items][][product_id]', nil, min: 1,
+                  data: { 'sale-form-target': 'productId' } %></td>
+          <td><%= number_field_tag 'sale[items][][quantity]', 1, min: 1,
+                  data: { 'sale-form-target': 'quantity',
+                          action: 'input->sale-form#recompute' } %></td>
+          <td><%= number_field_tag 'sale[items][][unit_price_usd]', '0.00', step: '0.01',
+                  data: { 'sale-form-target': 'unitPrice',
+                          action: 'input->sale-form#recompute' } %></td>
+          <td data-sale-form-target="lineTotal">USD 0.00</td>
+          <td><button type="button" data-action="sale-form#removeLine">Remove</button></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button type="button" data-action="sale-form#addLine">Add Line Item</button>
+
+    <p>
+      Grand Total (USD): <span data-sale-form-target="grandTotal">0.00</span>
+    </p>
   </div>
 
   <%= f.submit 'Create Document' %>

@@ -15,7 +15,7 @@
   </thead>
   <tbody>
     <% @sales.each do |sale| %>
-      <tr>
+      <tr id="<%= dom_id(sale) %>">
         <td><%= sale.correlative %></td>
         <td><%= sale.document_type.humanize %></td>
         <td><%= sale.client.full_name %></td>
@@ -34,7 +34,7 @@
 </table>
 
 <% if @sales.empty? %>
-  <p>No sales found.</p>
+  <p id="no-sales-message">No sales found.</p>
 <% end %>
 
 <%== @pagy.series_nav if @pagy.pages > 1 %>
