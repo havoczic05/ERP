@@ -1,0 +1,53 @@
+<%= form_with model: company_settings, url: company_settings_path, method: :patch, multipart: true do |f| %>
+  <% if company_settings.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(company_settings.errors.count, "error") %> prohibited these settings from being saved:</h2>
+      <ul>
+        <% company_settings.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :razon_social %>
+    <%= f.text_field :razon_social %>
+    <% if company_settings.errors[:razon_social].any? %>
+      <span class="error"><%= company_settings.errors[:razon_social].join(", ") %></span>
+    <% end %>
+  </div>
+
+  <div>
+    <%= f.label :ruc %>
+    <%= f.text_field :ruc %>
+    <% if company_settings.errors[:ruc].any? %>
+      <span class="error"><%= company_settings.errors[:ruc].join(", ") %></span>
+    <% end %>
+  </div>
+
+  <div>
+    <%= f.label :direccion %>
+    <%= f.text_field :direccion %>
+    <% if company_settings.errors[:direccion].any? %>
+      <span class="error"><%= company_settings.errors[:direccion].join(", ") %></span>
+    <% end %>
+  </div>
+
+  <div>
+    <%= f.label :telefono %>
+    <%= f.text_field :telefono %>
+    <% if company_settings.errors[:telefono].any? %>
+      <span class="error"><%= company_settings.errors[:telefono].join(", ") %></span>
+    <% end %>
+  </div>
+
+  <div>
+    <%= f.label :logo %>
+    <%= f.file_field :logo %>
+  </div>
+
+  <div>
+    <%= f.submit %>
+  </div>
+<% end %>

@@ -45,4 +45,6 @@ Rails.application.routes.draw do
   end
 
   get "accounts_receivable", to: "accounts_receivable#index", as: :accounts_receivable
+
+  resource :company_settings, only: %i[show edit update]
 end
