@@ -11,10 +11,22 @@ class Installment < ApplicationRecord
   has_many :amortizations
 
   # ---------------------------------------------------------------------------
+  # Scopes
+  # ---------------------------------------------------------------------------
+  scope :outstanding, -> { where(status: 'pendiente').order(:due_date) }
+
+  # ---------------------------------------------------------------------------
   # Validations
   # ---------------------------------------------------------------------------
   validates :amount_usd, numericality: { greater_than: 0 }
   validates :balance_usd, numericality: { greater_than_or_equal_to: 0 }
   validates :due_date, presence: true
   validates :installment_number, presence: true, numericality: { greater_than: 0, only_integer: true }
+
+  # ---------------------------------------------------------------------------
+  # Computed helpers
+  # ---------------------------------------------------------------------------
+  def overdue?
+    pendiente? && due_date < Date.current
+  end
 end

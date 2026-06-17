@@ -57,4 +57,43 @@ RSpec.describe Installment, type: :model do
       expect(association.macro).to eq(:has_many)
     end
   end
+
+  describe '.outstanding scope' do
+    it 'returns only pendiente installments ordered by due_date asc' do
+      old_due  = create(:installment, status: 'pendiente', due_date: 10.days.from_now)
+      new_due  = create(:installment, status: 'pendiente', due_date: 20.days.from_now)
+      _pagada  = create(:installment, status: 'pagada',    due_date: 5.days.from_now)
+      _vencida = create(:installment, status: 'vencida',   due_date: 1.day.ago)
+
+      result = described_class.outstanding
+      expect(result).to eq([old_due, new_due])
+    end
+
+    it 'excludes pagada installments' do
+      create(:installment, status: 'pagada', due_date: 1.day.from_now)
+      expect(described_class.outstanding).to be_empty
+    end
+  end
+
+  describe '#overdue?' do
+    it 'returns true when pendiente and due_date is in the past' do
+      installment = build(:installment, status: 'pendiente', due_date: 1.day.ago)
+      expect(installment.overdue?).to be(true)
+    end
+
+    it 'returns false when pendiente and due_date is today' do
+      installment = build(:installment, status: 'pendiente', due_date: Date.current)
+      expect(installment.overdue?).to be(false)
+    end
+
+    it 'returns false when pendiente and due_date is in the future' do
+      installment = build(:installment, status: 'pendiente', due_date: 1.day.from_now)
+      expect(installment.overdue?).to be(false)
+    end
+
+    it 'returns false when pagada even if due_date is in the past' do
+      installment = build(:installment, status: 'pagada', due_date: 1.day.ago)
+      expect(installment.overdue?).to be(false)
+    end
+  end
 end
