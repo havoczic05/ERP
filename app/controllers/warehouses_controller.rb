@@ -21,7 +21,7 @@ class WarehousesController < ApplicationController
     authorize @warehouse
 
     if @warehouse.save
-      redirect_to @warehouse, notice: 'Warehouse was successfully created.'
+      redirect_to @warehouse, notice: "Warehouse was successfully created."
     else
       render :new, status: :unprocessable_entity
     end
@@ -35,7 +35,7 @@ class WarehousesController < ApplicationController
     authorize @warehouse
 
     if @warehouse.update(warehouse_params)
-      redirect_to @warehouse, notice: 'Warehouse was successfully updated.'
+      redirect_to @warehouse, notice: "Warehouse was successfully updated."
     else
       render :edit, status: :unprocessable_entity
     end
@@ -46,9 +46,9 @@ class WarehousesController < ApplicationController
 
     if @warehouse.destroyable?
       @warehouse.destroy
-      redirect_to warehouses_path, notice: 'Warehouse was successfully deleted.'
+      redirect_to warehouses_path, notice: "Warehouse was successfully deleted."
     else
-      flash.now[:alert] = 'This warehouse cannot be deleted because it has associated products or sales.'
+      flash.now[:alert] = "This warehouse cannot be deleted because it has associated products or sales."
       render :show, status: :unprocessable_entity
     end
   end

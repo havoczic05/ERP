@@ -12,6 +12,6 @@ class CreateInstallments < ActiveRecord::Migration[8.1]
     end
 
     # Composite unique index: prevents duplicate installment numbers per sale.
-    add_index :installments, [:sale_id, :installment_number], unique: true
+    add_index :installments, [ :sale_id, :installment_number ], unique: true
   end
 end

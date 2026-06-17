@@ -11,7 +11,7 @@ Rails.application.routes.draw do
 
   # Authentication routes
   resource :session, only: %i[new create destroy]
-  get  "login",  to: "sessions#new",     as: :login
+  get "login",  to: "sessions#new",     as: :login
   delete "logout", to: "sessions#destroy", as: :logout
 
   # Defines the root path route ("/")
@@ -41,8 +41,8 @@ Rails.application.routes.draw do
   end
 
   resources :installments, only: [] do
-    resources :amortizations, only: [:create]
+    resources :amortizations, only: [ :create ]
   end
 
-  get 'accounts_receivable', to: 'accounts_receivable#index', as: :accounts_receivable
+  get "accounts_receivable", to: "accounts_receivable#index", as: :accounts_receivable
 end

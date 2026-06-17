@@ -19,7 +19,7 @@ class Product < ApplicationRecord
   validates :sku,
             uniqueness: {
               conditions: -> { where(discarded_at: nil) },
-              message: 'is already taken by an active product'
+              message: "is already taken by an active product"
             }
 
   # ---------------------------------------------------------------------------

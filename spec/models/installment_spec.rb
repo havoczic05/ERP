@@ -66,7 +66,7 @@ RSpec.describe Installment, type: :model do
       _vencida = create(:installment, status: 'vencida',   due_date: 1.day.ago)
 
       result = described_class.outstanding
-      expect(result).to eq([old_due, new_due])
+      expect(result).to eq([ old_due, new_due ])
     end
 
     it 'excludes pagada installments' do
