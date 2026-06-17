@@ -33,9 +33,20 @@ class SalesController < ApplicationController
     end
   end
 
-  # GET /sales/:id
+  # GET /sales/:id(.pdf)
   def show
     authorize @sale
+
+    respond_to do |format|
+      format.html
+      format.pdf do
+        pdf = SalePdf.new(@sale, CompanySettings.instance)
+        send_data pdf.render,
+                  filename: "#{@sale.correlative}.pdf",
+                  type: "application/pdf",
+                  disposition: "inline"
+      end
+    end
   end
 
   # POST /sales/:id/convert_to_sale

@@ -43,6 +43,10 @@ gem "image_processing", "~> 2.0"
 gem "pundit"
 gem "pagy"
 
+# PDF generation for commercial documents (cotizaciones/ventas) — pure Ruby, no headless browser
+gem "prawn"
+gem "prawn-table"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
@@ -58,6 +62,9 @@ group :development, :test do
 
   gem "rspec-rails"
   gem "factory_bot_rails"
+
+  # Inspect generated PDF text/content in specs [https://github.com/prawnpdf/pdf-inspector]
+  gem "pdf-inspector", require: false
 end
 
 group :development do
