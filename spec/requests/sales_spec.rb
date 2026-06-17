@@ -11,10 +11,6 @@ RSpec.describe 'Sales', type: :request do
   let(:client)    { create(:client, :ruc_client) }
   let(:product)   { create(:product, stock: 100, base_price_usd: 10.00, warehouse: warehouse) }
 
-  def login_as(user)
-    allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(user)
-  end
-
   def venta_params(num_installments: 1, interval_days: 30, items: nil)
     items ||= [{ product_id: product.id, quantity: 2, unit_price_usd: '10.00' }]
     {

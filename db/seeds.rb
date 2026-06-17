@@ -12,3 +12,10 @@
 Warehouse.find_or_create_by!(name: 'Almacén Principal') do |w|
   w.location = 'Lima, Peru'
 end
+
+# Default admin user — idempotent, safe to run in any environment.
+User.find_or_create_by!(email: 'admin@erp.local') do |u|
+  u.role     = 'administrador'
+  u.password = ENV.fetch('SEED_ADMIN_PASSWORD', 'changeme123')
+  u.active   = true
+end

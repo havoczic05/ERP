@@ -9,10 +9,6 @@ RSpec.describe 'AccountsReceivable', type: :request do
   let(:sale)   { create(:sale, :venta, :with_items) }
   let(:client) { sale.client }
 
-  def login_as(user)
-    allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(user)
-  end
-
   # ---------------------------------------------------------------------------
   # AR-01: index shows only pending installments (pagada excluded)
   # ---------------------------------------------------------------------------

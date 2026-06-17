@@ -12,10 +12,6 @@ RSpec.describe 'Amortizations', type: :request do
     create(:installment, sale: sale, amount_usd: 500.00, balance_usd: 500.00)
   end
 
-  def login_as(user)
-    allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(user)
-  end
-
   def amortization_params(amount: '200.00', notes: nil)
     { amortization: { amount_usd: amount, notes: notes } }
   end
