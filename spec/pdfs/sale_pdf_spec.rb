@@ -1,0 +1,133 @@
+require "rails_helper"
+require "pdf/inspector"
+
+RSpec.describe SalePdf do
+  let(:warehouse) { create(:warehouse) }
+  let(:client) do
+    create(:client, :ruc_client, full_name: "Cliente Mayorista SAC",
+           document_number: "20987654321")
+  end
+  let(:product) { create(:product, name: "Resistor 10k", warehouse: warehouse) }
+  let(:settings) { CompanySettings.instance }
+
+  def text_of(pdf_string)
+    PDF::Inspector::Text.analyze(pdf_string).strings.join(" ")
+  end
+
+  before do
+    settings.update!(razon_social: "Importadora Electrónica SAC", ruc: "20123456789")
+  end
+
+  describe "#render" do
+    let(:sale) do
+      sale = create(:sale, client: client, warehouse: warehouse,
+                    subtotal_usd: 30.00, tax_usd: 0.00, total_usd: 30.00)
+      create(:sale_item, sale: sale, product: product, quantity: 3,
+             unit_price_usd: 10.00, line_total_usd: 30.00)
+      sale
+    end
+
+    it "returns a valid PDF byte string" do
+      pdf = described_class.new(sale, settings).render
+      expect(pdf).to start_with("%PDF")
+    end
+
+    it "injects the company razon_social and RUC into the header (RF5.4)" do
+      text = text_of(described_class.new(sale, settings).render)
+      expect(text).to include("Importadora Electrónica SAC")
+      expect(text).to include("20123456789")
+    end
+
+    it "renders the document type label and correlative" do
+      text = text_of(described_class.new(sale, settings).render)
+      expect(text).to include(sale.correlative)
+      expect(text).to match(/Cotizacion/i)
+    end
+
+    it "renders client identification" do
+      text = text_of(described_class.new(sale, settings).render)
+      expect(text).to include("Cliente Mayorista SAC")
+      expect(text).to include("20987654321")
+    end
+
+    it "renders line items and totals" do
+      text = text_of(described_class.new(sale, settings).render)
+      expect(text).to include("Resistor 10k")
+      expect(text).to include("3")               # quantity
+      expect(text).to include("USD 30.00")       # total
+    end
+  end
+
+  describe "venta with installments" do
+    let(:venta) do
+      sale = create(:sale, :venta, client: client, warehouse: warehouse,
+                    subtotal_usd: 20.00, total_usd: 20.00)
+      create(:sale_item, sale: sale, product: product, quantity: 2,
+             unit_price_usd: 10.00, line_total_usd: 20.00)
+      create(:installment, sale: sale, installment_number: 1,
+             amount_usd: 20.00, balance_usd: 20.00, due_date: Date.new(2026, 7, 1))
+      sale
+    end
+
+    it "renders the installments section" do
+      text = text_of(described_class.new(venta, settings).render)
+      expect(text).to match(/Venta/i)
+      expect(text).to include("2026-07-01")
+    end
+  end
+
+  describe "annulled document" do
+    let(:anulada) do
+      sale = create(:sale, :venta, :anulada, client: client, warehouse: warehouse,
+                    subtotal_usd: 20.00, total_usd: 20.00)
+      create(:sale_item, sale: sale, product: product)
+      sale
+    end
+
+    it "marks the document as Anulada" do
+      text = text_of(described_class.new(anulada, settings).render)
+      expect(text).to match(/Anulada/i)
+    end
+  end
+
+  describe "logo handling" do
+    let(:sale) do
+      sale = create(:sale, client: client, warehouse: warehouse)
+      create(:sale_item, sale: sale, product: product)
+      sale
+    end
+
+    it "embeds the logo when attached" do
+      settings.logo.attach(
+        io: File.open(Rails.root.join("spec/fixtures/files/logo.png")),
+        filename: "logo.png", content_type: "image/png"
+      )
+      expect { described_class.new(sale, settings).render }.not_to raise_error
+    end
+
+    it "renders without a logo when none is attached" do
+      expect(settings.logo).not_to be_attached
+      expect { described_class.new(sale, settings).render }.not_to raise_error
+    end
+  end
+
+  describe "optional company fields" do
+    let(:sale) do
+      sale = create(:sale, client: client, warehouse: warehouse)
+      create(:sale_item, sale: sale, product: product)
+      sale
+    end
+
+    it "renders when direccion and telefono are nil" do
+      settings.update!(direccion: nil, telefono: nil)
+      expect { described_class.new(sale, settings).render }.not_to raise_error
+    end
+
+    it "renders direccion and telefono when present" do
+      settings.update!(direccion: "Av. Comercio 123", telefono: "555-1234")
+      text = text_of(described_class.new(sale, settings).render)
+      expect(text).to include("Av. Comercio 123")
+      expect(text).to include("555-1234")
+    end
+  end
+end

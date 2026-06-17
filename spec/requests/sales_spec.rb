@@ -166,6 +166,39 @@ RSpec.describe 'Sales', type: :request do
   end
 
   # ---------------------------------------------------------------------------
+  # GET /sales/:id.pdf — RF5.4 PDF export
+  # ---------------------------------------------------------------------------
+  describe 'GET /sales/:id.pdf' do
+    let(:sale) do
+      sale = create(:sale, :venta, client: client, warehouse: warehouse)
+      create(:sale_item, sale: sale, product: product, quantity: 2,
+             unit_price_usd: 10.00, line_total_usd: 20.00)
+      sale
+    end
+
+    it 'returns a PDF for a logged-in vendedor' do
+      login_as(vendor_user)
+      get sale_path(sale, format: :pdf)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.media_type).to eq('application/pdf')
+      expect(response.body).to start_with('%PDF')
+    end
+
+    it 'names the file after the document correlative' do
+      login_as(admin_user)
+      get sale_path(sale, format: :pdf)
+
+      expect(response.headers['Content-Disposition']).to include("#{sale.correlative}.pdf")
+    end
+
+    it 'redirects to login when unauthenticated' do
+      get sale_path(sale, format: :pdf)
+      expect(response).to redirect_to(login_path)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # POST /sales/:id/convert_to_sale — convert cotizacion to venta
   # ---------------------------------------------------------------------------
   describe 'POST /sales/:id/convert_to_sale' do
