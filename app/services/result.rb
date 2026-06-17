@@ -1,14 +1,25 @@
 # Lightweight Result PORO returned by service objects.
-# Usage:
-#   Result.success(sale)          → result.success? == true
-#   Result.failure(sale, errors)  → result.success? == false
+#
+# Primary interface:
+#   Result.success(record)          → result.record, result.success? == true
+#   Result.failure(record, errors)  → result.record, result.errors, result.failure? == true
+#
+# Backward-compatible alias:
+#   result.sale  →  same as result.record  (Sales callers unchanged)
 class Result
-  attr_reader :sale, :errors
+  attr_reader :record, :errors
 
-  def initialize(success:, sale: nil, errors: [])
+  # Accept both record: and sale: keywords so any direct Result.new call keeps working.
+  # record: wins when both are supplied.
+  def initialize(success:, record: nil, sale: nil, errors: [])
     @success = success
-    @sale    = sale
+    @record  = record.nil? ? sale : record
     @errors  = Array(errors)
+  end
+
+  # Backward-compatible alias kept so Sales callers need zero changes.
+  def sale
+    @record
   end
 
   def success?
@@ -19,11 +30,11 @@ class Result
     !@success
   end
 
-  def self.success(sale)
-    new(success: true, sale: sale, errors: [])
+  def self.success(record)
+    new(success: true, record: record, errors: [])
   end
 
-  def self.failure(sale = nil, errors = [])
-    new(success: false, sale: sale, errors: Array(errors))
+  def self.failure(record = nil, errors = [])
+    new(success: false, record: record, errors: Array(errors))
   end
 end
