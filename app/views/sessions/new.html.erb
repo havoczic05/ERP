@@ -1,0 +1,21 @@
+<h1>Log in</h1>
+
+<% if flash[:alert] %>
+  <div id="flash_alert"><%= flash[:alert] %></div>
+<% end %>
+
+<%= form_with url: session_path, method: :post do |f| %>
+  <div>
+    <%= f.label :email, "Email" %>
+    <%= f.email_field :email, autocomplete: "email", required: true %>
+  </div>
+
+  <div>
+    <%= f.label :password, "Password" %>
+    <%= f.password_field :password, autocomplete: "current-password", required: true %>
+  </div>
+
+  <div>
+    <%= f.submit "Log in" %>
+  </div>
+<% end %>
