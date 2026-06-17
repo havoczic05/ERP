@@ -1,0 +1,33 @@
+<h1>Product Details</h1>
+
+<dl>
+  <dt>SKU</dt>
+  <dd><%= @product.sku %></dd>
+
+  <dt>Name</dt>
+  <dd><%= @product.name %></dd>
+
+  <dt>Brand</dt>
+  <dd><%= @product.brand %></dd>
+
+  <dt>Warehouse</dt>
+  <dd><%= @product.warehouse&.name %></dd>
+
+  <dt>Stock</dt>
+  <dd><%= @product.stock %></dd>
+
+  <dt>Base Price (USD)</dt>
+  <dd><%= @product.base_price_usd %></dd>
+</dl>
+
+<% if flash[:alert].present? %>
+  <div id="alert"><%= flash[:alert] %></div>
+<% end %>
+
+<p>
+  <%= link_to 'Edit', edit_product_path(@product) %>
+  <%= button_to 'Delete', @product, method: :delete,
+                data: { confirm: 'Delete this product?' } %>
+</p>
+
+<%= link_to 'Back to Products', products_path %>

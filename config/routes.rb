@@ -20,6 +20,12 @@ Rails.application.routes.draw do
 
   resources :warehouses
 
+  resources :products do
+    collection do
+      get :search
+    end
+  end
+
   resources :sales do
     member do
       post :annul

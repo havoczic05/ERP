@@ -42,4 +42,11 @@ class Product < ApplicationRecord
   def discarded?
     discarded_at.present?
   end
+
+  # ---------------------------------------------------------------------------
+  # Destroy guard (RF-PM-4)
+  # ---------------------------------------------------------------------------
+  def destroyable?
+    !sale_items.exists?
+  end
 end

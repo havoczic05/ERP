@@ -1,0 +1,13 @@
+<%= turbo_frame_tag "product_search_results" do %>
+  <% if @products.empty? %>
+    <p>No products found.</p>
+  <% else %>
+    <ul>
+      <% @products.each do |product| %>
+        <li id="<%= dom_id(product) %>">
+          <%= product.name %> — <%= product.sku %> (<%= product.warehouse&.name %>)
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+<% end %>

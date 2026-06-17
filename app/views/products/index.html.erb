@@ -1,0 +1,43 @@
+<h1>Products</h1>
+
+<form action="<%= products_path %>" method="get">
+  <label for="q">Search (name or SKU)</label>
+  <input type="text" id="q" name="q" value="<%= params[:q] %>">
+
+  <label for="warehouse_id">Warehouse</label>
+  <select id="warehouse_id" name="warehouse_id">
+    <option value="">All Warehouses</option>
+    <% @warehouses.each do |wh| %>
+      <option value="<%= wh.id %>" <%= 'selected' if params[:warehouse_id].to_s == wh.id.to_s %>>
+        <%= wh.name %>
+      </option>
+    <% end %>
+  </select>
+
+  <button type="submit">Search</button>
+</form>
+
+<table>
+  <thead>
+    <tr>
+      <th>SKU</th>
+      <th>Name</th>
+      <th>Brand</th>
+      <th>Warehouse</th>
+      <th>Stock</th>
+      <th>Price (USD)</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= render @products %>
+  </tbody>
+</table>
+
+<% if @products.empty? %>
+  <p id="no-products-message">No products found.</p>
+<% end %>
+
+<%= link_to 'New Product', new_product_path %>
+
+<%== @pagy.series_nav if @pagy.pages > 1 %>

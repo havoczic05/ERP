@@ -1,0 +1,76 @@
+<%= turbo_frame_tag dom_id(product) do %>
+  <%= form_with model: product, local: false do |f| %>
+    <% if product.errors.any? %>
+      <div id="error_explanation">
+        <h2><%= pluralize(product.errors.count, 'error') %> prohibited this product from being saved:</h2>
+        <ul>
+          <% product.errors.each do |error| %>
+            <li><%= error.full_message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div>
+      <%= f.label :sku %>
+      <%= f.text_field :sku %>
+      <% if product.errors[:sku].any? %>
+        <span class="error"><%= product.errors[:sku].join(', ') %></span>
+      <% end %>
+    </div>
+
+    <div>
+      <%= f.label :name %>
+      <%= f.text_field :name %>
+      <% if product.errors[:name].any? %>
+        <span class="error"><%= product.errors[:name].join(', ') %></span>
+      <% end %>
+    </div>
+
+    <div>
+      <%= f.label :brand %>
+      <%= f.text_field :brand %>
+      <% if product.errors[:brand].any? %>
+        <span class="error"><%= product.errors[:brand].join(', ') %></span>
+      <% end %>
+    </div>
+
+    <div>
+      <%= f.label :warehouse_id, 'Warehouse' %>
+      <%= f.collection_select :warehouse_id, @warehouses, :id, :name,
+                              { include_blank: 'Select warehouse' } %>
+      <% if product.errors[:warehouse_id].any? %>
+        <span class="error"><%= product.errors[:warehouse_id].join(', ') %></span>
+      <% end %>
+    </div>
+
+    <% if product.persisted? %>
+      <%# RF-PM-3: stock is read-only on edit — render as plain text, no input %>
+      <div>
+        <label>Stock</label>
+        <span><%= product.stock %></span>
+      </div>
+    <% else %>
+      <%# RF-PM-3: stock is writable only at creation %>
+      <div>
+        <%= f.label :stock %>
+        <%= f.number_field :stock, min: 0 %>
+        <% if product.errors[:stock].any? %>
+          <span class="error"><%= product.errors[:stock].join(', ') %></span>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div>
+      <%= f.label :base_price_usd, 'Base price usd' %>
+      <%= f.number_field :base_price_usd, step: 0.01, min: 0.01 %>
+      <% if product.errors[:base_price_usd].any? %>
+        <span class="error"><%= product.errors[:base_price_usd].join(', ') %></span>
+      <% end %>
+    </div>
+
+    <div>
+      <%= f.submit %>
+    </div>
+  <% end %>
+<% end %>

@@ -109,4 +109,32 @@ RSpec.describe Product, type: :model do
       expect(association.macro).to eq(:has_many)
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # destroyable? — RF-PM-4 guard
+  # ---------------------------------------------------------------------------
+  describe '#destroyable?' do
+    context 'when product has no sale_items' do
+      it 'returns true' do
+        product = create(:product)
+        expect(product.destroyable?).to be true
+      end
+    end
+
+    context 'when product has one sale_item' do
+      it 'returns false' do
+        product = create(:product)
+        create(:sale_item, product: product)
+        expect(product.destroyable?).to be false
+      end
+    end
+
+    context 'when product has multiple sale_items' do
+      it 'returns false (guard applies regardless of count)' do
+        product = create(:product)
+        create_list(:sale_item, 3, product: product)
+        expect(product.destroyable?).to be false
+      end
+    end
+  end
 end
