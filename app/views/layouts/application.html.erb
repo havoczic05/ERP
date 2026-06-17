@@ -29,6 +29,7 @@
         <span><%= current_user.email %> (<%= current_user.role %>)</span>
         <% if current_user.admin? %>
           <%= link_to "Users", users_path %>
+          <%= link_to "Company Settings", company_settings_path %>
         <% end %>
         <%= button_to "Log out", logout_path, method: :delete %>
       </nav>
