@@ -63,20 +63,20 @@ RSpec.describe 'Sales', type: :system do
       expect(page).to have_link('View', href: sale_path(sale))
     end
 
-    it 'does not show discarded (soft-deleted) sales' do
-      kept     = create(:sale, client: client, warehouse: warehouse,
-                                correlative: 'COT-00010', document_type: 'cotizacion',
-                                status: 'confirmada')
-      discarded = create(:sale, :anulada, client: client, warehouse: warehouse,
-                                          correlative: 'COT-00011', document_type: 'cotizacion')
+    it 'shows annulled sales in the index for audit purposes' do
+      # Per spec (RF3.1): "Annulled sales (status=anulada) MUST still appear in the
+      # index for audit purposes." Annulment soft-deletes (sets discarded_at), so the
+      # index must surface them via an explicit status filter, not just Sale.kept.
+      create(:sale, client: client, warehouse: warehouse,
+                    correlative: 'COT-00010', document_type: 'cotizacion',
+                    status: 'confirmada')
+      create(:sale, :anulada, client: client, warehouse: warehouse,
+                              correlative: 'COT-00011', document_type: 'cotizacion')
 
       visit sales_path
 
       expect(page).to have_content('COT-00010')
-      # Annulled sales still appear for audit (status=anulada, kept in kept scope via discarded_at)
-      # Per spec: "Annulled sales MUST still appear in the index for audit purposes"
-      # The :anulada trait sets discarded_at, so they are excluded by Sale.kept scope
-      # This is consistent with the controller using Sale.kept
+      expect(page).to have_content('COT-00011')
     end
 
     it 'shows "Annul" button for admin on confirmed ventas' do

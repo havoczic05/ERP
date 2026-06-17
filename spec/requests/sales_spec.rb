@@ -53,14 +53,16 @@ RSpec.describe 'Sales', type: :request do
       expect(response).to have_http_status(:ok)
     end
 
-    it 'shows only kept (non-discarded) sales' do
-      kept_sale   = create(:sale, :venta, client: client, warehouse: warehouse)
-      discarded   = create(:sale, :venta, :anulada, client: client, warehouse: warehouse)
+    it 'shows kept sales and annulled sales (for audit) per spec RF3.1' do
+      kept_sale = create(:sale, :venta, client: client, warehouse: warehouse,
+                                        correlative: 'VTA-09001')
+      annulled  = create(:sale, :venta, :anulada, client: client, warehouse: warehouse,
+                                                  correlative: 'VTA-09002')
 
       get sales_path
 
       expect(response.body).to include(kept_sale.correlative)
-      expect(response.body).not_to include(discarded.correlative)
+      expect(response.body).to include(annulled.correlative)
     end
   end
 

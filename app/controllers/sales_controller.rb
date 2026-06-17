@@ -5,7 +5,9 @@ class SalesController < ApplicationController
   # GET /sales
   def index
     authorize Sale
-    scope = Sale.kept.order(created_at: :desc)
+    # Annulled sales soft-delete (discarded_at), but per spec RF3.1 they MUST remain
+    # visible in the index for audit purposes — hence kept OR anulada.
+    scope = Sale.kept.or(Sale.anulada).order(created_at: :desc)
     @pagy, @sales = pagy(:offset, scope)
   end
 
