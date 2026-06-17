@@ -46,5 +46,7 @@ Rails.application.routes.draw do
 
   get "accounts_receivable", to: "accounts_receivable#index", as: :accounts_receivable
 
+  get "dashboard", to: "dashboards#show", as: :dashboard
+
   resource :company_settings, only: %i[show edit update]
 end

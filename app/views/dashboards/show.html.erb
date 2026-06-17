@@ -1,0 +1,61 @@
+<h1>Dashboard</h1>
+
+<section class="metrics-month">
+  <h2>Ventas del Mes</h2>
+  <dl>
+    <dt>Número de ventas</dt>
+    <dd><%= @metrics.monthly_sales_count %></dd>
+    <dt>Monto total</dt>
+    <dd><%= number_to_currency(@metrics.monthly_sales_total, unit: 'USD ') %></dd>
+  </dl>
+</section>
+
+<section class="metrics-day">
+  <h2>Ventas de Hoy</h2>
+  <dl>
+    <dt>Número de ventas</dt>
+    <dd><%= @metrics.daily_sales_count %></dd>
+    <dt>Monto total</dt>
+    <dd><%= number_to_currency(@metrics.daily_sales_total, unit: 'USD ') %></dd>
+  </dl>
+</section>
+
+<section class="metrics-risk">
+  <h2>Riesgo y Liquidez</h2>
+  <dl>
+    <dt>Cuentas por cobrar (pendiente)</dt>
+    <dd><%= number_to_currency(@metrics.outstanding_ar, unit: 'USD ') %></dd>
+    <dt>Facturas vencidas</dt>
+    <dd><%= @metrics.overdue_count %></dd>
+    <dt>Monto vencido</dt>
+    <dd><%= number_to_currency(@metrics.overdue_total, unit: 'USD ') %></dd>
+  </dl>
+</section>
+
+<section class="top-products">
+  <h2>Top 5 Productos del Mes</h2>
+  <ol>
+    <% @metrics.top_products.each do |product, units| %>
+      <li><%= product.name %> — <%= units %> unidades</li>
+    <% end %>
+  </ol>
+</section>
+
+<section class="low-stock">
+  <h2>Alerta de Bajo Stock (&lt; 10)</h2>
+  <ul>
+    <% @metrics.low_stock_products.each do |product| %>
+      <li><%= product.name %> — <%= product.stock %> unidades</li>
+    <% end %>
+  </ul>
+</section>
+
+<section class="chart-sales-count">
+  <h2>Ventas por Día del Mes</h2>
+  <%= bar_chart_svg(@metrics.sales_count_by_day) %>
+</section>
+
+<section class="chart-sales-total">
+  <h2>Monto de Ventas por Día del Mes (USD)</h2>
+  <%= bar_chart_svg(@metrics.sales_total_by_day) %>
+</section>
