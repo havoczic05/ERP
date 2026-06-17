@@ -32,7 +32,7 @@ RSpec.describe Result do
   end
 
   describe '.failure' do
-    subject(:result) { described_class.failure(obj, ['something went wrong']) }
+    subject(:result) { described_class.failure(obj, [ 'something went wrong' ]) }
 
     let(:obj) { double('payload') }
 
@@ -53,7 +53,7 @@ RSpec.describe Result do
     end
 
     it 'exposes errors' do
-      expect(result.errors).to eq(['something went wrong'])
+      expect(result.errors).to eq([ 'something went wrong' ])
     end
   end
 

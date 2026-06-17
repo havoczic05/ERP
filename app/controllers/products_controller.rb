@@ -15,7 +15,7 @@ class ProductsController < ApplicationController
     term = params[:q].to_s.strip
     scope = Product.kept
     @products = term.present? ? search_products(scope, term) : scope.none
-    render partial: 'products/results'
+    render partial: "products/results"
   end
 
   def show
@@ -33,13 +33,13 @@ class ProductsController < ApplicationController
     authorize @product
 
     if @product.save
-      redirect_to @product, notice: 'Product was successfully created.'
+      redirect_to @product, notice: "Product was successfully created."
     else
       @warehouses = Warehouse.order(:name)
       render :new, status: :unprocessable_entity
     end
   rescue ActiveRecord::RecordNotUnique
-    @product.errors.add(:sku, 'is already taken')
+    @product.errors.add(:sku, "is already taken")
     @warehouses = Warehouse.order(:name)
     render :new, status: :unprocessable_entity
   end
@@ -53,13 +53,13 @@ class ProductsController < ApplicationController
     authorize @product
 
     if @product.update(product_update_params)
-      redirect_to @product, notice: 'Product was successfully updated.'
+      redirect_to @product, notice: "Product was successfully updated."
     else
       @warehouses = Warehouse.order(:name)
       render :edit, status: :unprocessable_entity
     end
   rescue ActiveRecord::RecordNotUnique
-    @product.errors.add(:sku, 'is already taken')
+    @product.errors.add(:sku, "is already taken")
     @warehouses = Warehouse.order(:name)
     render :edit, status: :unprocessable_entity
   end
@@ -69,9 +69,9 @@ class ProductsController < ApplicationController
 
     if @product.destroyable?
       @product.discard
-      redirect_to products_path, notice: 'Product was successfully archived.'
+      redirect_to products_path, notice: "Product was successfully archived."
     else
-      flash.now[:alert] = 'This product cannot be deleted because it has associated sale items.'
+      flash.now[:alert] = "This product cannot be deleted because it has associated sale items."
       render :show, status: :unprocessable_entity
     end
   end
@@ -96,6 +96,6 @@ class ProductsController < ApplicationController
     term = query.to_s.strip
     return scope if term.blank?
 
-    scope.where('name ILIKE :q OR sku ILIKE :q', q: "%#{term}%")
+    scope.where("name ILIKE :q OR sku ILIKE :q", q: "%#{term}%")
   end
 end

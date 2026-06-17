@@ -9,7 +9,7 @@ class SalePolicy < ApplicationPolicy
 
   # Annulment is restricted to administrators only.
   def annul?
-    user.present? && user.role == 'administrador'
+    user.present? && user.role == "administrador"
   end
 
   private

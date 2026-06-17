@@ -28,11 +28,11 @@ class AmortizationCreationService
   def call
     # Early guards (outside transaction — fast path, no lock needed)
     if @amount <= 0
-      return Result.failure(@installment, ['Amount must be greater than 0'])
+      return Result.failure(@installment, [ "Amount must be greater than 0" ])
     end
 
     unless @installment.pendiente?
-      return Result.failure(@installment, ['Installment is not open for payment'])
+      return Result.failure(@installment, [ "Installment is not open for payment" ])
     end
 
     result = nil
@@ -43,7 +43,7 @@ class AmortizationCreationService
         balance = BigDecimal(@installment.balance_usd.to_s)
 
         if @amount > balance
-          @errors = ['Amount exceeds outstanding balance']
+          @errors = [ "Amount exceeds outstanding balance" ]
           raise ActiveRecord::Rollback
         end
 
@@ -56,7 +56,7 @@ class AmortizationCreationService
         new_balance = balance - @amount
         @installment.update!(
           balance_usd: new_balance,
-          status:      new_balance.zero? ? 'pagada' : 'pendiente'
+          status:      new_balance.zero? ? "pagada" : "pendiente"
         )
 
         result = Result.success(amortization)
@@ -65,8 +65,8 @@ class AmortizationCreationService
 
     result || Result.failure(@installment, @errors)
   rescue ActiveRecord::RecordInvalid => e
-    Result.failure(@installment, [e.message])
+    Result.failure(@installment, [ e.message ])
   rescue ActiveRecord::StatementInvalid => e
-    Result.failure(@installment, [e.message])
+    Result.failure(@installment, [ e.message ])
   end
 end

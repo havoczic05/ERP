@@ -2,7 +2,7 @@ class Client < ApplicationRecord
   # ---------------------------------------------------------------------------
   # Enum
   # ---------------------------------------------------------------------------
-  enum :document_type, { ruc: 'ruc', dni: 'dni' }
+  enum :document_type, { ruc: "ruc", dni: "dni" }
 
   # ---------------------------------------------------------------------------
   # Associations
@@ -21,11 +21,11 @@ class Client < ApplicationRecord
 
   # Conditional format validation based on document_type enum predicates.
   validates :document_number,
-            format: { with: /\A\d{11}\z/, message: 'must be exactly 11 numeric digits for RUC' },
+            format: { with: /\A\d{11}\z/, message: "must be exactly 11 numeric digits for RUC" },
             if: :ruc?
 
   validates :document_number,
-            format: { with: /\A\d{8}\z/, message: 'must be exactly 8 numeric digits for DNI' },
+            format: { with: /\A\d{8}\z/, message: "must be exactly 8 numeric digits for DNI" },
             if: :dni?
 
   # Model-level uniqueness scoped to active (non-discarded) records.
@@ -33,7 +33,7 @@ class Client < ApplicationRecord
   validates :document_number,
             uniqueness: {
               conditions: -> { where(discarded_at: nil) },
-              message: 'is already registered'
+              message: "is already registered"
             }
 
   # ---------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 class WarehousePolicy < ApplicationPolicy
-  ADMIN_ROLE  = 'administrador'
+  ADMIN_ROLE  = "administrador"
   READER_ROLES = %w[administrador vendedor].freeze
 
   # Both roles can list and view warehouses.

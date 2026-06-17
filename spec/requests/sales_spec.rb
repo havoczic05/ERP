@@ -12,7 +12,7 @@ RSpec.describe 'Sales', type: :request do
   let(:product)   { create(:product, stock: 100, base_price_usd: 10.00, warehouse: warehouse) }
 
   def venta_params(num_installments: 1, interval_days: 30, items: nil)
-    items ||= [{ product_id: product.id, quantity: 2, unit_price_usd: '10.00' }]
+    items ||= [ { product_id: product.id, quantity: 2, unit_price_usd: '10.00' } ]
     {
       sale: {
         client_id:        client.id,

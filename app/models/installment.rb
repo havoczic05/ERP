@@ -2,7 +2,7 @@ class Installment < ApplicationRecord
   # ---------------------------------------------------------------------------
   # Enums (string-backed)
   # ---------------------------------------------------------------------------
-  enum :status, { pendiente: 'pendiente', pagada: 'pagada', vencida: 'vencida', anulada: 'anulada' }
+  enum :status, { pendiente: "pendiente", pagada: "pagada", vencida: "vencida", anulada: "anulada" }
 
   # ---------------------------------------------------------------------------
   # Associations
@@ -13,7 +13,7 @@ class Installment < ApplicationRecord
   # ---------------------------------------------------------------------------
   # Scopes
   # ---------------------------------------------------------------------------
-  scope :outstanding, -> { where(status: 'pendiente').order(:due_date) }
+  scope :outstanding, -> { where(status: "pendiente").order(:due_date) }
 
   # ---------------------------------------------------------------------------
   # Validations

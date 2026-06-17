@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :sale do
-    association :client, factory: [:client, :ruc_client]
+    association :client, factory: [ :client, :ruc_client ]
     association :warehouse
     document_type { 'cotizacion' }
     status { 'confirmada' }

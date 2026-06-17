@@ -12,9 +12,9 @@ class AmortizationsController < ApplicationController
     )
 
     if result.success?
-      redirect_to accounts_receivable_path, notice: 'Payment recorded.'
+      redirect_to accounts_receivable_path, notice: "Payment recorded."
     else
-      flash[:alert] = result.errors.join('; ')
+      flash[:alert] = result.errors.join("; ")
       redirect_back fallback_location: accounts_receivable_path
     end
   end

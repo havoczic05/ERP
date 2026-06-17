@@ -2,16 +2,16 @@ class Sale < ApplicationRecord
   # ---------------------------------------------------------------------------
   # Enums (string-backed)
   # ---------------------------------------------------------------------------
-  enum :document_type, { cotizacion: 'cotizacion', venta: 'venta' }
-  enum :status, { confirmada: 'confirmada', anulada: 'anulada' }
-  enum :billing_status, { pending: 'pending', sent: 'sent', accepted: 'accepted', rejected: 'rejected' }
+  enum :document_type, { cotizacion: "cotizacion", venta: "venta" }
+  enum :status, { confirmada: "confirmada", anulada: "anulada" }
+  enum :billing_status, { pending: "pending", sent: "sent", accepted: "accepted", rejected: "rejected" }
 
   # ---------------------------------------------------------------------------
   # Associations
   # ---------------------------------------------------------------------------
   belongs_to :client
   belongs_to :warehouse
-  belongs_to :source_cotizacion, class_name: 'Sale', optional: true,
+  belongs_to :source_cotizacion, class_name: "Sale", optional: true,
              foreign_key: :source_cotizacion_id
   has_many :sale_items, dependent: :destroy
   has_many :installments, dependent: :destroy

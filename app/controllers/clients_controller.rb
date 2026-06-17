@@ -12,7 +12,7 @@ class ClientsController < ApplicationController
     term = params[:q].to_s.strip
     scope = Client.kept
     @clients = term.present? ? search_clients(scope, term) : scope.none
-    render partial: 'clients/results'
+    render partial: "clients/results"
   end
 
   def show
@@ -29,12 +29,12 @@ class ClientsController < ApplicationController
     authorize @client
 
     if @client.save
-      redirect_to @client, notice: 'Client was successfully created.'
+      redirect_to @client, notice: "Client was successfully created."
     else
       render :new, status: :unprocessable_entity
     end
   rescue ActiveRecord::RecordNotUnique
-    @client.errors.add(:document_number, 'is already registered')
+    @client.errors.add(:document_number, "is already registered")
     render :new, status: :unprocessable_entity
   end
 
@@ -46,12 +46,12 @@ class ClientsController < ApplicationController
     authorize @client
 
     if @client.update(client_params)
-      redirect_to @client, notice: 'Client was successfully updated.'
+      redirect_to @client, notice: "Client was successfully updated."
     else
       render :edit, status: :unprocessable_entity
     end
   rescue ActiveRecord::RecordNotUnique
-    @client.errors.add(:document_number, 'is already registered')
+    @client.errors.add(:document_number, "is already registered")
     render :edit, status: :unprocessable_entity
   end
 
@@ -60,9 +60,9 @@ class ClientsController < ApplicationController
 
     if @client.destroyable?
       @client.discard
-      redirect_to clients_path, notice: 'Client was successfully archived.'
+      redirect_to clients_path, notice: "Client was successfully archived."
     else
-      flash.now[:alert] = 'This client cannot be deleted because it has associated sales.'
+      flash.now[:alert] = "This client cannot be deleted because it has associated sales."
       render :show, status: :unprocessable_entity
     end
   end
@@ -82,7 +82,7 @@ class ClientsController < ApplicationController
     return scope if term.blank?
 
     scope.where(
-      'document_number ILIKE :q OR full_name ILIKE :q',
+      "document_number ILIKE :q OR full_name ILIKE :q",
       q: "%#{term}%"
     )
   end

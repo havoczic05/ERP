@@ -25,12 +25,12 @@ class SaleAnnulmentService
   def call
     # Step 1: idempotency guard (outside transaction — no side effects needed)
     if @sale.anulada?
-      return Result.failure(@sale, ['This sale has already been annulled'])
+      return Result.failure(@sale, [ "This sale has already been annulled" ])
     end
 
     ActiveRecord::Base.transaction do
       # Step 2: set status and soft-delete timestamp
-      @sale.update!(status: 'anulada', discarded_at: Time.current)
+      @sale.update!(status: "anulada", discarded_at: Time.current)
 
       # Step 3: restore product stock (venta only)
       # Lock product rows individually in id-ascending order (deadlock-free)
@@ -47,7 +47,7 @@ class SaleAnnulmentService
       # Step 4: void installments (bypass model validations via update_columns — zeroing amounts
       # on an anulada installment is intentional and valid at the business level).
       @sale.installments.each do |installment|
-        installment.update_columns(status: 'anulada', amount_usd: 0.00, balance_usd: 0.00)
+        installment.update_columns(status: "anulada", amount_usd: 0.00, balance_usd: 0.00)
       end
 
       # Step 5: create CreditNote (sale_id unique index prevents double-notes)
@@ -60,8 +60,8 @@ class SaleAnnulmentService
       Result.success(@sale)
     end
   rescue ActiveRecord::RecordInvalid => e
-    Result.failure(@sale, [e.message])
+    Result.failure(@sale, [ e.message ])
   rescue ActiveRecord::StatementInvalid => e
-    Result.failure(@sale, [e.message])
+    Result.failure(@sale, [ e.message ])
   end
 end

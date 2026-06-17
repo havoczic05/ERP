@@ -25,7 +25,7 @@ class SalesController < ApplicationController
     result = SaleCreationService.call(sale_creation_params)
 
     if result.success?
-      redirect_to result.sale, notice: 'Document was successfully created.'
+      redirect_to result.sale, notice: "Document was successfully created."
     else
       @sale = result.sale || Sale.new
       @errors = result.errors
@@ -52,9 +52,9 @@ class SalesController < ApplicationController
     result = SaleCreationService.convert(@sale, conversion_params)
 
     if result.success?
-      redirect_to result.sale, notice: 'Cotizacion successfully converted to venta.'
+      redirect_to result.sale, notice: "Cotizacion successfully converted to venta."
     else
-      flash[:alert] = result.errors.join('; ')
+      flash[:alert] = result.errors.join("; ")
       redirect_to @sale
     end
   end
@@ -66,9 +66,9 @@ class SalesController < ApplicationController
     result = SaleAnnulmentService.call(@sale, current_user)
 
     if result.success?
-      redirect_to @sale, notice: 'Sale was successfully annulled.'
+      redirect_to @sale, notice: "Sale was successfully annulled."
     else
-      flash[:alert] = result.errors.join('; ')
+      flash[:alert] = result.errors.join("; ")
       redirect_to @sale
     end
   end
