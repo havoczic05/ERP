@@ -1,0 +1,50 @@
+<h1>Accounts Receivable</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Client</th>
+      <th>Sale</th>
+      <th>Installment #</th>
+      <th>Amount (USD)</th>
+      <th>Balance (USD)</th>
+      <th>Due Date</th>
+      <th>Status</th>
+      <th>Payment</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @installments.each do |installment| %>
+      <tr id="<%= dom_id(installment) %>">
+        <td><%= installment.sale.client.full_name %></td>
+        <td><%= installment.sale.correlative %></td>
+        <td><%= installment.installment_number %></td>
+        <td><%= number_to_currency(installment.amount_usd, unit: 'USD ') %></td>
+        <td><%= number_to_currency(installment.balance_usd, unit: 'USD ') %></td>
+        <td><%= installment.due_date %></td>
+        <td>
+          <% if installment.overdue? %>
+            <span class="overdue-badge">Overdue</span>
+          <% else %>
+            Pendiente
+          <% end %>
+        </td>
+        <td>
+          <%= form_with url: installment_amortizations_path(installment), method: :post do |f| %>
+            <%= f.number_field :amount_usd, step: '0.01', min: '0.01',
+                                placeholder: 'Amount', name: 'amortization[amount_usd]' %>
+            <%= f.text_field :notes, placeholder: 'Notes (optional)',
+                              name: 'amortization[notes]' %>
+            <%= f.submit 'Record Payment' %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<% if @installments.empty? %>
+  <p id="no-installments-message">No pending installments.</p>
+<% end %>
+
+<%== @pagy.series_nav if @pagy.pages > 1 %>
