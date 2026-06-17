@@ -1,0 +1,36 @@
+<h1>Users</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Email</th>
+      <th>Role</th>
+      <th>Active</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @users.each do |user| %>
+      <tr id="<%= dom_id(user) %>">
+        <td><%= user.email %></td>
+        <td><%= user.role.humanize %></td>
+        <td><%= user.active? ? 'Yes' : 'No' %></td>
+        <td>
+          <%= link_to 'Edit', edit_user_path(user) %>
+          <% if user.active? %>
+            <%= button_to 'Deactivate', user_path(user), method: :delete,
+                          data: { confirm: "Deactivate #{user.email}?" } %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<% if @users.empty? %>
+  <p id="no-users-message">No users found.</p>
+<% end %>
+
+<%= link_to 'New User', new_user_path %>
+
+<%== @pagy.series_nav if @pagy.pages > 1 %>
