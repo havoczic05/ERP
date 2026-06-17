@@ -59,7 +59,7 @@ RSpec.describe 'Users', type: :request do
         post users_path, params: { user: { email: '', role: 'vendedor',
                                             password: 'secret123',
                                             password_confirmation: 'secret123' } }
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
   end
@@ -106,7 +106,7 @@ RSpec.describe 'Users', type: :request do
     context 'with invalid role (blank)' do
       it 'returns 422' do
         patch user_path(target), params: { user: { email: target.email, role: '' } }
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
   end
@@ -127,21 +127,29 @@ RSpec.describe 'Users', type: :request do
     end
 
     # Guard: cannot deactivate the last active administrador
+    # current_user is an inactive admin (passes policy check) so the self-guard does not fire;
+    # target is the only ACTIVE admin in the DB.
     context 'when admin is the only active administrador' do
-      it 'returns 422 with a friendly flash and leaves the user active' do
-        # admin is the ONLY administrador in the DB
+      it 'redirects to users_path with a friendly alert and leaves the user active' do
+        inactive_admin = create(:user, :administrador, active: false)
+        allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(inactive_admin)
+        # admin is the ONLY active administrador in the DB
         delete user_path(admin)
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to redirect_to(users_path)
+        follow_redirect!
+        expect(response.body).to include('Cannot deactivate the last active administrator')
         expect(admin.reload.active).to be true
       end
     end
 
     # Guard: cannot deactivate yourself
     context 'when trying to deactivate yourself' do
-      it 'returns 422 when current_user == target (even if another admin exists)' do
+      it 'redirects to users_path when current_user == target (even if another admin exists)' do
         _second_admin = create(:user, :administrador, active: true)
         delete user_path(admin)
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to redirect_to(users_path)
+        follow_redirect!
+        expect(response.body).to include('You cannot deactivate your own account')
         expect(admin.reload.active).to be true
       end
     end
@@ -155,7 +163,7 @@ RSpec.describe 'Users', type: :request do
       it 'returns 422 and leaves the role unchanged' do
         patch user_path(admin), params: { user: { email: admin.email, role: 'vendedor',
                                                    password: '', password_confirmation: '' } }
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(admin.reload.role).to eq('administrador')
       end
     end
