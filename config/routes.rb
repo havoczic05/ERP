@@ -32,4 +32,10 @@ Rails.application.routes.draw do
       post :convert_to_sale
     end
   end
+
+  resources :installments, only: [] do
+    resources :amortizations, only: [:create]
+  end
+
+  get 'accounts_receivable', to: 'accounts_receivable#index', as: :accounts_receivable
 end
