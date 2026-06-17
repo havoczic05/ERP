@@ -1,5 +1,4 @@
 class CompanySettingsController < ApplicationController
-  before_action :authenticate_user!
   before_action :set_company_settings
 
   def show
