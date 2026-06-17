@@ -1,0 +1,22 @@
+<h1>Warehouses</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Location</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= render @warehouses %>
+  </tbody>
+</table>
+
+<% if @warehouses.empty? %>
+  <p id="no-warehouses-message">No warehouses found.</p>
+<% end %>
+
+<%= link_to 'New Warehouse', new_warehouse_path %>
+
+<%== @pagy.series_nav if @pagy.pages > 1 %>

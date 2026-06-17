@@ -1,0 +1,21 @@
+<h1>Warehouse Details</h1>
+
+<dl>
+  <dt>Name</dt>
+  <dd><%= @warehouse.name %></dd>
+
+  <dt>Location</dt>
+  <dd><%= @warehouse.location %></dd>
+</dl>
+
+<% if flash[:alert].present? %>
+  <div id="alert"><%= flash[:alert] %></div>
+<% end %>
+
+<p>
+  <%= link_to 'Edit', edit_warehouse_path(@warehouse) %>
+  <%= button_to 'Delete', @warehouse, method: :delete,
+                data: { confirm: 'Delete this warehouse?' } %>
+</p>
+
+<%= link_to 'Back to Warehouses', warehouses_path %>

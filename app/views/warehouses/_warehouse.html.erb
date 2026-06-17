@@ -1,0 +1,11 @@
+<tr id="<%= dom_id(warehouse) %>">
+  <td><%= warehouse.name %></td>
+  <td><%= warehouse.location %></td>
+  <td>
+    <%= link_to 'Show', warehouse %>
+    <%= link_to 'Edit', edit_warehouse_path(warehouse) %>
+    <%= button_to 'Delete', warehouse, method: :delete,
+                  data: { confirm: 'Delete this warehouse?' },
+                  form: { style: 'display:inline' } %>
+  </td>
+</tr>

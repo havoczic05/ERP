@@ -18,6 +18,8 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :warehouses
+
   resources :sales do
     member do
       post :annul
