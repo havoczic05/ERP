@@ -1,7 +1,5 @@
 class SessionsController < ApplicationController
-  # Guard does not exist yet (added in Slice 3). This forward-compatible skip
-  # ensures the action remains when the before_action is wired up in the next slice.
-  # skip_before_action :authenticate_user!, only: %i[new create]
+  skip_before_action :authenticate_user!, only: %i[new create]
 
   def new
     # Render login form

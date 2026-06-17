@@ -96,11 +96,11 @@ RSpec.describe 'Amortizations', type: :request do
   # AR-06: unauthenticated POST is forbidden
   # ---------------------------------------------------------------------------
   describe 'POST /installments/:installment_id/amortizations (unauthenticated)' do
-    it 'returns 403 Forbidden when no user is logged in' do
+    it 'redirects to login (authenticate_user! guard — authn before authz)' do
       post installment_amortizations_path(installment),
            params: amortization_params(amount: '100.00')
 
-      expect(response).to have_http_status(:forbidden)
+      expect(response).to redirect_to(login_path)
     end
   end
 end

@@ -89,9 +89,9 @@ RSpec.describe 'AccountsReceivable', type: :request do
     # AR-01: unauthenticated access is blocked
     # -------------------------------------------------------------------------
     context 'when unauthenticated' do
-      it 'returns 403 Forbidden' do
+      it 'redirects to login (authenticate_user! guard — authn before authz)' do
         get accounts_receivable_path
-        expect(response).to have_http_status(:forbidden)
+        expect(response).to redirect_to(login_path)
       end
     end
   end

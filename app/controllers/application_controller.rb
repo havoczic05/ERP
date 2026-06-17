@@ -10,12 +10,7 @@ class ApplicationController < ActionController::Base
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
 
-  # Provides a current_user seam for Pundit and specs.
-  # In test environment, specs may set @current_user directly via controller.current_user = user.
-  # In non-test environments, this reads from the session (full auth deferred to a separate change).
-  if Rails.env.test?
-    attr_writer :current_user
-  end
+  before_action :authenticate_user!
 
   def current_user
     @current_user ||= session[:user_id] && User.find_by(id: session[:user_id])
@@ -23,6 +18,12 @@ class ApplicationController < ActionController::Base
   helper_method :current_user
 
   private
+
+  # Authentication gate: nil current_user -> redirect to login.
+  # Distinct from authz (Pundit NotAuthorizedError -> head :forbidden).
+  def authenticate_user!
+    redirect_to login_path, alert: "Please sign in to continue." unless current_user
+  end
 
   def user_not_authorized
     head :forbidden
