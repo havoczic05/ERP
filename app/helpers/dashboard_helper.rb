@@ -6,7 +6,8 @@ module DashboardHelper
   # Renders a {Date => Numeric} series as an inline SVG bar chart.
   # Server-rendered (no JS) so it is fully covered by rack_test system specs —
   # the CI/WSL2 environment has no headless browser for JS charting libraries.
-  def bar_chart_svg(data)
+  # `label` sets the accessible name for screen readers.
+  def bar_chart_svg(data, label: nil)
     max = data.values.map(&:to_f).max.to_f
     max = 1.0 if max <= 0
     slot = BAR_WIDTH + BAR_GAP
@@ -21,6 +22,8 @@ module DashboardHelper
       end
     end
 
-    tag.svg(safe_join(bars), width: width, height: CHART_HEIGHT, role: "img")
+    tag.svg(safe_join(bars), width: width, height: CHART_HEIGHT,
+            viewBox: "0 0 #{width} #{CHART_HEIGHT}", preserveAspectRatio: "none",
+            role: "img", "aria-label": label)
   end
 end
