@@ -19,14 +19,14 @@
         <td><%= installment.sale.client.full_name %></td>
         <td><%= installment.sale.correlative %></td>
         <td><%= installment.installment_number %></td>
-        <td><%= number_to_currency(installment.amount_usd, unit: 'USD ') %></td>
-        <td><%= number_to_currency(installment.balance_usd, unit: 'USD ') %></td>
+        <td class="num"><%= number_to_currency(installment.amount_usd, unit: 'USD ') %></td>
+        <td class="num"><%= number_to_currency(installment.balance_usd, unit: 'USD ') %></td>
         <td><%= installment.due_date %></td>
         <td>
           <% if installment.overdue? %>
-            <span class="overdue-badge">Overdue</span>
+            <span class="badge badge--danger">Overdue</span>
           <% else %>
-            Pendiente
+            <span class="badge badge--warning">Pendiente</span>
           <% end %>
         </td>
         <td>

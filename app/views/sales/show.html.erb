@@ -13,7 +13,7 @@
   <dd><%= @sale.document_type.humanize %></dd>
 
   <dt>Status</dt>
-  <dd><%= @sale.status.humanize %></dd>
+  <dd><%= sale_status_badge(@sale) %></dd>
 
   <dt>Client</dt>
   <dd><%= @sale.client.full_name %></dd>
@@ -22,13 +22,13 @@
   <dd><%= @sale.warehouse.name %></dd>
 
   <dt>Subtotal</dt>
-  <dd><%= number_to_currency(@sale.subtotal_usd, unit: 'USD ') %></dd>
+  <dd class="num"><%= number_to_currency(@sale.subtotal_usd, unit: 'USD ') %></dd>
 
   <dt>Tax</dt>
-  <dd><%= number_to_currency(@sale.tax_usd, unit: 'USD ') %></dd>
+  <dd class="num"><%= number_to_currency(@sale.tax_usd, unit: 'USD ') %></dd>
 
   <dt>Total</dt>
-  <dd><%= number_to_currency(@sale.total_usd, unit: 'USD ') %></dd>
+  <dd class="num"><%= number_to_currency(@sale.total_usd, unit: 'USD ') %></dd>
 
   <% if @sale.notes.present? %>
     <dt>Notes</dt>
@@ -51,8 +51,8 @@
       <tr>
         <td><%= item.product.name %></td>
         <td><%= item.quantity %></td>
-        <td><%= number_to_currency(item.unit_price_usd, unit: 'USD ') %></td>
-        <td><%= number_to_currency(item.line_total_usd, unit: 'USD ') %></td>
+        <td class="num"><%= number_to_currency(item.unit_price_usd, unit: 'USD ') %></td>
+        <td class="num"><%= number_to_currency(item.line_total_usd, unit: 'USD ') %></td>
       </tr>
     <% end %>
   </tbody>
@@ -74,10 +74,10 @@
       <% @sale.installments.order(:installment_number).each do |inst| %>
         <tr>
           <td><%= inst.installment_number %></td>
-          <td><%= number_to_currency(inst.amount_usd, unit: 'USD ') %></td>
-          <td><%= number_to_currency(inst.balance_usd, unit: 'USD ') %></td>
+          <td class="num"><%= number_to_currency(inst.amount_usd, unit: 'USD ') %></td>
+          <td class="num"><%= number_to_currency(inst.balance_usd, unit: 'USD ') %></td>
           <td><%= inst.due_date %></td>
-          <td><%= inst.status.humanize %></td>
+          <td><%= installment_status_badge(inst) %></td>
         </tr>
       <% end %>
     </tbody>
