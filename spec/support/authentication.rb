@@ -18,15 +18,28 @@ module SystemAuthenticationHelper
   #
   # Requires the user's password to be 'password123' (FactoryBot default).
   #
-  # Waits for the post-login redirect to root_path to complete before returning,
-  # so callers can immediately visit the target page without a race condition.
+  # Waits for the authenticated page to render before returning, so callers can
+  # immediately visit the target page without a race condition.
+  #
+  # We assert on a DOM element that only exists once logged in (the nav "Log out"
+  # button) rather than on have_current_path: the login submit navigates through
+  # Turbo, and checking the URL alone races against that navigation. Waiting for
+  # content forces Capybara to synchronize with the rendered authenticated page.
   def system_login_as(user)
     visit login_path
+    # Turbo runs a post-load render shortly after the page reports ready; it can
+    # reset the form, wiping values typed before it fires (leaving the required
+    # fields empty so the submit is blocked by HTML5 validation and never reaches
+    # the server). Let the page settle — a driver round-trip plus a brief pause —
+    # before filling so the typed values stick. This race only surfaces under the
+    # cumulative slowdown of several sequential Selenium sessions in one run.
+    page.has_css?("form input[type=email]", wait: 5)
+    sleep 0.3
     fill_in "Email", with: user.email
     fill_in "Password", with: "password123"
     click_button "Log in"
-    # Wait for the redirect to land on root — proves the session is established.
-    expect(page).to have_current_path(root_path)
+    # Proves the session is established and the authenticated page has rendered.
+    expect(page).to have_button("Log out")
   end
 end
 
