@@ -33,6 +33,9 @@ module SystemAuthenticationHelper
     # the server). Let the page settle — a driver round-trip plus a brief pause —
     # before filling so the typed values stick. This race only surfaces under the
     # cumulative slowdown of several sequential Selenium sessions in one run.
+    #
+    # DEBT: the fixed sleep is a minor smell. A cleaner settle would await a
+    # `turbo:load` event instead of pausing a fixed interval.
     page.has_css?("form input[type=email]", wait: 5)
     sleep 0.3
     fill_in "Email", with: user.email
