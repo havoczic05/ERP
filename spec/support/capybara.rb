@@ -9,8 +9,14 @@ end
 # Headless Chrome driver for JS-tagged system specs.
 #
 # Uses --headless=new (Chrome 112+), --no-sandbox and --disable-dev-shm-usage
-# for WSL2 and Docker compatibility. Selenium Manager (selenium-webdriver 4.x)
-# auto-resolves chromedriver — no manual binary needed.
+# for WSL2 and Docker compatibility.
+#
+# Driver resolution: locally, Selenium Manager (selenium-webdriver 4.x)
+# auto-resolves chromedriver — no manual binary needed. On CI, set
+# CHROMEDRIVER_BIN to the chromedriver installed alongside Chrome (e.g. by
+# browser-actions/setup-chrome) so Selenium uses that exact, version-matched
+# binary instead of letting Selenium Manager download a newer chromedriver that
+# outpaces the installed Chrome (a 151-driver-vs-149-browser mismatch).
 # ---------------------------------------------------------------------------
 Capybara.register_driver :headless_chrome do |app|
   options = Selenium::WebDriver::Chrome::Options.new
@@ -19,7 +25,14 @@ Capybara.register_driver :headless_chrome do |app|
   options.add_argument("--disable-dev-shm-usage")
   options.add_argument("--disable-gpu")
   options.add_argument("--window-size=1400,1400")
-  Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
+
+  driver_path = ENV["CHROMEDRIVER_BIN"].to_s
+  if driver_path.empty?
+    Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
+  else
+    service = Selenium::WebDriver::Chrome::Service.new(path: driver_path)
+    Capybara::Selenium::Driver.new(app, browser: :chrome, options: options, service: service)
+  end
 end
 
 # ---------------------------------------------------------------------------

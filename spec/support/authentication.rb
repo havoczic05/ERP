@@ -21,28 +21,24 @@ module SystemAuthenticationHelper
   # Waits for the authenticated page to render before returning, so callers can
   # immediately visit the target page without a race condition.
   #
-  # We assert on a DOM element that only exists once logged in (the nav "Log out"
-  # button) rather than on have_current_path: the login submit navigates through
-  # Turbo, and checking the URL alone races against that navigation. Waiting for
-  # content forces Capybara to synchronize with the rendered authenticated page.
+  # Why the retry loop: a Turbo post-load re-render of the login page can reset
+  # the form just after it loads, wiping values typed before it fires. The submit
+  # then carries empty required fields, is blocked by HTML5 validation, and never
+  # reaches the server — so we stay on /login. The timing of that render varies
+  # with machine load, so no fixed wait is reliable. Instead we attempt the full
+  # flow and, if the authenticated nav ("Log out", which only exists once logged
+  # in) doesn't appear, re-submit on a fresh page load until it does.
   def system_login_as(user)
-    visit login_path
-    # Turbo runs a post-load render shortly after the page reports ready; it can
-    # reset the form, wiping values typed before it fires (leaving the required
-    # fields empty so the submit is blocked by HTML5 validation and never reaches
-    # the server). Let the page settle — a driver round-trip plus a brief pause —
-    # before filling so the typed values stick. This race only surfaces under the
-    # cumulative slowdown of several sequential Selenium sessions in one run.
-    #
-    # DEBT: the fixed sleep is a minor smell. A cleaner settle would await a
-    # `turbo:load` event instead of pausing a fixed interval.
-    page.has_css?("form input[type=email]", wait: 5)
-    sleep 0.3
-    fill_in "Email", with: user.email
-    fill_in "Password", with: "password123"
-    click_button "Log in"
-    # Proves the session is established and the authenticated page has rendered.
-    expect(page).to have_button("Log out")
+    attempts = 0
+    loop do
+      attempts += 1
+      visit login_path
+      fill_in "Email", with: user.email
+      fill_in "Password", with: "password123"
+      click_button "Log in"
+      return if page.has_button?("Log out", wait: 5)
+      raise "system_login_as: login did not complete after #{attempts} attempts" if attempts >= 5
+    end
   end
 end
 
