@@ -4,7 +4,7 @@
   <td><%= product.brand %></td>
   <td><%= product.warehouse&.name %></td>
   <td><%= product.stock %></td>
-  <td><%= product.base_price_usd %></td>
+  <td class="num"><%= product.base_price_usd %></td>
   <td>
     <%= link_to 'Show', product %>
     <%= link_to 'Edit', edit_product_path(product) %>

@@ -19,8 +19,8 @@
         <td><%= sale.correlative %></td>
         <td><%= sale.document_type.humanize %></td>
         <td><%= sale.client.full_name %></td>
-        <td><%= number_to_currency(sale.total_usd, unit: 'USD ') %></td>
-        <td><%= sale.status.humanize %></td>
+        <td class="num"><%= number_to_currency(sale.total_usd, unit: 'USD ') %></td>
+        <td><%= sale_status_badge(sale) %></td>
         <td>
           <%= link_to 'View', sale %>
           <% if policy(sale).annul? && sale.confirmada? && sale.venta? %>
