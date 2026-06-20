@@ -1,34 +1,20 @@
-<% if flash[:notice].present? %>
-  <div id="notice"><%= flash[:notice] %></div>
-<% end %>
-
-<% if flash[:alert].present? %>
-  <div id="alert"><%= flash[:alert] %></div>
-<% end %>
-
-<h1>Sale <%= @sale.correlative %></h1>
+<div class="detail-head">
+  <h1>Sale <%= @sale.correlative %></h1>
+  <%= sale_status_badge(@sale) %>
+</div>
+<p class="detail-meta">
+  <%= @sale.document_type.humanize %> · <%= @sale.client.full_name %> · <%= @sale.warehouse.name %>
+</p>
 
 <dl>
-  <dt>Document Type</dt>
-  <dd><%= @sale.document_type.humanize %></dd>
-
-  <dt>Status</dt>
-  <dd><%= sale_status_badge(@sale) %></dd>
-
-  <dt>Client</dt>
-  <dd><%= @sale.client.full_name %></dd>
-
-  <dt>Warehouse</dt>
-  <dd><%= @sale.warehouse.name %></dd>
-
   <dt>Subtotal</dt>
-  <dd class="num"><%= number_to_currency(@sale.subtotal_usd, unit: 'USD ') %></dd>
+  <dd><%= number_to_currency(@sale.subtotal_usd, unit: 'USD ') %></dd>
 
   <dt>Tax</dt>
-  <dd class="num"><%= number_to_currency(@sale.tax_usd, unit: 'USD ') %></dd>
+  <dd><%= number_to_currency(@sale.tax_usd, unit: 'USD ') %></dd>
 
   <dt>Total</dt>
-  <dd class="num"><%= number_to_currency(@sale.total_usd, unit: 'USD ') %></dd>
+  <dd><%= number_to_currency(@sale.total_usd, unit: 'USD ') %></dd>
 
   <% if @sale.notes.present? %>
     <dt>Notes</dt>
@@ -41,16 +27,16 @@
   <thead>
     <tr>
       <th>Product</th>
-      <th>Qty</th>
-      <th>Unit Price</th>
-      <th>Line Total</th>
+      <th class="num">Qty</th>
+      <th class="num">Unit Price</th>
+      <th class="num">Line Total</th>
     </tr>
   </thead>
   <tbody>
     <% @sale.sale_items.each do |item| %>
       <tr>
         <td><%= item.product.name %></td>
-        <td><%= item.quantity %></td>
+        <td class="num"><%= item.quantity %></td>
         <td class="num"><%= number_to_currency(item.unit_price_usd, unit: 'USD ') %></td>
         <td class="num"><%= number_to_currency(item.line_total_usd, unit: 'USD ') %></td>
       </tr>
@@ -63,9 +49,9 @@
   <table>
     <thead>
       <tr>
-        <th>#</th>
-        <th>Amount</th>
-        <th>Balance</th>
+        <th class="num">#</th>
+        <th class="num">Amount</th>
+        <th class="num">Balance</th>
         <th>Due Date</th>
         <th>Status</th>
       </tr>
@@ -73,7 +59,7 @@
     <tbody>
       <% @sale.installments.order(:installment_number).each do |inst| %>
         <tr>
-          <td><%= inst.installment_number %></td>
+          <td class="num"><%= inst.installment_number %></td>
           <td class="num"><%= number_to_currency(inst.amount_usd, unit: 'USD ') %></td>
           <td class="num"><%= number_to_currency(inst.balance_usd, unit: 'USD ') %></td>
           <td><%= inst.due_date %></td>
@@ -86,13 +72,13 @@
 
 <% if @sale.credit_note %>
   <h2>Credit Note</h2>
-  <p>
+  <p class="note-card">
     Issued: <%= @sale.credit_note.issued_at %> —
     Total: <%= number_to_currency(@sale.credit_note.total_usd, unit: 'USD ') %>
   </p>
 <% end %>
 
-<div>
+<div class="action-bar">
   <% if @sale.cotizacion? && @sale.confirmada? && policy(@sale).convert_to_sale? %>
     <%= button_to 'Convert to Venta', convert_to_sale_sale_path(@sale), method: :post,
                   params: { num_installments: 1, interval_days: 30 } %>
@@ -100,9 +86,11 @@
 
   <% if policy(@sale).annul? && @sale.confirmada? && @sale.venta? %>
     <%= button_to 'Annul Sale', annul_sale_path(@sale), method: :post,
+                  class: 'btn--danger',
                   data: { confirm: 'Annul this sale? This cannot be undone.' } %>
   <% end %>
-</div>
 
-<%= link_to 'Descargar PDF', sale_path(@sale, format: :pdf) %>
-<%= link_to 'Back to Sales', sales_path %>
+  <span class="spacer"></span>
+  <%= link_to 'Descargar PDF', sale_path(@sale, format: :pdf), class: 'btn btn--ghost' %>
+  <%= link_to 'Back to Sales', sales_path %>
+</div>

@@ -421,6 +421,84 @@ svg .bar, rect.bar { fill: var(--brand); }
 svg .bar:hover, rect.bar:hover { fill: var(--brand-hover); }
 
 /* =============================================================================
+   Sales flow — toolbar, row actions, detail header, line-item editor
+   ========================================================================== */
+
+/* Page toolbar: title block on the left, primary action on the right */
+.toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-5);
+}
+.toolbar .page-head { margin-bottom: 0; }
+
+/* Compact button variant for in-table / inline actions */
+.btn--sm { padding: var(--sp-1) var(--sp-3); font-size: var(--text-xs); }
+
+/* Inline row actions in tables (View / Annul). button_to renders a <form>. */
+.row-actions { display: flex; align-items: center; gap: var(--sp-3); white-space: nowrap; }
+.row-actions form { margin: 0; }
+
+/* Detail header: correlative + status badge on one baseline */
+.detail-head { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; margin-bottom: var(--sp-2); }
+.detail-head h1 { margin: 0; }
+.detail-meta { color: var(--muted); font-size: var(--text-sm); margin: 0 0 var(--sp-5); }
+
+/* Action bar at the foot of the detail / form views */
+.action-bar {
+  display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap;
+  margin: var(--sp-6) 0 var(--sp-4);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--line);
+}
+.action-bar form { margin: 0; }
+.action-bar .spacer { margin-left: auto; }
+
+/* Form sections — group related fields under a quiet heading */
+.form-section { margin-bottom: var(--sp-6); }
+.form-section > h2, .form-section > h3 { margin-top: 0; }
+
+/* Two-column meta field grid for short document fields */
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0 var(--sp-5);
+  max-width: 640px;
+}
+.field { display: flex; flex-direction: column; }
+
+/* Line-item editor table: inputs fill their cell, no stacked margins */
+.line-items-table input { max-width: none; margin-bottom: 0; }
+.line-items-table td { vertical-align: middle; }
+.line-items-table .col-total { text-align: right; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+/* Totals summary under the line items */
+.totals-bar {
+  display: flex; align-items: baseline; justify-content: flex-end; gap: var(--sp-3);
+  margin-top: var(--sp-3);
+}
+.totals-bar .totals-label { color: var(--muted); font-size: var(--text-sm); }
+.totals-bar .totals-value { font-size: var(--text-md); font-weight: var(--weight-semi); font-variant-numeric: tabular-nums; }
+
+/* Credit-note callout on the detail view */
+.note-card {
+  background: var(--danger-weak); color: var(--danger-ink);
+  border-radius: var(--r); padding: var(--sp-3) var(--sp-4);
+  font-size: var(--text-sm); margin-bottom: var(--sp-5);
+}
+
+/* Larger empty state for an index with no rows */
+.empty-state {
+  text-align: center; padding: var(--sp-8) var(--sp-5);
+  border: 1px dashed var(--line-strong); border-radius: var(--r-lg);
+  color: var(--muted);
+}
+.empty-state p { margin: 0 0 var(--sp-4); max-width: none; }
+
+/* =============================================================================
    Motion / accessibility
    ========================================================================== */
 
