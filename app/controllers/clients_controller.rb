@@ -2,6 +2,7 @@ class ClientsController < ApplicationController
   before_action :set_client, only: %i[show edit update destroy]
 
   def index
+    authorize Client
     scope = Client.kept.order(:full_name)
     scope = search_clients(scope, params[:q]) if params[:q].present?
     @pagy, @clients = pagy(:offset, scope)

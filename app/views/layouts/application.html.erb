@@ -25,28 +25,18 @@
 
   <body>
     <% if current_user %>
-      <header class="app-header">
-        <nav class="app-nav">
-          <span class="nav-user"><%= current_user.email %> (<%= current_user.role %>)</span>
-          <% if current_user.admin? %>
-            <%= link_to "Dashboard", dashboard_path %>
-            <%= link_to "Users", users_path %>
-            <%= link_to "Company Settings", company_settings_path %>
-          <% end %>
-          <%= button_to "Log out", logout_path, method: :delete, class: "btn--ghost", form_class: "nav-spacer" %>
-        </nav>
-      </header>
+      <div class="app-shell">
+        <%= render "layouts/sidebar" %>
+        <main class="app-main">
+          <%= render "layouts/flash" %>
+          <%= yield %>
+        </main>
+      </div>
+    <% else %>
+      <main class="container">
+        <%= render "layouts/flash" %>
+        <%= yield %>
+      </main>
     <% end %>
-
-    <main class="container">
-      <% if flash[:notice] %>
-        <p class="flash-notice"><%= flash[:notice] %></p>
-      <% end %>
-      <% if flash[:alert] %>
-        <p class="flash-alert"><%= flash[:alert] %></p>
-      <% end %>
-
-      <%= yield %>
-    </main>
   </body>
 </html>

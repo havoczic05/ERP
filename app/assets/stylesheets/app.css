@@ -116,40 +116,128 @@ a:hover { color: var(--brand-hover); text-decoration: underline; text-underline-
 small { font-size: var(--text-sm); color: var(--muted); }
 
 /* =============================================================================
-   Layout — header + content container
+   Layout — app shell (sidebar + main) and content container
    ========================================================================== */
 
-.app-header {
-  background: var(--surface-2);
-  border-bottom: 1px solid var(--line);
+/* App shell: fixed-width sidebar + fluid content. */
+.app-shell {
+  display: grid;
+  grid-template-columns: 15rem 1fr;
+  min-height: 100vh;
 }
 
-.app-nav {
-  max-width: var(--container);
-  margin: 0 auto;
-  padding: var(--sp-3) var(--sp-5);
+.app-main {
+  min-width: 0; /* let wide tables scroll instead of stretching the grid track */
+  padding: var(--sp-6) var(--sp-6) var(--sp-8);
+}
+
+/* Sidebar: the second neutral layer (--surface-2), full-height column. */
+.app-sidebar {
   display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: var(--sp-5);
+  background: var(--surface-2);
+  border-right: 1px solid var(--line);
+  padding: var(--sp-5) var(--sp-4);
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
 }
 
-.app-nav .nav-user { font-size: var(--text-sm); color: var(--muted); }
-.app-nav .nav-spacer { margin-left: auto; }
+.sidebar-brand {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semi);
+  color: var(--brand);
+  letter-spacing: 0.02em;
+  padding: 0 var(--sp-2);
+}
+.sidebar-brand:hover { text-decoration: none; color: var(--brand-hover); }
 
-.app-nav a {
-  color: var(--ink-soft);
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
+.nav-group { display: flex; flex-direction: column; gap: 2px; }
+
+.nav-group-label {
+  margin: 0 0 var(--sp-1);
+  padding: 0 var(--sp-2);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.nav-item {
+  display: block;
+  padding: var(--sp-2) var(--sp-2);
+  border-radius: var(--r);
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
-  padding: var(--sp-1) var(--sp-2);
-  border-radius: var(--r-sm);
+  color: var(--ink-soft);
 }
-.app-nav a:hover { color: var(--ink); background: var(--brand-weak); text-decoration: none; }
+.nav-item:hover { background: var(--brand-weak); color: var(--ink); text-decoration: none; }
+.nav-item.is-active {
+  background: var(--brand-weak);
+  color: var(--brand);
+  font-weight: var(--weight-semi);
+}
 
+.sidebar-foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--line);
+}
+.sidebar-user { display: flex; flex-direction: column; gap: var(--sp-1); padding: 0 var(--sp-2); }
+.sidebar-user-email {
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  word-break: break-all;
+}
+.sidebar-foot .badge { align-self: flex-start; }
+.btn--block { width: 100%; }
+
+/* Content container — used by the full-width (logged-out) layout. */
 .container {
   max-width: var(--container);
   margin: 0 auto;
   padding: var(--sp-6) var(--sp-5) var(--sp-8);
+}
+
+/* Collapse the sidebar to a top strip on narrow viewports (desktop-first app). */
+@media (max-width: 56rem) {
+  .app-shell { grid-template-columns: 1fr; }
+  .app-sidebar {
+    position: static;
+    height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-3) var(--sp-4);
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .sidebar-nav { flex-direction: row; flex-wrap: wrap; gap: var(--sp-3) var(--sp-4); overflow: visible; }
+  .nav-group { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 2px var(--sp-1); }
+  .nav-group-label { display: none; }
+  .sidebar-foot {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-left: auto;
+    padding-top: 0;
+    border-top: 0;
+  }
+  .sidebar-user { flex-direction: row; align-items: center; gap: var(--sp-2); }
+  .btn--block { width: auto; }
 }
 
 /* =============================================================================
