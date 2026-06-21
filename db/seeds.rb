@@ -31,17 +31,30 @@ end
 
 warehouses = [ main_warehouse, north_warehouse ]
 
-admin = User.find_or_create_by!(email: "admin@erp.local") do |u|
-  u.role     = "administrador"
-  u.password = ENV.fetch("SEED_ADMIN_PASSWORD", "changeme123")
-  u.active   = true
+# Idempotent user upsert: create the account if missing, and on every run
+# (re)set role / password / active so the seeded credentials always work.
+# find_or_create_by! only assigns the block attributes on create, which left a
+# stale password on accounts that already existed from an earlier seed.
+ensure_user = lambda do |email:, role:, password:|
+  User.find_or_initialize_by(email: email).tap do |user|
+    user.role     = role
+    user.password = password
+    user.active   = true
+    user.save!
+  end
 end
 
-User.find_or_create_by!(email: "vendedor@erp.local") do |u|
-  u.role     = "vendedor"
-  u.password = ENV.fetch("SEED_VENDEDOR_PASSWORD", "changeme123")
-  u.active   = true
-end
+admin = ensure_user.call(
+  email:    "admin@erp.local",
+  role:     "administrador",
+  password: ENV.fetch("SEED_ADMIN_PASSWORD", "changeme123")
+)
+
+ensure_user.call(
+  email:    "vendedor@erp.local",
+  role:     "vendedor",
+  password: ENV.fetch("SEED_VENDEDOR_PASSWORD", "changeme123")
+)
 
 # ---------------------------------------------------------------------------
 # 2. Demo catalog — products
