@@ -97,6 +97,7 @@ jobs:
           bundler-cache: true
 
       - name: Set up Chrome
+        id: setup-chrome
         uses: browser-actions/setup-chrome@v1
         with:
           install-chromedriver: true
@@ -108,12 +109,15 @@ jobs:
           # RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
           # REDIS_URL: redis://localhost:6379/0
         run: |
-          # Pin Selenium to the chromedriver installed alongside Chrome so it
-          # matches the browser version (Selenium Manager would otherwise fetch a
-          # newer chromedriver than the installed Chrome and fail the JS specs).
-          google-chrome --version || true
-          chromedriver --version || true
+          # Pin Selenium to the Chrome + chromedriver pair that setup-chrome
+          # installed so their versions match. Without this, Selenium launches the
+          # runner's pre-installed google-chrome (a different version) against the
+          # newer chromedriver and the JS specs fail with SessionNotCreatedError.
+          export CHROME_BIN="${{ steps.setup-chrome.outputs.chrome-path }}"
           export CHROMEDRIVER_BIN="$(command -v chromedriver)"
+          echo "Using CHROME_BIN=$CHROME_BIN"
+          "$CHROME_BIN" --version || true
           echo "Using CHROMEDRIVER_BIN=$CHROMEDRIVER_BIN"
+          "$CHROMEDRIVER_BIN" --version || true
           bin/rails db:test:prepare
           bundle exec rspec

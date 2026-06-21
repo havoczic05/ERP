@@ -26,6 +26,12 @@ Capybara.register_driver :headless_chrome do |app|
   options.add_argument("--disable-gpu")
   options.add_argument("--window-size=1400,1400")
 
+  # On CI, launch the exact Chrome that CHROMEDRIVER_BIN was built for; otherwise
+  # Selenium may start a different Chrome already on the runner (e.g. the system
+  # google-chrome), reintroducing the driver/browser version mismatch.
+  chrome_bin = ENV["CHROME_BIN"].to_s
+  options.binary = chrome_bin unless chrome_bin.empty?
+
   driver_path = ENV["CHROMEDRIVER_BIN"].to_s
   if driver_path.empty?
     Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
