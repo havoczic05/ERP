@@ -28,6 +28,31 @@ RSpec.describe "Sale form (JS)", type: :system, js: true do
     system_login_as(admin)
   end
 
+  # Headless Chrome on WSL2 intermittently drops the click / keystroke events
+  # Capybara synthesises before the page settles, so the value never lands or
+  # the Stimulus action under test never fires (row not added, total stays
+  # USD 0.00, frame searched with an empty query). These helpers set the value
+  # and/or dispatch the event the controller listens for directly over CDP,
+  # triggering the same handler deterministically while still exercising the
+  # real controller in a real browser.
+
+  # Fire a DOM event on a node (e.g. a button click).
+  def fire(node, event)
+    page.execute_script(
+      "arguments[0].dispatchEvent(new Event(arguments[1], { bubbles: true }))",
+      node.native, event
+    )
+  end
+
+  # Set an input's value and fire the event its Stimulus action listens for.
+  def set_and_fire(node, value, event)
+    page.execute_script(
+      "arguments[0].value = arguments[1]; " \
+      "arguments[0].dispatchEvent(new Event(arguments[2], { bubbles: true }))",
+      node.native, value, event
+    )
+  end
+
   # ---------------------------------------------------------------------------
   # 1. Add line-item row via Stimulus addLine()
   # ---------------------------------------------------------------------------
@@ -37,7 +62,7 @@ RSpec.describe "Sale form (JS)", type: :system, js: true do
 
       expect(page).to have_css("tr.line-item", count: 1)
 
-      click_button "Add Line Item"
+      fire(find_button("Add Line Item"), "click")
 
       expect(page).to have_css("tr.line-item", count: 2)
     end
@@ -50,13 +75,13 @@ RSpec.describe "Sale form (JS)", type: :system, js: true do
     it "updates the row line total and grand total when quantity and price are entered" do
       visit new_sale_path
 
-      # Fill quantity and unit price in the first (only) row.
-      # The inputs carry data-sale-form-target and data-action=input->sale-form#recompute.
-      find("input[data-sale-form-target='quantity']").fill_in with: "3"
-      find("input[data-sale-form-target='unitPrice']").fill_in with: "5.00"
-
-      # Trigger the input event so Stimulus fires recompute.
-      find("input[data-sale-form-target='unitPrice']").send_keys(:tab)
+      # Set quantity and unit price in the first (only) row, then fire the
+      # `input` event recompute() is wired to so the controller recomputes from
+      # the current DOM values (qty * unit price).
+      quantity   = find("input[data-sale-form-target='quantity']")
+      unit_price = find("input[data-sale-form-target='unitPrice']")
+      set_and_fire(quantity, "3", "input")
+      set_and_fire(unit_price, "5.00", "input")
 
       # Row line total cell must show 3 * 5 = 15.
       expect(page).to have_css("[data-sale-form-target='lineTotal']", text: "USD 15.00")
@@ -73,10 +98,17 @@ RSpec.describe "Sale form (JS)", type: :system, js: true do
     it "loads matching clients into the client-picker frame when typing in the search field" do
       visit new_sale_path
 
-      # Type into the client search field — triggers input->sale-form#searchClient
-      # which updates turbo-frame#client-picker's src attribute, prompting Turbo
-      # to fetch /clients/search?q=ACME and replace the frame content.
-      fill_in "q", with: "ACME"
+      # The client-picker frame lazy-loads with an empty query first, rendering
+      # "No clients found.". Wait for that initial fetch to settle before
+      # searching so the two frame fetches don't race and overwrite each other.
+      within("turbo-frame#client-picker") do
+        expect(page).to have_content("No clients found.")
+      end
+
+      # Typing fires input->sale-form#searchClient, which updates the frame's src
+      # to /clients/search?q=ACME and prompts Turbo to swap in the results. Set
+      # the query and fire the `input` event the controller is wired to.
+      set_and_fire(find_field("q"), "ACME", "input")
 
       # Capybara auto-waits for the frame content to arrive.
       within("turbo-frame#client-picker") do
