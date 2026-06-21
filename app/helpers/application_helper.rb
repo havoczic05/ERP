@@ -25,4 +25,14 @@ module ApplicationHelper
     variant = INSTALLMENT_BADGE_VARIANT.fetch(installment.status, "info")
     content_tag(:span, installment.status.humanize, class: "badge badge--#{variant}")
   end
+
+  # Renders a sidebar navigation link. Marks itself active (background tint +
+  # aria-current) when the current request is handled by one of `controllers`,
+  # so a section stays highlighted across its nested pages (e.g. /sales/123).
+  def nav_link_to(label, path, controllers:)
+    active = Array(controllers).include?(controller_name)
+    link_to label, path,
+            class: class_names("nav-item", "is-active" => active),
+            aria: { current: active ? "page" : nil }
+  end
 end

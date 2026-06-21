@@ -31,7 +31,7 @@ RSpec.describe 'Authentication layout', type: :system do
     end
 
     it 'shows the current user role in the nav' do
-      expect(page).to have_content('administrador')
+      expect(page).to have_content('Administrador')
     end
 
     it 'shows a Log out button' do
@@ -54,7 +54,7 @@ RSpec.describe 'Authentication layout', type: :system do
     end
 
     it 'shows the current user role in the nav' do
-      expect(page).to have_content('vendedor')
+      expect(page).to have_content('Vendedor')
     end
 
     it 'shows a Log out button' do
