@@ -15,6 +15,7 @@ class SalesController < ApplicationController
   def new
     @sale = Sale.new
     authorize @sale
+    @products = product_options
   end
 
   # POST /sales
@@ -29,6 +30,7 @@ class SalesController < ApplicationController
     else
       @sale = result.sale || Sale.new
       @errors = result.errors
+      @products = product_options
       render :new, status: :unprocessable_entity
     end
   end
@@ -100,7 +102,7 @@ class SalesController < ApplicationController
     raw = params.require(:sale).permit(
       :client_id, :warehouse_id, :document_type,
       :num_installments, :interval_days, :notes,
-      items: %i[product_id quantity unit_price_usd]
+      items: %i[product_id product_query quantity unit_price_usd]
     )
 
     {
@@ -112,11 +114,32 @@ class SalesController < ApplicationController
       notes:            raw[:notes],
       items:            Array(raw[:items]).map do |item|
         {
-          product_id:     item[:product_id].to_i,
+          product_id:     resolve_product_id(item),
           quantity:       item[:quantity].to_i,
           unit_price_usd: item[:unit_price_usd]
         }
       end
     }
+  end
+
+  # Resolve a line item to a product_id. Accepts an explicit product_id (used by
+  # the API / request specs) or a "Name (SKU)" datalist label typed in the
+  # new-sale form, resolved by the unique SKU, falling back to an exact name
+  # match for free-typed input. Returns 0 when unresolved so SaleCreationService
+  # reports a "product does not exist" failure (its existing contract).
+  def resolve_product_id(item)
+    return item[:product_id].to_i if item[:product_id].present?
+
+    query = item[:product_query].to_s.strip
+    return 0 if query.blank?
+
+    sku = query[/\(([^)]+)\)\s*\z/, 1]
+    product = sku ? Product.kept.find_by(sku: sku) : Product.kept.find_by(name: query)
+    product&.id || 0
+  end
+
+  # Products for the new-sale datalist (name-based search). Ordered by name.
+  def product_options
+    Product.kept.order(:name)
   end
 end
