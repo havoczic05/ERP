@@ -127,9 +127,21 @@ RSpec.describe 'Sales', type: :system do
     it 'renders a line-item section with product, quantity, and unit price fields' do
       visit new_sale_path
       expect(page).to have_css('#line-items')
-      expect(page).to have_field('sale[items][][product_id]')
+      expect(page).to have_field('sale[items][][product_query]')
       expect(page).to have_field('sale[items][][quantity]')
       expect(page).to have_field('sale[items][][unit_price_usd]')
+    end
+
+    it 'lets the user search products by name via a datalist (not a raw id field)' do
+      create(:product, warehouse: warehouse, name: 'Searchable Widget', sku: 'SKU-XYZ')
+      visit new_sale_path
+
+      # The product field is a name-searchable text input backed by a datalist,
+      # NOT a raw numeric product_id field (users don't know internal ids).
+      expect(page).to have_field('sale[items][][product_query]')
+      expect(page).not_to have_field('sale[items][][product_id]')
+      expect(page).to have_css('datalist#products-datalist')
+      expect(page).to have_css("datalist#products-datalist option[value*='Searchable Widget']")
     end
 
     it 'renders a client search turbo frame placeholder' do
@@ -155,7 +167,9 @@ RSpec.describe 'Sales', type: :system do
       find('input[name="sale[warehouse_id]"]', visible: false).set(warehouse.id)
       select 'Cotizacion', from: 'sale[document_type]'
       fill_in 'sale[num_installments]', with: '1'
-      find('input[name="sale[items][][product_id]"]').set(product.id)
+      # The user searches the product by name; the submitted value is the
+      # "Name (SKU)" datalist label, which the controller resolves to product_id.
+      find('input[name="sale[items][][product_query]"]').set("#{product.name} (#{product.sku})")
       find('input[name="sale[items][][quantity]"]').set('5')
       find('input[name="sale[items][][unit_price_usd]"]').set('10.00')
 
@@ -171,7 +185,7 @@ RSpec.describe 'Sales', type: :system do
       visit new_sale_path
 
       select 'Cotizacion', from: 'sale[document_type]'
-      fill_in 'sale[items][][product_id]', with: product.id
+      fill_in 'sale[items][][product_query]', with: "#{product.name} (#{product.sku})"
       fill_in 'sale[items][][quantity]', with: '1'
       fill_in 'sale[items][][unit_price_usd]', with: '10.00'
       # Intentionally omit client_id and warehouse_id
@@ -285,6 +299,16 @@ RSpec.describe 'Sales', type: :system do
     it 'renders no results message when no clients match' do
       visit search_clients_path(q: 'ZZZNOMATCH')
       expect(page).to have_content('No clients found.')
+    end
+
+    it 'wraps results in the client-picker turbo frame so Turbo can swap them in place' do
+      # The search response MUST be wrapped in a turbo-frame whose id matches the
+      # picker frame in the sales form (new.html.erb: turbo-frame#client-picker).
+      # If the ids differ, Turbo cannot find a matching frame in the response and
+      # renders its "Content missing" fallback instead of the results.
+      create(:client, :ruc_client, full_name: 'Turbo Corp')
+      visit search_clients_path(q: 'Turbo')
+      expect(page).to have_css('turbo-frame#client-picker')
     end
   end
 end
