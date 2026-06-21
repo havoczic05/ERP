@@ -21,24 +21,31 @@ module SystemAuthenticationHelper
   # Waits for the authenticated page to render before returning, so callers can
   # immediately visit the target page without a race condition.
   #
-  # Why the retry loop: a Turbo post-load re-render of the login page can reset
-  # the form just after it loads, wiping values typed before it fires. The submit
-  # then carries empty required fields, is blocked by HTML5 validation, and never
-  # reaches the server — so we stay on /login. The timing of that render varies
-  # with machine load, so no fixed wait is reliable. Instead we attempt the full
-  # flow and, if the authenticated nav ("Log out", which only exists once logged
-  # in) doesn't appear, re-submit on a fresh page load until it does.
+  # Why this drives the form through JavaScript instead of fill_in/click_button:
+  # under headless Chrome on WSL2, on repeated logins within one persistent
+  # browser session, keystroke delivery to the password field is intermittently
+  # dropped before the page settles — the field stays blank, the submit is
+  # blocked by HTML5 required validation, and we silently stay on /login (no
+  # amount of re-typing recovers it within the example). A coordinate click on
+  # the submit button is likewise occasionally swallowed.
+  #
+  # Setting the field values and calling requestSubmit() in one script runs over
+  # CDP, so it bypasses the flaky input-event delivery entirely while still
+  # exercising the real session controller (requestSubmit fires HTML5 validation
+  # and the Turbo-handled submit). This is auth setup, not a test of the login
+  # form itself — that is covered by the non-JS sessions/authentication specs.
+  # We then wait on the authenticated nav ("Log out", only present once logged
+  # in) so callers can visit the target page without a login race.
+  PASSWORD = "password123" # FactoryBot default
+
   def system_login_as(user)
-    attempts = 0
-    loop do
-      attempts += 1
-      visit login_path
-      fill_in "Email", with: user.email
-      fill_in "Password", with: "password123"
-      click_button "Log in"
-      return if page.has_button?("Log out", wait: 5)
-      raise "system_login_as: login did not complete after #{attempts} attempts" if attempts >= 5
-    end
+    visit login_path
+    page.execute_script(<<~JS, user.email, PASSWORD)
+      document.querySelector('input[type="email"]').value = arguments[0];
+      document.querySelector('input[type="password"]').value = arguments[1];
+      document.querySelector('form').requestSubmit();
+    JS
+    expect(page).to have_button("Log out")
   end
 end
 
