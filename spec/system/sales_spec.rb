@@ -1,20 +1,10 @@
 require 'rails_helper'
 
 # System specs for Sales views (Phase 7, Slice C).
-# Driver: rack_test (no Chrome/Chromium in this WSL2 environment).
+# Driver: rack_test (server-rendered HTML assertions only).
 #
-# Assertions are server-rendered HTML only. Live-JS behaviors are documented
-# as known debt below.
-#
-# W-3 DEBT (live-JS gap):
-#   The following behaviors require a real JS driver (Chrome/Selenium) and are
-#   NOT covered here:
-#   - Stimulus sale_form_controller: add/remove line-item rows client-side
-#   - Stimulus: live recompute of line totals and grand total in the browser
-#   - Turbo Frame: inline client-search result swap without page reload
-#   These are verified manually (QA) until a headless Chrome environment is
-#   available. The authoritative automated coverage of totals/stock/installment
-#   math lives in service + model + request specs (Phases 3-6).
+# JS behaviors (Stimulus sale_form_controller, Turbo Frame client-picker) are
+# covered by spec/system/sales_form_js_spec.rb using headless Chrome (js: true).
 
 RSpec.describe 'Sales', type: :system do
   before { driven_by(:rack_test) }
@@ -192,20 +182,8 @@ RSpec.describe 'Sales', type: :system do
       expect(page).to have_button('Create Document')
     end
 
-    # W-3 DEBT: the following behaviors require a real JS driver.
-    # Using `skip` (not `pending`) because rack_test cannot execute JS at all —
-    # these examples would never produce a failure, making `pending` incorrect.
-    it 'dynamically adds line-item rows via Stimulus controller' do
-      skip 'W-3: requires JS driver (no Chrome in WSL2) — sale_form_controller.js add-row'
-    end
-
-    it 'recomputes line totals client-side via Stimulus controller' do
-      skip 'W-3: requires JS driver (no Chrome in WSL2) — sale_form_controller.js live totals'
-    end
-
-    it 'swaps client-search results inline via Turbo Frame' do
-      skip 'W-3: requires JS driver (no Chrome in WSL2) — Turbo Frame client-picker swap'
-    end
+    # JS behaviors (add row, live totals, Turbo Frame client search) are covered
+    # by spec/system/sales_form_js_spec.rb using headless Chrome (js: true).
   end
 
   # ---------------------------------------------------------------------------

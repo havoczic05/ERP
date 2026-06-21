@@ -10,10 +10,16 @@
   </div>
 <% end %>
 
+<%# Stimulus sale-form controller scope.
+    The data-controller wrapper must enclose BOTH the client-search input and
+    the line-items section because the controller handles actions on both.
+    Moving the wrapper here (around the entire form body) ensures every
+    data-action="...sale-form#..." element is within the controller's DOM scope. %>
+<div data-controller="sale-form"
+     data-sale-form-search-url-value="<%= search_clients_path %>">
 <%= form_with url: sales_path, method: :post do |f| %>
   <%# Client picker — Turbo Frame renders /clients/search results inline.
-      The hidden field carries the selected client_id on submit.
-      JS-dependent inline swap (W-3 debt): live swap requires a real JS driver. %>
+      The hidden field carries the selected client_id on submit. %>
   <div>
     <%= label_tag :q, 'Search Client' %>
     <%= text_field_tag :q, '', placeholder: 'Name or document number',
@@ -58,12 +64,8 @@
   </div>
 
   <%# Line items — Stimulus sale-form controller manages add/remove rows
-      and computes line totals client-side. Requires a real JS driver to
-      exercise those behaviors (W-3 debt). The server always sees the
-      submitted fields regardless. %>
-  <div id="line-items"
-       data-controller="sale-form"
-       data-sale-form-search-url-value="<%= search_clients_path %>">
+      and computes line totals client-side. %>
+  <div id="line-items">
     <h3>Line Items</h3>
 
     <table id="line-items-table">
@@ -101,5 +103,6 @@
 
   <%= f.submit 'Create Document' %>
 <% end %>
+</div>
 
 <%= link_to 'Back to Sales', sales_path %>
