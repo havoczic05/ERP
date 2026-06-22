@@ -875,6 +875,19 @@ li {
 .pagination-gap { padding: 0 var(--sp-1); color: var(--muted); }
 .pagination-count { margin: 0; font-size: var(--text-sm); color: var(--muted); font-variant-numeric: tabular-nums; }
 
+/* Table footer: pagination (left) · subtotal (center) · export (right) */
+.table-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3) var(--sp-4);
+    flex-wrap: wrap;
+    margin-top: var(--sp-4);
+}
+.table-footer .pagination-bar { margin-top: 0; }
+.footer-subtotal { margin: 0; font-size: var(--text-md); font-variant-numeric: tabular-nums; }
+.footer-subtotal strong { color: var(--ink); }
+
 /* Compact button variant for in-table / inline actions */
 .btn--sm {
     padding: var(--sp-1) var(--sp-3);

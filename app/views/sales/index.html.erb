@@ -4,6 +4,34 @@
 </div>
 
 <div class="toolbar">
+  <%= form_with url: sales_path, method: :get, class: "filters" do |f| %>
+    <div class="field">
+      <%= label_tag :q, 'Cliente' %>
+      <%= text_field_tag :q, params[:q], placeholder: 'Nombre del cliente' %>
+    </div>
+    <div class="field">
+      <%= label_tag :date_range, 'Fecha' %>
+      <%= select_tag :date_range, options_for_select(DateRange::OPTIONS, params[:date_range]) %>
+    </div>
+    <div class="field">
+      <%= label_tag :on, 'Día específico' %>
+      <%= date_field_tag :on, params[:on] %>
+    </div>
+    <div class="field">
+      <%= label_tag :document_type, 'Tipo' %>
+      <%= select_tag :document_type,
+            options_for_select([['Todos', ''], ['Cotización', 'cotizacion'], ['Venta', 'venta']],
+                               params[:document_type]) %>
+    </div>
+    <div class="field">
+      <%= label_tag :status, 'Estado' %>
+      <%= select_tag :status,
+            options_for_select([['Todos', ''], ['Confirmada', 'confirmada'], ['Anulada', 'anulada']],
+                               params[:status]) %>
+    </div>
+    <%= f.submit 'Filtrar' %>
+  <% end %>
+
   <%= action_link 'Nuevo documento', new_sale_path, variant: :primary, size: :md, icon: :plus %>
 </div>
 
@@ -43,7 +71,14 @@
     </tbody>
   </table>
 
-  <%= pagination_nav(@pagy) %>
+  <div class="table-footer">
+    <%= pagination_nav(@pagy) %>
+    <p class="footer-subtotal">
+      Subtotal: <strong><%= number_to_currency(@subtotal, unit: 'USD ') %></strong>
+    </p>
+    <%= export_link 'Descargar Excel',
+          sales_path(request.query_parameters.except('page').merge(format: 'csv')) %>
+  </div>
 <% else %>
   <div class="empty-state">
     <p id="no-sales-message">No se encontraron ventas.</p>

@@ -142,6 +142,13 @@ module ApplicationHelper
            suffix: (capture(&suffix) if suffix)
   end
 
+  # Reusable export button — opens the export (e.g. a CSV) in a new tab. Same
+  # ghost style as the other actions; pass a path with the desired format/filters.
+  def export_link(label, path)
+    action_link(label, path, variant: :ghost, size: :md, icon: :download,
+                target: "_blank", rel: "noopener")
+  end
+
   # Reusable, accessible pagination (see app/views/shared/_pagination). Renders a
   # numbered nav with Anterior/Siguiente + a "Mostrando X–Y de N" count. Works
   # with any Pagy offset object and preserves the current query string (filters).
