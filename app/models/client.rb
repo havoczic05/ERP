@@ -1,4 +1,12 @@
 class Client < ApplicationRecord
+  HUMAN_ATTRS = {
+    "full_name" => "Nombre completo",
+    "document_type" => "Tipo de documento",
+    "document_number" => "Número de documento",
+    "phone" => "Teléfono"
+  }.freeze
+  include SpanishAttributeNames
+
   # ---------------------------------------------------------------------------
   # Enum
   # ---------------------------------------------------------------------------

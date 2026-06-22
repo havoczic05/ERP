@@ -1,4 +1,10 @@
 class Warehouse < ApplicationRecord
+  HUMAN_ATTRS = {
+    "name" => "Nombre",
+    "location" => "Ubicación"
+  }.freeze
+  include SpanishAttributeNames
+
   # ---------------------------------------------------------------------------
   # Associations
   # ---------------------------------------------------------------------------
