@@ -43,6 +43,9 @@ gem "image_processing", "~> 2.0"
 gem "pundit"
 gem "pagy"
 
+# Ruby's CSV library (a bundled gem since Ruby 3.4) — for the sales CSV export
+gem "csv"
+
 # PDF generation for commercial documents (cotizaciones/ventas) — pure Ruby, no headless browser
 gem "prawn"
 gem "prawn-table"

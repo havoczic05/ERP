@@ -2,14 +2,23 @@ class SalesController < ApplicationController
   before_action :set_sale,        only: %i[show]
   before_action :set_kept_sale,   only: %i[annul convert_to_sale]
 
-  # GET /sales
+  # GET /sales(.csv)
   def index
     authorize Sale
     # Annulled sales soft-delete (discarded_at), but per spec RF3.1 they MUST remain
     # visible in the index for audit purposes — hence kept OR anulada.
-    scope = Sale.kept.or(Sale.anulada).order(created_at: :desc)
-    # ~15 rows so the pagination/footer fits on screen without much scrolling.
-    @pagy, @sales = pagy(:offset, scope, limit: 15)
+    scope = filter_sales(Sale.kept.or(Sale.anulada).order(created_at: :desc))
+    @subtotal = scope.sum(:total_usd) # subtotal of the FILTERED set (not the page)
+
+    respond_to do |format|
+      # ~15 rows so the pagination/footer fits on screen without much scrolling.
+      format.html { @pagy, @sales = pagy(:offset, scope, limit: 15) }
+      format.csv do
+        send_data sales_csv(scope),
+                  filename: "ventas-#{Date.current.iso8601}.csv",
+                  type: "text/csv", disposition: "inline"
+      end
+    end
   end
 
   # GET /sales/new
@@ -90,6 +99,37 @@ class SalesController < ApplicationController
   end
 
   private
+
+  # Apply the index filters: client name (q), document_type, status, and date
+  # (a specific day via `on`, else a preset via `date_range`). Unknown values
+  # are ignored, so a bad param never breaks the page.
+  def filter_sales(scope)
+    if params[:q].present?
+      scope = scope.joins(:client).where("clients.full_name ILIKE ?", "%#{params[:q]}%")
+    end
+    scope = scope.where(document_type: params[:document_type]) if Sale.document_types.key?(params[:document_type])
+    scope = scope.where(status: params[:status]) if Sale.statuses.key?(params[:status])
+
+    range = DateRange.for_day(params[:on]) || DateRange.for(params[:date_range])
+    scope = scope.where(created_at: range) if range
+    scope
+  end
+
+  def sales_csv(scope)
+    CSV.generate(headers: true) do |csv|
+      csv << [ "Correlativo", "Fecha", "Tipo", "Cliente", "Total (USD)", "Estado" ]
+      scope.includes(:client).each do |sale|
+        csv << [
+          sale.correlative,
+          helpers.format_date(sale.created_at),
+          helpers.document_type_label(sale.document_type),
+          sale.client.full_name,
+          sale.total_usd,
+          sale.status.humanize
+        ]
+      end
+    end
+  end
 
   # Show allows viewing annulled (discarded) sales for audit purposes.
   def set_sale

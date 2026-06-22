@@ -60,6 +60,59 @@ RSpec.describe 'Sales', type: :request do
       expect(response.body).to include(kept_sale.correlative)
       expect(response.body).to include(annulled.correlative)
     end
+
+    context 'filters and CSV export' do
+      let!(:acme)  { create(:client, :ruc_client, full_name: 'Acme Corp') }
+      let!(:beta)  { create(:client, :ruc_client, full_name: 'Beta SA') }
+      let!(:venta_acme) do
+        create(:sale, :venta, client: acme, warehouse: warehouse, correlative: 'VTA-F001', total_usd: 100)
+      end
+      let!(:cotiz_beta) do
+        create(:sale, client: beta, warehouse: warehouse, document_type: 'cotizacion',
+                      correlative: 'COT-F001', total_usd: 50)
+      end
+      let!(:anulada_acme) do
+        create(:sale, :venta, :anulada, client: acme, warehouse: warehouse,
+                                        correlative: 'VTA-F002', total_usd: 200)
+      end
+
+      it 'filters by client name (q)' do
+        get sales_path(q: 'Acme')
+        expect(response.body).to include('VTA-F001')
+        expect(response.body).not_to include('COT-F001')
+      end
+
+      it 'filters by document_type and status' do
+        get sales_path(document_type: 'cotizacion')
+        expect(response.body).to include('COT-F001')
+        expect(response.body).not_to include('VTA-F001')
+
+        get sales_path(status: 'anulada')
+        expect(response.body).to include('VTA-F002')
+        expect(response.body).not_to include('VTA-F001')
+      end
+
+      it 'ignores unknown filter values (no error)' do
+        get sales_path(status: 'bogus', document_type: 'bogus')
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('VTA-F001')
+      end
+
+      it 'shows the subtotal of the filtered set' do
+        get sales_path(status: 'confirmada') # VTA-F001 (100) + COT-F001 (50) = 150
+        expect(response.body).to include('Subtotal:')
+        expect(response.body).to include('USD 150.00')
+      end
+
+      it 'exports the filtered set as CSV (respects filters)' do
+        get sales_path(format: :csv, q: 'Acme')
+        expect(response.media_type).to eq('text/csv')
+        expect(response.body).to include('Correlativo,Fecha,Tipo,Cliente,Total (USD),Estado')
+        expect(response.body).to include('VTA-F001')
+        expect(response.body).to include('Acme Corp')
+        expect(response.body).not_to include('COT-F001')
+      end
+    end
   end
 
   # ---------------------------------------------------------------------------
