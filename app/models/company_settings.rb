@@ -1,4 +1,13 @@
 class CompanySettings < ApplicationRecord
+  HUMAN_ATTRS = {
+    "razon_social" => "Razón social",
+    "ruc" => "RUC",
+    "direccion" => "Dirección",
+    "telefono" => "Teléfono",
+    "logo" => "Logo"
+  }.freeze
+  include SpanishAttributeNames
+
   # ---------------------------------------------------------------------------
   # Attachments
   # ---------------------------------------------------------------------------

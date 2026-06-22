@@ -1,8 +1,18 @@
 class Product < ApplicationRecord
+  HUMAN_ATTRS = {
+    "name" => "Nombre",
+    "sku" => "SKU",
+    "brand" => "Marca",
+    "stock" => "Stock",
+    "base_price_usd" => "Precio base (USD)",
+    "warehouse" => "Almacén"
+  }.freeze
+  include SpanishAttributeNames
+
   # ---------------------------------------------------------------------------
   # Associations
   # ---------------------------------------------------------------------------
-  belongs_to :warehouse
+  belongs_to :warehouse, optional: true
   has_many :sale_items
 
   # ---------------------------------------------------------------------------
@@ -13,6 +23,7 @@ class Product < ApplicationRecord
   validates :brand, presence: { message: "no puede estar en blanco" }
   validates :stock, numericality: { greater_than_or_equal_to: 0, message: "debe ser mayor o igual a 0" }
   validates :base_price_usd, numericality: { greater_than: 0, message: "debe ser mayor que 0" }
+  validates :warehouse, presence: { message: "debe existir" }
 
   # Model-level uniqueness scoped to active (non-discarded) products.
   # DB partial index (WHERE discarded_at IS NULL) provides race-condition safety.

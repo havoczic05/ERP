@@ -1,4 +1,18 @@
 class Sale < ApplicationRecord
+  HUMAN_ATTRS = {
+    "document_type" => "Tipo de documento",
+    "status" => "Estado",
+    "correlative" => "Correlativo",
+    "client" => "Cliente",
+    "warehouse" => "Almacén",
+    "source_cotizacion" => "Cotización de origen",
+    "notes" => "Notas",
+    "subtotal_usd" => "Subtotal (USD)",
+    "tax_usd" => "Impuesto (USD)",
+    "total_usd" => "Total (USD)"
+  }.freeze
+  include SpanishAttributeNames
+
   # ---------------------------------------------------------------------------
   # Enums (string-backed)
   # ---------------------------------------------------------------------------
@@ -9,8 +23,8 @@ class Sale < ApplicationRecord
   # ---------------------------------------------------------------------------
   # Associations
   # ---------------------------------------------------------------------------
-  belongs_to :client
-  belongs_to :warehouse
+  belongs_to :client, optional: true
+  belongs_to :warehouse, optional: true
   belongs_to :source_cotizacion, class_name: "Sale", optional: true,
              foreign_key: :source_cotizacion_id
   has_many :sale_items, dependent: :destroy
@@ -20,9 +34,12 @@ class Sale < ApplicationRecord
   # ---------------------------------------------------------------------------
   # Validations
   # ---------------------------------------------------------------------------
-  validates :document_type, presence: true
-  validates :status, presence: true
-  validates :correlative, presence: true, uniqueness: true
+  validates :document_type, presence: { message: "no puede estar en blanco" }
+  validates :status, presence: { message: "no puede estar en blanco" }
+  validates :correlative, presence: { message: "no puede estar en blanco" },
+            uniqueness: { message: "ya está en uso" }
+  validates :client, presence: { message: "debe existir" }
+  validates :warehouse, presence: { message: "debe existir" }
 
   # ---------------------------------------------------------------------------
   # Scopes (no default_scope — explicit call required)
