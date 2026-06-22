@@ -1,22 +1,22 @@
-<h1>Company Settings</h1>
+<h1>Configuración de la empresa</h1>
 
 <dl>
-  <dt>Razon Social</dt>
+  <dt>Razón social</dt>
   <dd><%= @company_settings.razon_social %></dd>
 
   <dt>RUC</dt>
   <dd><%= @company_settings.ruc %></dd>
 
-  <dt>Direccion</dt>
+  <dt>Dirección</dt>
   <dd><%= @company_settings.direccion %></dd>
 
-  <dt>Telefono</dt>
+  <dt>Teléfono</dt>
   <dd><%= @company_settings.telefono %></dd>
 
   <% if @company_settings.logo.attached? %>
     <dt>Logo</dt>
-    <dd><%= image_tag @company_settings.logo, alt: "Company Logo" %></dd>
+    <dd><%= image_tag @company_settings.logo, alt: "Logo de la empresa" %></dd>
   <% end %>
 </dl>
 
-<%= link_to "Edit Settings", edit_company_settings_path %>
+<%= link_to "Editar configuración", edit_company_settings_path %>

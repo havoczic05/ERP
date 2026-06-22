@@ -11,7 +11,7 @@
   <% end %>
 
   <div>
-    <%= f.label :razon_social %>
+    <%= f.label :razon_social, "Razón social" %>
     <%= f.text_field :razon_social %>
     <% if company_settings.errors[:razon_social].any? %>
       <span class="error"><%= company_settings.errors[:razon_social].join(", ") %></span>
@@ -19,7 +19,7 @@
   </div>
 
   <div>
-    <%= f.label :ruc %>
+    <%= f.label :ruc, "RUC" %>
     <%= f.text_field :ruc %>
     <% if company_settings.errors[:ruc].any? %>
       <span class="error"><%= company_settings.errors[:ruc].join(", ") %></span>
@@ -27,7 +27,7 @@
   </div>
 
   <div>
-    <%= f.label :direccion %>
+    <%= f.label :direccion, "Dirección" %>
     <%= f.text_field :direccion %>
     <% if company_settings.errors[:direccion].any? %>
       <span class="error"><%= company_settings.errors[:direccion].join(", ") %></span>
@@ -35,7 +35,7 @@
   </div>
 
   <div>
-    <%= f.label :telefono %>
+    <%= f.label :telefono, "Teléfono" %>
     <%= f.text_field :telefono %>
     <% if company_settings.errors[:telefono].any? %>
       <span class="error"><%= company_settings.errors[:telefono].join(", ") %></span>
@@ -43,11 +43,11 @@
   </div>
 
   <div>
-    <%= f.label :logo %>
+    <%= f.label :logo, "Logo" %>
     <%= f.file_field :logo %>
   </div>
 
   <div>
-    <%= f.submit %>
+    <%= f.submit "Guardar cambios" %>
   </div>
 <% end %>

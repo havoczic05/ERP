@@ -62,7 +62,7 @@ RSpec.describe "CompanySettings", type: :request do
       expect(response).to have_http_status(:found)
       expect(response).to redirect_to(company_settings_path)
       follow_redirect!
-      expect(response.body).to include("Settings updated")
+      expect(response.body).to include("Configuración actualizada")
       expect(CompanySettings.first.razon_social).to eq("Mi Empresa S.A.")
     end
 
