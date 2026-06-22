@@ -40,6 +40,13 @@ export default class extends Controller {
   }
 
   async search() {
+    // Editing the text invalidates any committed selection: drop the hidden id
+    // and let hosts react (e.g. disable the client's edit link).
+    if (this.hiddenTarget.value) {
+      this.hiddenTarget.value = ""
+      this.dispatch("clear")
+    }
+
     const q = this.inputTarget.value.trim()
     if (q.length === 0) {
       this.clear()

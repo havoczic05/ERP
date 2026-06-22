@@ -22,13 +22,53 @@ export default class extends Controller {
     "unitPrice",
     "numInstallments",
     "intervalDays",
-    "clientMeta",
+    "warehouse",
     "clientDoc",
     "clientEdit",
   ]
 
+  static values = { productSearchUrl: String }
+
   connect() {
     this.togglePaymentMode()
+    this.syncWarehouseGating()
+  }
+
+  // -------------------------------------------------------------------------
+  // Warehouse gates the product pickers: until an almacén is chosen the product
+  // search is disabled; choosing one enables it and scopes the search to that
+  // warehouse (combobox url gets ?warehouse_id=...).
+  // -------------------------------------------------------------------------
+  warehouseChanged() {
+    this.syncWarehouseGating()
+  }
+
+  syncWarehouseGating() {
+    const id = this.hasWarehouseTarget ? this.warehouseTarget.value : ""
+    const enabled = id !== ""
+    const base = this.productSearchUrlValue
+
+    this.element.querySelectorAll(".combobox.product-search").forEach((cb) => {
+      const input = cb.querySelector("[data-combobox-target='input']")
+      const hidden = cb.querySelector("[data-combobox-target='hidden']")
+      const results = cb.querySelector(".combobox-results")
+
+      cb.setAttribute(
+        "data-combobox-url-value",
+        enabled ? `${base}?warehouse_id=${encodeURIComponent(id)}` : base
+      )
+
+      if (input) {
+        input.disabled = !enabled
+        input.placeholder = enabled ? "Escriba el nombre del producto" : "Elija un almacén primero"
+      }
+      if (!enabled) {
+        if (input) input.value = ""
+        if (hidden) hidden.value = ""
+        if (results) results.innerHTML = ""
+        cb.classList.remove("is-open")
+      }
+    })
   }
 
   // -------------------------------------------------------------------------
@@ -71,6 +111,9 @@ export default class extends Controller {
     if (lineTotalCell) lineTotalCell.textContent = "USD 0.00"
 
     body.appendChild(newRow)
+
+    // The cloned product picker must inherit the current warehouse gating.
+    this.syncWarehouseGating()
   }
 
   // -------------------------------------------------------------------------
@@ -120,12 +163,25 @@ export default class extends Controller {
   // combobox:select reactions
   // -------------------------------------------------------------------------
 
-  // Client picker: reveal the selected client's document + edit link.
+  // Client picker: show the selected client's document and enable the edit link.
   clientSelected(event) {
     const { document: doc, editPath } = event.detail
     if (this.hasClientDocTarget) this.clientDocTarget.textContent = doc || ""
-    if (this.hasClientEditTarget && editPath) this.clientEditTarget.href = editPath
-    if (this.hasClientMetaTarget) this.clientMetaTarget.hidden = false
+    if (this.hasClientEditTarget && editPath) {
+      this.clientEditTarget.href = editPath
+      this.clientEditTarget.classList.remove("is-disabled")
+      this.clientEditTarget.removeAttribute("aria-disabled")
+    }
+  }
+
+  // Client picker cleared (input edited): clear the document and disable the edit link.
+  clientCleared() {
+    if (this.hasClientDocTarget) this.clientDocTarget.textContent = ""
+    if (this.hasClientEditTarget) {
+      this.clientEditTarget.removeAttribute("href")
+      this.clientEditTarget.classList.add("is-disabled")
+      this.clientEditTarget.setAttribute("aria-disabled", "true")
+    }
   }
 
   // Product picker: autofill the row's unit price, then recompute.

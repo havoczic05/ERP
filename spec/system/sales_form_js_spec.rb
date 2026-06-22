@@ -110,8 +110,13 @@ RSpec.describe "Sale form (JS)", type: :system, js: true do
   # 4. Selecting a client fills client_id and reveals its document + edit link
   # ---------------------------------------------------------------------------
   describe "selecting a client from the dropdown" do
-    it "fills the hidden client_id, shows the name, closes, and reveals the document + edit link" do
+    it "fills client_id, shows the document, and enables the edit link; clearing re-disables it" do
       visit new_sale_path
+
+      edit = find("[data-sale-form-target='clientEdit']")
+      # Before any selection the edit link is disabled (no href).
+      expect(edit[:class]).to include("is-disabled")
+      expect(edit[:href]).to be_nil
 
       set_and_fire(find_field("q"), "ACME", "input")
       fire(find("button.picker-option", text: "ACME Corp"), "click")
@@ -121,25 +126,42 @@ RSpec.describe "Sale form (JS)", type: :system, js: true do
       expect(find_field("q").value).to eq("ACME Corp")
       expect(page).to have_no_css("button.picker-option")
 
-      # The selected client's document + an edit link (new tab) appear.
-      within("[data-sale-form-target='clientMeta']") do
+      # The document shows and the edit link is enabled (new tab, edit path).
+      within(".client-meta") do
         expect(page).to have_text("RUC #{client.document_number}")
-        expect(page).to have_css("a[href='#{edit_client_path(client)}'][target='_blank']")
       end
+      expect(edit[:class]).not_to include("is-disabled")
+      expect(edit[:href]).to end_with(edit_client_path(client))
+      expect(edit[:target]).to eq("_blank")
+
+      # Editing the search text clears the selection → edit link disabled again.
+      set_and_fire(find_field("q"), "AC", "input")
+      expect(find("input[name='sale[client_id]']", visible: :all).value).to eq("")
+      expect(edit[:class]).to include("is-disabled")
+      expect(edit[:href]).to be_nil
     end
   end
 
   # ---------------------------------------------------------------------------
   # 5. Product combobox: selecting a product autofills its unit price
   # ---------------------------------------------------------------------------
-  describe "product combobox autofill" do
+  describe "product combobox gated by warehouse" do
     let!(:keyboard) do
       create(:product, warehouse: warehouse, name: "Teclado Mecanico",
              sku: "KEY-001", base_price_usd: 49.90, stock: 25)
     end
 
+    it "keeps the product search disabled until a warehouse is chosen" do
+      visit new_sale_path
+      expect(find("input[name='sale[items][][product_query]']")).to be_disabled
+
+      select warehouse.name, from: "sale[warehouse_id]"
+      expect(find("input[name='sale[items][][product_query]']")).not_to be_disabled
+    end
+
     it "fills the row's product_id and unit price, and recomputes the line total" do
       visit new_sale_path
+      select warehouse.name, from: "sale[warehouse_id]"
 
       query = find("input[name='sale[items][][product_query]']")
       set_and_fire(query, "Teclado", "input")

@@ -295,5 +295,18 @@ RSpec.describe 'Products', type: :request do
       get search_products_path, params: { q: 'SearchMe' }
       expect(response).to have_http_status(:ok)
     end
+
+    it 'filters by warehouse_id when given' do
+      other_wh = create(:warehouse)
+      here  = create(:product, name: 'AquiProd', sku: 'WH-IN-1', warehouse: warehouse)
+      there = create(:product, name: 'AllaProd', sku: 'WH-OUT-1', warehouse: other_wh)
+
+      get search_products_path, params: { q: 'Prod', warehouse_id: warehouse.id }
+
+      expect(response.body).to include('AquiProd')
+      expect(response.body).not_to include('AllaProd')
+      expect(response.body).to include("data-id=\"#{here.id}\"")
+      expect(response.body).not_to include("data-id=\"#{there.id}\"")
+    end
   end
 end
