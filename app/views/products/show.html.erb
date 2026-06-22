@@ -1,22 +1,22 @@
-<h1>Product Details</h1>
+<h1>Detalles del producto</h1>
 
 <dl>
   <dt>SKU</dt>
   <dd><%= @product.sku %></dd>
 
-  <dt>Name</dt>
+  <dt>Nombre</dt>
   <dd><%= @product.name %></dd>
 
-  <dt>Brand</dt>
+  <dt>Marca</dt>
   <dd><%= @product.brand %></dd>
 
-  <dt>Warehouse</dt>
+  <dt>Almacén</dt>
   <dd><%= @product.warehouse&.name %></dd>
 
   <dt>Stock</dt>
   <dd><%= @product.stock %></dd>
 
-  <dt>Base Price (USD)</dt>
+  <dt>Precio base USD</dt>
   <dd class="num"><%= @product.base_price_usd %></dd>
 </dl>
 
@@ -25,9 +25,9 @@
 <% end %>
 
 <p>
-  <%= link_to 'Edit', edit_product_path(@product) %>
-  <%= button_to 'Delete', @product, method: :delete,
-                data: { confirm: 'Delete this product?' } %>
+  <%= link_to 'Editar', edit_product_path(@product) %>
+  <%= button_to 'Eliminar', @product, method: :delete,
+                data: { confirm: '¿Eliminar este producto?' } %>
 </p>
 
-<%= link_to 'Back to Products', products_path %>
+<%= link_to 'Volver a productos', products_path %>
