@@ -99,10 +99,10 @@ RSpec.describe "Sale form (JS)", type: :system, js: true do
       visit new_sale_path
 
       # The client-picker frame lazy-loads with an empty query first, rendering
-      # "No clients found.". Wait for that initial fetch to settle before
+      # "No se encontraron clientes.". Wait for that initial fetch to settle before
       # searching so the two frame fetches don't race and overwrite each other.
       within("turbo-frame#client-picker") do
-        expect(page).to have_content("No clients found.")
+        expect(page).to have_content("No se encontraron clientes.")
       end
 
       # Typing fires input->sale-form#searchClient, which updates the frame's src

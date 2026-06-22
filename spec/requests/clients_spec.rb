@@ -149,7 +149,7 @@ RSpec.describe 'Clients', type: :request do
         delete client_path(client)
         expect(response).to have_http_status(:unprocessable_entity)
         expect(client.reload.discarded?).to be false
-        expect(response.body).to include('cannot be deleted')
+        expect(response.body).to include('No se puede eliminar')
       end
     end
   end

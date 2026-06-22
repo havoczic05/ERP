@@ -298,7 +298,7 @@ RSpec.describe 'Sales', type: :system do
 
     it 'renders no results message when no clients match' do
       visit search_clients_path(q: 'ZZZNOMATCH')
-      expect(page).to have_content('No clients found.')
+      expect(page).to have_content('No se encontraron clientes.')
     end
 
     it 'wraps results in the client-picker turbo frame so Turbo can swap them in place' do

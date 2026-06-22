@@ -1,27 +1,27 @@
-<h1>Client Details</h1>
+<h1>Detalle del cliente</h1>
 
 <dl>
-  <dt>Full Name</dt>
+  <dt>Nombre completo</dt>
   <dd><%= @client.full_name %></dd>
 
-  <dt>Document Type</dt>
+  <dt>Tipo de documento</dt>
   <dd><%= @client.document_type&.humanize %></dd>
 
-  <dt>Document Number</dt>
+  <dt>Número de documento</dt>
   <dd><%= @client.document_number %></dd>
 
-  <dt>Phone</dt>
+  <dt>Teléfono</dt>
   <dd><%= @client.phone %></dd>
 </dl>
 
 <p>
-  <%= link_to 'Edit', edit_client_path(@client) %>
-  <%= button_to 'Archive', @client, method: :delete,
-                data: { confirm: 'Archive this client?' } %>
+  <%= link_to 'Editar', edit_client_path(@client) %>
+  <%= button_to 'Archivar', @client, method: :delete,
+                data: { confirm: '¿Archivar este cliente?' } %>
 </p>
 
 <% if flash[:alert].present? %>
   <div id="alert"><%= flash[:alert] %></div>
 <% end %>
 
-<%= link_to 'Back to Clients', clients_path %>
+<%= link_to 'Volver a clientes', clients_path %>

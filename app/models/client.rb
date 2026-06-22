@@ -14,18 +14,18 @@ class Client < ApplicationRecord
   # ---------------------------------------------------------------------------
   # Validations
   # ---------------------------------------------------------------------------
-  validates :full_name, presence: true
-  validates :document_type, presence: true
-  validates :document_number, presence: true
-  validates :phone, presence: true
+  validates :full_name, presence: { message: "no puede estar en blanco" }
+  validates :document_type, presence: { message: "no puede estar en blanco" }
+  validates :document_number, presence: { message: "no puede estar en blanco" }
+  validates :phone, presence: { message: "no puede estar en blanco" }
 
   # Conditional format validation based on document_type enum predicates.
   validates :document_number,
-            format: { with: /\A\d{11}\z/, message: "must be exactly 11 numeric digits for RUC" },
+            format: { with: /\A\d{11}\z/, message: "debe tener exactamente 11 dígitos numéricos para RUC" },
             if: :ruc?
 
   validates :document_number,
-            format: { with: /\A\d{8}\z/, message: "must be exactly 8 numeric digits for DNI" },
+            format: { with: /\A\d{8}\z/, message: "debe tener exactamente 8 dígitos numéricos para DNI" },
             if: :dni?
 
   # Model-level uniqueness scoped to active (non-discarded) records.
@@ -33,7 +33,7 @@ class Client < ApplicationRecord
   validates :document_number,
             uniqueness: {
               conditions: -> { where(discarded_at: nil) },
-              message: "is already registered"
+              message: "ya está registrado"
             }
 
   # ---------------------------------------------------------------------------
