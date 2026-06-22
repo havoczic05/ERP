@@ -114,4 +114,93 @@ RSpec.describe ApplicationHelper, type: :helper do
       end
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # icon — inline SVG from a curated set (no gem, no Node)
+  # ---------------------------------------------------------------------------
+  describe '#icon' do
+    it 'returns an inline SVG for a known icon name' do
+      svg = helper.icon(:eye)
+      expect(svg).to include('<svg')
+      expect(svg).to include('aria-hidden="true"')
+      expect(svg).to be_html_safe
+    end
+
+    it 'accepts a string name' do
+      expect(helper.icon('trash')).to include('<svg')
+    end
+
+    it 'returns nil for an unknown icon name' do
+      expect(helper.icon(:does_not_exist)).to be_nil
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # action_link / action_button — shared, consistent action controls
+  # Visible Spanish labels MUST be preserved (system specs depend on them).
+  # ---------------------------------------------------------------------------
+  describe '#action_link' do
+    it 'renders an anchor with the ghost + small button classes by default' do
+      html = helper.action_link('Ver', '/products/1')
+      expect(html).to have_link('Ver', href: '/products/1')
+      expect(html).to include('btn')
+      expect(html).to include('btn--ghost')
+      expect(html).to include('btn--sm')
+    end
+
+    it 'applies the danger variant' do
+      html = helper.action_link('Eliminar', '/products/1', variant: :danger)
+      expect(html).to include('btn--danger')
+      expect(html).not_to include('btn--ghost')
+    end
+
+    it 'applies the primary variant with no neutral/danger modifier' do
+      html = helper.action_link('Nuevo', '/products/new', variant: :primary)
+      expect(html).to include('btn')
+      expect(html).not_to include('btn--ghost')
+      expect(html).not_to include('btn--danger')
+    end
+
+    it 'omits the small modifier when size is :md' do
+      html = helper.action_link('Nuevo', '/products/new', variant: :primary, size: :md)
+      expect(html).not_to include('btn--sm')
+    end
+
+    it 'prepends an icon when given' do
+      html = helper.action_link('Ver', '/products/1', icon: :eye)
+      expect(html).to include('<svg')
+      expect(html).to have_link('Ver')
+    end
+
+    it 'preserves the exact visible label' do
+      expect(helper.action_link('Editar', '/products/1')).to have_link('Editar')
+    end
+  end
+
+  describe '#action_button' do
+    it 'renders a button_to form with the danger + small classes by default' do
+      html = helper.action_button('Eliminar', '/products/1', method: :delete)
+      expect(html).to have_button('Eliminar')
+      expect(html).to include('btn--danger')
+      expect(html).to include('btn--sm')
+    end
+
+    it 'sets a non-GET HTTP method via the hidden _method field' do
+      html = helper.action_button('Eliminar', '/products/1', method: :delete)
+      expect(html).to include('name="_method"')
+      expect(html).to include('value="delete"')
+    end
+
+    it 'adds a turbo confirm dialog when confirm is given' do
+      html = helper.action_button('Eliminar', '/products/1', method: :delete,
+                                   confirm: '¿Eliminar este producto?')
+      expect(html).to include('data-turbo-confirm="¿Eliminar este producto?"')
+    end
+
+    it 'prepends an icon when given' do
+      html = helper.action_button('Eliminar', '/products/1', method: :delete, icon: :trash)
+      expect(html).to include('<svg')
+      expect(html).to have_button('Eliminar')
+    end
+  end
 end

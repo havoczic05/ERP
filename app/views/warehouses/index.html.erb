@@ -17,6 +17,6 @@
   <p id="no-warehouses-message">No se encontraron almacenes.</p>
 <% end %>
 
-<%= link_to 'Nuevo almacén', new_warehouse_path %>
+<%= action_link 'Nuevo almacén', new_warehouse_path, variant: :primary, size: :md, icon: :plus %>
 
 <%== @pagy.series_nav if @pagy.pages > 1 %>

@@ -24,10 +24,10 @@
   <div id="alert"><%= flash[:alert] %></div>
 <% end %>
 
-<p>
-  <%= link_to 'Editar', edit_product_path(@product) %>
-  <%= button_to 'Eliminar', @product, method: :delete,
-                data: { confirm: '¿Eliminar este producto?' } %>
-</p>
-
-<%= link_to 'Volver a productos', products_path %>
+<div class="action-bar">
+  <%= action_link 'Editar', edit_product_path(@product), size: :md, icon: :pencil %>
+  <%= action_button 'Eliminar', @product, method: :delete, size: :md, icon: :trash,
+                    confirm: '¿Eliminar este producto?' %>
+  <span class="spacer"></span>
+  <%= action_link 'Volver a productos', products_path, size: :md, icon: "arrow-left" %>
+</div>

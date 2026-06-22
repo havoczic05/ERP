@@ -38,6 +38,6 @@
   <p id="no-products-message">No se encontraron productos</p>
 <% end %>
 
-<%= link_to 'Nuevo producto', new_product_path %>
+<%= action_link 'Nuevo producto', new_product_path, variant: :primary, size: :md, icon: :plus %>
 
 <%== @pagy.series_nav if @pagy.pages > 1 %>

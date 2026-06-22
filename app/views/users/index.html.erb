@@ -15,12 +15,14 @@
         <td><%= user.email %></td>
         <td><%= user.role.humanize %></td>
         <td><%= user.active? ? 'Sí' : 'No' %></td>
-        <td>
-          <%= link_to 'Editar', edit_user_path(user) %>
-          <% if user.active? %>
-            <%= button_to 'Desactivar', user_path(user), method: :delete,
-                          data: { confirm: "¿Desactivar #{user.email}?" } %>
-          <% end %>
+        <td class="col-actions">
+          <div class="row-actions">
+            <%= action_link 'Editar', edit_user_path(user), icon: :pencil %>
+            <% if user.active? %>
+              <%= action_button 'Desactivar', user_path(user), method: :delete, icon: "user-x",
+                                confirm: "¿Desactivar #{user.email}?" %>
+            <% end %>
+          </div>
         </td>
       </tr>
     <% end %>
@@ -31,6 +33,6 @@
   <p id="no-users-message">No se encontraron usuarios.</p>
 <% end %>
 
-<%= link_to 'Nuevo usuario', new_user_path %>
+<%= action_link 'Nuevo usuario', new_user_path, variant: :primary, size: :md, icon: :plus %>
 
 <%== @pagy.series_nav if @pagy.pages > 1 %>

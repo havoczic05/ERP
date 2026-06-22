@@ -19,4 +19,6 @@
   <% end %>
 </dl>
 
-<%= link_to "Editar configuración", edit_company_settings_path %>
+<div class="action-bar">
+  <%= action_link "Editar configuración", edit_company_settings_path, variant: :primary, size: :md, icon: :pencil %>
+</div>

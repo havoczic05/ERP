@@ -5,11 +5,12 @@
   <td><%= product.warehouse&.name %></td>
   <td><%= product.stock %></td>
   <td class="num"><%= product.base_price_usd %></td>
-  <td>
-    <%= link_to 'Ver', product %>
-    <%= link_to 'Editar', edit_product_path(product) %>
-    <%= button_to 'Eliminar', product, method: :delete,
-                  data: { confirm: '¿Eliminar este producto?' },
-                  form: { style: 'display:inline' } %>
+  <td class="col-actions">
+    <div class="row-actions">
+      <%= action_link 'Ver', product, icon: :eye %>
+      <%= action_link 'Editar', edit_product_path(product), icon: :pencil %>
+      <%= action_button 'Eliminar', product, method: :delete, icon: :trash,
+                        confirm: '¿Eliminar este producto?' %>
+    </div>
   </td>
 </tr>
