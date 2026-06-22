@@ -152,4 +152,37 @@ RSpec.describe "Sale form (JS)", type: :system, js: true do
       expect(page).to have_css("[data-sale-form-target='lineTotal']", text: "USD 49.90")
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # 6. Forma de pago: Contado disables the installment fields, Cuotas enables
+  # ---------------------------------------------------------------------------
+  describe "payment mode (forma de pago)" do
+    def pick_payment(value)
+      radio = find("input[name='payment_method'][value='#{value}']", visible: :all)
+      page.execute_script(
+        "arguments[0].checked = true; " \
+        "arguments[0].dispatchEvent(new Event('change', { bubbles: true }))",
+        radio.native
+      )
+    end
+
+    it "disables num_installments/interval for Contado and enables them for Cuotas" do
+      visit new_sale_path
+
+      num      = find("input[name='sale[num_installments]']")
+      interval = find("select[name='sale[interval_days]']")
+
+      # Default is Contado → both disabled.
+      expect(num).to be_disabled
+      expect(interval).to be_disabled
+
+      pick_payment("cuotas")
+      expect(num).not_to be_disabled
+      expect(interval).not_to be_disabled
+
+      pick_payment("contado")
+      expect(num).to be_disabled
+      expect(interval).to be_disabled
+    end
+  end
 end

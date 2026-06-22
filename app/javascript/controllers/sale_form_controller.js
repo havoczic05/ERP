@@ -27,6 +27,25 @@ export default class extends Controller {
     "clientEdit",
   ]
 
+  connect() {
+    this.togglePaymentMode()
+  }
+
+  // -------------------------------------------------------------------------
+  // Forma de pago: Contado disables the installment fields (they then submit
+  // nothing and the service defaults to a single installment); Cuotas enables.
+  // -------------------------------------------------------------------------
+  togglePaymentMode() {
+    const cuotas =
+      this.element.querySelector("input[name='payment_method']:checked")?.value === "cuotas"
+
+    if (this.hasNumInstallmentsTarget) {
+      this.numInstallmentsTarget.disabled = !cuotas
+      if (!cuotas) this.numInstallmentsTarget.value = 1
+    }
+    if (this.hasIntervalDaysTarget) this.intervalDaysTarget.disabled = !cuotas
+  }
+
   // -------------------------------------------------------------------------
   // Add a new line-item row by cloning the first row
   // -------------------------------------------------------------------------

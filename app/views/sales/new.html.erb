@@ -39,7 +39,7 @@
     <%# Warehouse is preset (single default almacén); carried as a hidden field. %>
     <%= hidden_field_tag 'sale[warehouse_id]', @sale.warehouse_id %>
 
-    <div class="field-grid">
+    <div class="field-grid field-grid--4">
       <div class="field">
         <%= label_tag 'sale[document_type]', 'Tipo de documento' %>
         <%= select_tag 'sale[document_type]',
@@ -47,9 +47,22 @@
                                @sale.document_type) %>
       </div>
 
+      <%# Payment mode is UI-only (Sale has no payment column): Contado disables
+          the installment fields (so they submit nothing → service defaults to a
+          single installment); Cuotas enables them. %>
+      <fieldset class="field payment-mode">
+        <legend>Forma de pago</legend>
+        <div class="payment-options">
+          <label><%= radio_button_tag 'payment_method', 'contado', true,
+                       data: { action: 'change->sale-form#togglePaymentMode' } %> Contado</label>
+          <label><%= radio_button_tag 'payment_method', 'cuotas', false,
+                       data: { action: 'change->sale-form#togglePaymentMode' } %> Cuotas</label>
+        </div>
+      </fieldset>
+
       <div class="field">
         <%= label_tag 'sale[num_installments]', 'Número de cuotas' %>
-        <%= number_field_tag 'sale[num_installments]', 1, min: 1, max: 4,
+        <%= number_field_tag 'sale[num_installments]', 1, min: 1, max: 4, disabled: true,
             data: { 'sale-form-target': 'numInstallments' } %>
       </div>
 
@@ -57,11 +70,12 @@
         <%= label_tag 'sale[interval_days]', 'Intervalo (días)' %>
         <%= select_tag 'sale[interval_days]',
             options_for_select([7, 10, 15, 30, 45].map { |d| [d.to_s, d] }, 30),
+            disabled: true,
             data: { 'sale-form-target': 'intervalDays' } %>
       </div>
     </div>
 
-    <div class="field">
+    <div class="field field--full">
       <%= label_tag 'sale[notes]', 'Notas' %>
       <%= text_area_tag 'sale[notes]', @sale.notes %>
     </div>

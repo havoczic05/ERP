@@ -127,10 +127,13 @@ RSpec.describe 'Sales', type: :system do
                                   with_options: [ 'Cotización', 'Venta' ])
     end
 
-    it 'renders installment fields (num_installments and interval_days)' do
+    it 'renders the payment mode with installment fields disabled by default (Contado)' do
       visit new_sale_path
-      expect(page).to have_field('sale[num_installments]')
-      expect(page).to have_select('sale[interval_days]')
+      expect(page).to have_content('Forma de pago')
+      # Contado is the default, so the installment fields render disabled until
+      # the user picks Cuotas.
+      expect(page).to have_field('sale[num_installments]', disabled: true)
+      expect(page).to have_select('sale[interval_days]', disabled: true)
     end
 
     it 'renders a line-item section with product, quantity, and unit price fields' do
@@ -173,9 +176,10 @@ RSpec.describe 'Sales', type: :system do
       find('input[name="sale[client_id]"]', visible: false).set(client.id)
       find('input[name="sale[warehouse_id]"]', visible: false).set(warehouse.id)
       select 'Cotización', from: 'sale[document_type]'
-      fill_in 'sale[num_installments]', with: '1'
+      # num_installments stays disabled under Contado (default) → not submitted;
+      # the service defaults it, and a cotizacion generates no installments anyway.
       # The user searches the product by name; the submitted value is the
-      # "Name (SKU)" datalist label, which the controller resolves to product_id.
+      # "Name (SKU)" label, which the controller resolves to product_id.
       find('input[name="sale[items][][product_query]"]').set("#{product.name} (#{product.sku})")
       find('input[name="sale[items][][quantity]"]').set('5')
       find('input[name="sale[items][][unit_price_usd]"]').set('10.00')
