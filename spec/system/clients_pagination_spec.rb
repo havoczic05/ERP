@@ -33,8 +33,10 @@ RSpec.describe 'Clients pagination', type: :system do
     client_rows = all('table tbody tr[id^="client_"]')
     expect(client_rows.count).to eq(20)
 
-    # Pagy v43 series_nav renders a <nav> element with a class containing "series-nav"
-    expect(page).to have_css('nav.series-nav')
+    # The reusable pagination partial renders a <nav class="pagination">.
+    expect(page).to have_css('nav.pagination')
+    expect(page).to have_link('2', href: clients_path(page: 2))
+    expect(page).to have_content('Mostrando 1–20 de 25')
   end
 
   it 'shows the second page when navigating forward' do

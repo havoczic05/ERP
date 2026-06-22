@@ -98,15 +98,17 @@ RSpec.describe 'Sales', type: :system do
 
     context 'pagination' do
       it 'renders pagination nav when more than one page exists' do
-        # Pagy default is 20 per page; create 21 sales to trigger pagination
-        21.times do |i|
+        # Sales paginates at 15/page; create 16 sales to trigger a second page.
+        16.times do |i|
           create(:sale, client: client, warehouse: warehouse,
                         correlative: format('COT-%05d', i + 100),
                         document_type: 'cotizacion', status: 'confirmada')
         end
 
         visit sales_path
-        expect(page).to have_css('nav.series-nav')
+        expect(page).to have_css('nav.pagination')
+        expect(page).to have_link('Siguiente ›', href: sales_path(page: 2))
+        expect(page).to have_content('Mostrando 1–15 de 16')
       end
     end
   end

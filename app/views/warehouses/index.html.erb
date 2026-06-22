@@ -1,4 +1,8 @@
-<h1>Almacenes</h1>
+<div class="page-head"><h1>Almacenes</h1></div>
+
+<div class="toolbar">
+  <%= action_link 'Nuevo almacén', new_warehouse_path, variant: :primary, size: :md, icon: :plus %>
+</div>
 
 <table>
   <thead>
@@ -17,6 +21,4 @@
   <p id="no-warehouses-message">No se encontraron almacenes.</p>
 <% end %>
 
-<%= action_link 'Nuevo almacén', new_warehouse_path, variant: :primary, size: :md, icon: :plus %>
-
-<%== @pagy.series_nav if @pagy.pages > 1 %>
+<%= pagination_nav(@pagy) %>

@@ -1,0 +1,37 @@
+<%# Reusable pagination. Render via `pagination_nav(@pagy)`. Numbered links with
+    gaps + Anterior/Siguiente + a count line. Preserves the current query string
+    (filters) via pagination_page_url. %>
+<% if pagy.count.positive? %>
+<div class="pagination-bar">
+  <% if pagy.pages > 1 %>
+    <nav class="pagination" aria-label="Paginación">
+      <% if pagy.previous %>
+        <%= link_to "‹ Anterior", pagination_page_url(pagy.previous),
+              class: "pagination-link", rel: "prev" %>
+      <% else %>
+        <span class="pagination-link is-disabled" aria-disabled="true">‹ Anterior</span>
+      <% end %>
+
+      <% pagination_series(pagy.page, pagy.pages).each do |item| %>
+        <% if item == :gap %>
+          <span class="pagination-gap" aria-hidden="true">…</span>
+        <% elsif item == pagy.page %>
+          <span class="pagination-link is-current" aria-current="page"><%= item %></span>
+        <% else %>
+          <%= link_to item, pagination_page_url(item), class: "pagination-link",
+                aria: { label: "Página #{item}" } %>
+        <% end %>
+      <% end %>
+
+      <% if pagy.next %>
+        <%= link_to "Siguiente ›", pagination_page_url(pagy.next),
+              class: "pagination-link", rel: "next" %>
+      <% else %>
+        <span class="pagination-link is-disabled" aria-disabled="true">Siguiente ›</span>
+      <% end %>
+    </nav>
+  <% end %>
+
+  <p class="pagination-count">Mostrando <%= pagy.from %>–<%= pagy.to %> de <%= pagy.count %></p>
+</div>
+<% end %>

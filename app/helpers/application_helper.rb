@@ -142,6 +142,31 @@ module ApplicationHelper
            suffix: (capture(&suffix) if suffix)
   end
 
+  # Reusable, accessible pagination (see app/views/shared/_pagination). Renders a
+  # numbered nav with Anterior/Siguiente + a "Mostrando X–Y de N" count. Works
+  # with any Pagy offset object and preserves the current query string (filters).
+  def pagination_nav(pagy)
+    render "shared/pagination", pagy: pagy
+  end
+
+  # URL for a given page, preserving the current path + query params (filters).
+  def pagination_page_url(page)
+    "#{request.path}?#{request.query_parameters.merge('page' => page).to_query}"
+  end
+
+  # Page series with gaps, e.g. [1, :gap, 4, 5, 6, :gap, 12]. Window = pages on
+  # each side of the current page.
+  def pagination_series(current, total, window: 1)
+    return (1..total).to_a if total <= 7
+
+    series = [ 1 ]
+    series << :gap if current - window > 2
+    ((current - window)..(current + window)).each { |p| series << p if p > 1 && p < total }
+    series << :gap if current + window < total - 1
+    series << total
+    series
+  end
+
   private
 
   # Builds the button class string. :primary uses the bare .btn (filled brand);
