@@ -615,6 +615,34 @@ li { margin-bottom: var(--sp-1); }
 }
 .field { display: flex; flex-direction: column; }
 
+/* Inline hint next to a label (e.g. "leave blank to keep current password") */
+.field-hint { font-size: var(--text-xs); color: var(--muted); font-style: normal; margin-bottom: var(--sp-1); }
+
+/* Form action row (submit) — quiet separation from the fields above */
+.form-actions { display: flex; gap: var(--sp-3); align-items: center; margin-top: var(--sp-3); }
+
+/* Validation: summary box + per-field message (semantic danger tint) */
+#error_explanation {
+  background: var(--danger-weak);
+  color: var(--danger-ink);
+  border: 1px solid var(--danger);
+  border-radius: var(--r);
+  padding: var(--sp-3) var(--sp-4);
+  margin-bottom: var(--sp-5);
+  max-width: 640px;
+}
+#error_explanation h2 { font-size: var(--text-base); font-weight: var(--weight-semi); margin: 0 0 var(--sp-2); }
+#error_explanation ul { margin: 0; padding-left: var(--sp-5); }
+#error_explanation li { margin-bottom: var(--sp-1); }
+
+.error {
+  display: block;
+  color: var(--danger-ink);
+  font-size: var(--text-sm);
+  margin-top: calc(-1 * var(--sp-3));
+  margin-bottom: var(--sp-4);
+}
+
 /* =============================================================================
    Client search combobox (sales/new) — results float as a dropdown overlay
    instead of pushing the form down. Driven by sale_form_controller.js, which

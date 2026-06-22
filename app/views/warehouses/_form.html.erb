@@ -2,7 +2,7 @@
   <%= form_with model: warehouse, local: false do |f| %>
     <% if warehouse.errors.any? %>
       <div id="error_explanation">
-        <h2><%= pluralize(warehouse.errors.count, 'error') %> prohibited this warehouse from being saved:</h2>
+        <h2>No se pudo guardar el almacén. Corrija los siguientes errores:</h2>
         <ul>
           <% warehouse.errors.each do |error| %>
             <li><%= error.full_message %></li>
@@ -11,20 +11,22 @@
       </div>
     <% end %>
 
-    <div>
-      <%= f.label :name, 'Nombre' %>
-      <%= f.text_field :name %>
-      <% if warehouse.errors[:name].any? %>
-        <span class="error"><%= warehouse.errors[:name].join(', ') %></span>
-      <% end %>
+    <div class="field-grid">
+      <div class="field">
+        <%= f.label :name, 'Nombre' %>
+        <%= f.text_field :name %>
+        <% if warehouse.errors[:name].any? %>
+          <span class="error"><%= warehouse.errors[:name].join(', ') %></span>
+        <% end %>
+      </div>
+
+      <div class="field">
+        <%= f.label :location, 'Ubicación' %>
+        <%= f.text_field :location %>
+      </div>
     </div>
 
-    <div>
-      <%= f.label :location, 'Ubicación' %>
-      <%= f.text_field :location %>
-    </div>
-
-    <div>
+    <div class="form-actions">
       <%= f.submit(warehouse.new_record? ? 'Crear almacén' : 'Actualizar almacén') %>
     </div>
   <% end %>

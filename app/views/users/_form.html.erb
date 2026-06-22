@@ -1,7 +1,7 @@
 <%= form_with model: user do |f| %>
   <% if user.errors.any? %>
     <div id="error_explanation">
-      <h2><%= pluralize(user.errors.count, 'error') %> prohibited this user from being saved:</h2>
+      <h2>No se pudo guardar el usuario. Corrija los siguientes errores:</h2>
       <ul>
         <% user.errors.each do |error| %>
           <li><%= error.full_message %></li>
@@ -10,39 +10,43 @@
     </div>
   <% end %>
 
-  <div>
-    <%= f.label :email, 'Correo electrónico' %>
-    <%= f.email_field :email %>
-    <% if user.errors[:email].any? %>
-      <span class="error"><%= user.errors[:email].join(', ') %></span>
-    <% end %>
+  <div class="field-grid">
+    <div class="field">
+      <%= f.label :email, 'Correo electrónico' %>
+      <%= f.email_field :email %>
+      <% if user.errors[:email].any? %>
+        <span class="error"><%= user.errors[:email].join(', ') %></span>
+      <% end %>
+    </div>
+
+    <div class="field">
+      <%= f.label :role, 'Rol' %>
+      <%= f.select :role, User::ROLES.map { |r| [r.humanize, r] }, { include_blank: 'Seleccionar rol' } %>
+      <% if user.errors[:role].any? %>
+        <span class="error"><%= user.errors[:role].join(', ') %></span>
+      <% end %>
+    </div>
   </div>
 
-  <div>
-    <%= f.label :role, 'Rol' %>
-    <%= f.select :role, User::ROLES.map { |r| [r.humanize, r] }, { include_blank: 'Seleccionar rol' } %>
-    <% if user.errors[:role].any? %>
-      <span class="error"><%= user.errors[:role].join(', ') %></span>
-    <% end %>
+  <div class="field-grid">
+    <div class="field">
+      <%= f.label :password, 'Contraseña' %>
+      <% if user.persisted? %>
+        <em class="field-hint">(dejar en blanco para mantener la contraseña actual)</em>
+      <% end %>
+      <%= f.password_field :password %>
+      <% if user.errors[:password].any? %>
+        <span class="error"><%= user.errors[:password].join(', ') %></span>
+      <% end %>
+    </div>
+
+    <div class="field">
+      <%= f.label :password_confirmation, 'Confirmación de contraseña' %>
+      <%= f.password_field :password_confirmation %>
+    </div>
   </div>
 
-  <div>
-    <%= f.label :password, 'Contraseña' %>
-    <% if user.persisted? %>
-      <em>(dejar en blanco para mantener la contraseña actual)</em>
-    <% end %>
-    <%= f.password_field :password %>
-    <% if user.errors[:password].any? %>
-      <span class="error"><%= user.errors[:password].join(', ') %></span>
-    <% end %>
-  </div>
-
-  <div>
-    <%= f.label :password_confirmation, 'Confirmación de contraseña' %>
-    <%= f.password_field :password_confirmation %>
-  </div>
-
-  <div>
+  <div class="form-actions">
     <%= f.submit user.persisted? ? 'Actualizar usuario' : 'Crear usuario' %>
   </div>
 <% end %>
