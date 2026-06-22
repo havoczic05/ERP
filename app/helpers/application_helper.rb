@@ -11,6 +11,12 @@ module ApplicationHelper
     DOCUMENT_TYPE_LABELS.fetch(type.to_s, type.to_s.humanize)
   end
 
+  # Formats a date/time as dd/mm/aaaa in the app's local time zone (America/Lima).
+  # Returns "" for nil. No i18n — Spanish-hardcoded project convention.
+  def format_date(value)
+    value&.strftime("%d/%m/%Y").to_s
+  end
+
   # ---------------------------------------------------------------------------
   # Status badge variant maps
   # ---------------------------------------------------------------------------
