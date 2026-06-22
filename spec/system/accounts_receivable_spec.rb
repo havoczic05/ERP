@@ -19,7 +19,7 @@ RSpec.describe 'AccountsReceivable index', type: :system do
 
   it 'renders the page heading' do
     visit accounts_receivable_path
-    expect(page).to have_content('Accounts Receivable')
+    expect(page).to have_content('Cuentas por Cobrar')
   end
 
   it 'lists a pending installment with client name and sale correlative' do
@@ -44,10 +44,10 @@ RSpec.describe 'AccountsReceivable index', type: :system do
 
     visit accounts_receivable_path
 
-    expect(page).not_to have_content('pagada')
+    expect(page).not_to have_content('Pagada')
   end
 
-  it 'shows the Overdue badge for past-due installments' do
+  it 'shows the Vencida badge for past-due installments' do
     create(:installment, sale: sale,
                           status: 'pendiente',
                           due_date: 1.day.ago,
@@ -56,10 +56,10 @@ RSpec.describe 'AccountsReceivable index', type: :system do
 
     visit accounts_receivable_path
 
-    expect(page).to have_content('Overdue')
+    expect(page).to have_content('Vencida')
   end
 
-  it 'does not show Overdue badge for installments due today' do
+  it 'does not show Vencida badge for installments due today' do
     create(:installment, sale: sale,
                           status: 'pendiente',
                           due_date: Date.current,
@@ -68,12 +68,12 @@ RSpec.describe 'AccountsReceivable index', type: :system do
 
     visit accounts_receivable_path
 
-    expect(page).not_to have_content('Overdue')
+    expect(page).not_to have_content('Vencida')
   end
 
-  it 'shows the "No pending installments." message when no records exist' do
+  it 'shows the "No hay cuotas pendientes." message when no records exist' do
     visit accounts_receivable_path
-    expect(page).to have_content('No pending installments.')
+    expect(page).to have_content('No hay cuotas pendientes.')
   end
 
   it 'renders an inline payment form per installment row' do
@@ -85,7 +85,7 @@ RSpec.describe 'AccountsReceivable index', type: :system do
 
     visit accounts_receivable_path
 
-    expect(page).to have_button('Record Payment')
+    expect(page).to have_button('Registrar pago')
     expect(page).to have_field('amortization[amount_usd]')
   end
 end
