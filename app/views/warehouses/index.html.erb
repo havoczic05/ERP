@@ -1,11 +1,11 @@
-<h1>Warehouses</h1>
+<h1>Almacenes</h1>
 
 <table>
   <thead>
     <tr>
-      <th>Name</th>
-      <th>Location</th>
-      <th>Actions</th>
+      <th>Nombre</th>
+      <th>Ubicación</th>
+      <th>Acciones</th>
     </tr>
   </thead>
   <tbody>
@@ -14,9 +14,9 @@
 </table>
 
 <% if @warehouses.empty? %>
-  <p id="no-warehouses-message">No warehouses found.</p>
+  <p id="no-warehouses-message">No se encontraron almacenes.</p>
 <% end %>
 
-<%= link_to 'New Warehouse', new_warehouse_path %>
+<%= link_to 'Nuevo almacén', new_warehouse_path %>
 
 <%== @pagy.series_nav if @pagy.pages > 1 %>

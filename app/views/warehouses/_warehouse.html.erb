@@ -2,10 +2,10 @@
   <td><%= warehouse.name %></td>
   <td><%= warehouse.location %></td>
   <td>
-    <%= link_to 'Show', warehouse %>
-    <%= link_to 'Edit', edit_warehouse_path(warehouse) %>
-    <%= button_to 'Delete', warehouse, method: :delete,
-                  data: { confirm: 'Delete this warehouse?' },
+    <%= link_to 'Ver', warehouse %>
+    <%= link_to 'Editar', edit_warehouse_path(warehouse) %>
+    <%= button_to 'Eliminar', warehouse, method: :delete,
+                  data: { confirm: '¿Eliminar este almacén?' },
                   form: { style: 'display:inline' } %>
   </td>
 </tr>

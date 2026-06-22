@@ -12,7 +12,7 @@
     <% end %>
 
     <div>
-      <%= f.label :name %>
+      <%= f.label :name, 'Nombre' %>
       <%= f.text_field :name %>
       <% if warehouse.errors[:name].any? %>
         <span class="error"><%= warehouse.errors[:name].join(', ') %></span>
@@ -20,12 +20,12 @@
     </div>
 
     <div>
-      <%= f.label :location %>
+      <%= f.label :location, 'Ubicación' %>
       <%= f.text_field :location %>
     </div>
 
     <div>
-      <%= f.submit %>
+      <%= f.submit(warehouse.new_record? ? 'Crear almacén' : 'Actualizar almacén') %>
     </div>
   <% end %>
 <% end %>
