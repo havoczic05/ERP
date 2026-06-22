@@ -8,7 +8,7 @@ class Warehouse < ApplicationRecord
   # ---------------------------------------------------------------------------
   # Validations
   # ---------------------------------------------------------------------------
-  validates :name, presence: true
+  validates :name, presence: { message: "no puede estar en blanco" }
 
   # ---------------------------------------------------------------------------
   # Destroy guard

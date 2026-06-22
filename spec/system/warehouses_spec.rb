@@ -27,12 +27,12 @@ RSpec.describe 'Warehouses', type: :system do
 
     it 'shows a link to create a new warehouse' do
       visit warehouses_path
-      expect(page).to have_link('New Warehouse', href: new_warehouse_path)
+      expect(page).to have_link('Nuevo almacén', href: new_warehouse_path)
     end
 
     it 'shows a no-results message when no warehouses exist' do
       visit warehouses_path
-      expect(page).to have_content('No warehouses found.')
+      expect(page).to have_content('No se encontraron almacenes.')
     end
   end
 
@@ -43,9 +43,9 @@ RSpec.describe 'Warehouses', type: :system do
     context 'with valid params' do
       it 'creates the warehouse and shows it in the list' do
         visit new_warehouse_path
-        fill_in 'Name', with: 'New Storage'
-        fill_in 'Location', with: 'Callao'
-        click_button 'Create Warehouse'
+        fill_in 'Nombre', with: 'New Storage'
+        fill_in 'Ubicación', with: 'Callao'
+        click_button 'Crear almacén'
 
         expect(page).to have_content('New Storage')
         expect(Warehouse.find_by(name: 'New Storage')).not_to be_nil
@@ -55,11 +55,11 @@ RSpec.describe 'Warehouses', type: :system do
     context 'with blank name (inline errors via Turbo Frame form)' do
       it 'shows validation errors without leaving the form' do
         visit new_warehouse_path
-        fill_in 'Name', with: ''
-        click_button 'Create Warehouse'
+        fill_in 'Nombre', with: ''
+        click_button 'Crear almacén'
 
-        expect(page).to have_content("can't be blank")
-        expect(page).to have_button('Create Warehouse')
+        expect(page).to have_content("no puede estar en blanco")
+        expect(page).to have_button('Crear almacén')
       end
     end
   end
@@ -71,14 +71,14 @@ RSpec.describe 'Warehouses', type: :system do
     it 'pre-fills the form with existing data' do
       wh = create(:warehouse, name: 'Old Name', location: 'Lima')
       visit edit_warehouse_path(wh)
-      expect(page).to have_field('Name', with: 'Old Name')
+      expect(page).to have_field('Nombre', with: 'Old Name')
     end
 
     it 'updates the warehouse and reflects the new name' do
       wh = create(:warehouse, name: 'Before Update')
       visit edit_warehouse_path(wh)
-      fill_in 'Name', with: 'After Update'
-      click_button 'Update Warehouse'
+      fill_in 'Nombre', with: 'After Update'
+      click_button 'Actualizar almacén'
 
       expect(page).to have_content('After Update')
     end
@@ -86,11 +86,11 @@ RSpec.describe 'Warehouses', type: :system do
     it 'shows validation errors when name is blank' do
       wh = create(:warehouse, name: 'Valid Name')
       visit edit_warehouse_path(wh)
-      fill_in 'Name', with: ''
-      click_button 'Update Warehouse'
+      fill_in 'Nombre', with: ''
+      click_button 'Actualizar almacén'
 
-      expect(page).to have_content("can't be blank")
-      expect(page).to have_button('Update Warehouse')
+      expect(page).to have_content("no puede estar en blanco")
+      expect(page).to have_button('Actualizar almacén')
     end
   end
 
@@ -106,7 +106,7 @@ RSpec.describe 'Warehouses', type: :system do
         visit warehouses_path
 
         within("#warehouse_#{wh.id}") do
-          click_button 'Delete'
+          click_button 'Eliminar'
         end
 
         expect(page).to have_current_path(warehouses_path)
@@ -121,9 +121,9 @@ RSpec.describe 'Warehouses', type: :system do
         create(:product, warehouse: wh)
 
         visit warehouse_path(wh)
-        click_button 'Delete'
+        click_button 'Eliminar'
 
-        expect(page).to have_content('cannot be deleted')
+        expect(page).to have_content('No se puede eliminar este almacén porque tiene productos o ventas asociadas.')
         expect(Warehouse.find_by(id: wh.id)).not_to be_nil
       end
     end

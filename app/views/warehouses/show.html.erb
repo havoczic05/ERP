@@ -1,10 +1,10 @@
-<h1>Warehouse Details</h1>
+<h1>Detalle del almacén</h1>
 
 <dl>
-  <dt>Name</dt>
+  <dt>Nombre</dt>
   <dd><%= @warehouse.name %></dd>
 
-  <dt>Location</dt>
+  <dt>Ubicación</dt>
   <dd><%= @warehouse.location %></dd>
 </dl>
 
@@ -13,9 +13,9 @@
 <% end %>
 
 <p>
-  <%= link_to 'Edit', edit_warehouse_path(@warehouse) %>
-  <%= button_to 'Delete', @warehouse, method: :delete,
-                data: { confirm: 'Delete this warehouse?' } %>
+  <%= link_to 'Editar', edit_warehouse_path(@warehouse) %>
+  <%= button_to 'Eliminar', @warehouse, method: :delete,
+                data: { confirm: '¿Eliminar este almacén?' } %>
 </p>
 
-<%= link_to 'Back to Warehouses', warehouses_path %>
+<%= link_to 'Volver a almacenes', warehouses_path %>
