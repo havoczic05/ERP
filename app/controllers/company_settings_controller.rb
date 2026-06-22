@@ -13,7 +13,7 @@ class CompanySettingsController < ApplicationController
     authorize @company_settings
 
     if @company_settings.update(company_settings_params)
-      redirect_to company_settings_path, notice: "Settings updated."
+      redirect_to company_settings_path, notice: "Configuración actualizada."
     else
       render :edit, status: :unprocessable_content
     end

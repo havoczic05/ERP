@@ -7,10 +7,10 @@ class CompanySettings < ApplicationRecord
   # ---------------------------------------------------------------------------
   # Validations
   # ---------------------------------------------------------------------------
-  validates :razon_social, presence: true
+  validates :razon_social, presence: { message: "no puede estar en blanco" }
   validates :ruc,
-            presence: true,
-            format: { with: /\A\d{11}\z/, message: "must be exactly 11 numeric digits" }
+            presence: { message: "no puede estar en blanco" },
+            format: { with: /\A\d{11}\z/, message: "debe tener exactamente 11 dígitos numéricos" }
 
   # ---------------------------------------------------------------------------
   # Singleton accessor

@@ -29,7 +29,7 @@ RSpec.describe "CompanySettings", type: :system do
 
     it "shows a link to edit settings" do
       visit company_settings_path
-      expect(page).to have_link("Edit Settings", href: edit_company_settings_path)
+      expect(page).to have_link("Editar configuración", href: edit_company_settings_path)
     end
   end
 
@@ -39,25 +39,25 @@ RSpec.describe "CompanySettings", type: :system do
   describe "editing company settings" do
     it "admin fills the form and saves, then sees the updated values" do
       visit edit_company_settings_path
-      fill_in "Razon social", with: "Nueva Empresa SAC"
-      fill_in "Ruc", with: "20987654321"
-      fill_in "Direccion", with: "Jr. Cusco 456"
-      fill_in "Telefono", with: "999888777"
+      fill_in "Razón social", with: "Nueva Empresa SAC"
+      fill_in "RUC", with: "20987654321"
+      fill_in "Dirección", with: "Jr. Cusco 456"
+      fill_in "Teléfono", with: "999888777"
       find("input[type=submit]").click
 
       expect(page).to have_current_path(company_settings_path)
-      expect(page).to have_content("Settings updated")
+      expect(page).to have_content("Configuración actualizada")
       expect(page).to have_content("Nueva Empresa SAC")
       expect(page).to have_content("20987654321")
     end
 
     it "shows validation errors when RUC is invalid" do
       visit edit_company_settings_path
-      fill_in "Razon social", with: "Empresa"
-      fill_in "Ruc", with: "1234"
+      fill_in "Razón social", with: "Empresa"
+      fill_in "RUC", with: "1234"
       find("input[type=submit]").click
 
-      expect(page).to have_content("must be exactly 11 numeric digits")
+      expect(page).to have_content("debe tener exactamente 11 dígitos numéricos")
     end
   end
 
@@ -67,8 +67,8 @@ RSpec.describe "CompanySettings", type: :system do
   describe "logo attachment" do
     it "admin can attach a logo file" do
       visit edit_company_settings_path
-      fill_in "Razon social", with: "Logo Corp"
-      fill_in "Ruc", with: "20123456789"
+      fill_in "Razón social", with: "Logo Corp"
+      fill_in "RUC", with: "20123456789"
       attach_file "Logo", Rails.root.join("spec/fixtures/files/logo.png")
       find("input[type=submit]").click
 
