@@ -168,13 +168,15 @@ RSpec.describe 'Sales', type: :system do
     end
 
     it 'creates a cotizacion and redirects to show page' do
+      # Materialize the records before rendering so the warehouse select lists them.
+      client
+      product
       visit new_sale_path
 
-      # Hidden fields for client_id and warehouse_id are set via
-      # find('input[name="sale[client_id]"]').set(...) since fill_in
-      # doesn't locate hidden inputs by name.
+      # client_id is the hidden field the JS combobox fills; set it directly
+      # (fill_in doesn't locate hidden inputs by name). Warehouse is now a select.
       find('input[name="sale[client_id]"]', visible: false).set(client.id)
-      find('input[name="sale[warehouse_id]"]', visible: false).set(warehouse.id)
+      select warehouse.name, from: 'sale[warehouse_id]'
       select 'Cotización', from: 'sale[document_type]'
       # num_installments stays disabled under Contado (default) → not submitted;
       # the service defaults it, and a cotizacion generates no installments anyway.

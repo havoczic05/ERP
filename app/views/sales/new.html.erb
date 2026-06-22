@@ -14,7 +14,8 @@
     The data-controller wrapper must enclose BOTH the client-search input and
     the line-items section because the controller handles actions on both. %>
 <div data-controller="sale-form"
-     data-sale-form-search-url-value="<%= search_clients_path %>">
+     data-sale-form-search-url-value="<%= search_clients_path %>"
+     data-sale-form-product-search-url-value="<%= search_products_path %>">
 <%= form_with url: sales_path, method: :post do |f| %>
   <section class="form-section">
     <h2>Documento</h2>
@@ -25,21 +26,27 @@
           hidden_name: 'sale[client_id]', hidden_value: @sale.client_id,
           search_path: search_clients_path,
           placeholder: 'Nombre o número de documento', wrapper_class: 'client-search',
-          select_action: 'combobox:select->sale-form#clientSelected' do %>
-      <div class="client-meta" data-sale-form-target="clientMeta" hidden>
+          select_action: 'combobox:select->sale-form#clientSelected combobox:clear->sale-form#clientCleared' do %>
+      <div class="client-meta">
         <span class="client-doc" data-sale-form-target="clientDoc"></span>
-        <%= link_to "#", target: "_blank", rel: "noopener",
-              class: "btn btn--ghost btn--sm", title: "Editar cliente",
-              data: { "sale-form-target": "clientEdit" } do %>
-          <%= icon(:pencil) %>
-        <% end %>
+        <%# Edit link — no href until a client is selected (disabled); the
+            controller sets/removes the href + is-disabled on select/clear. %>
+        <%= content_tag :a, icon(:pencil), target: "_blank", rel: "noopener",
+              class: "btn btn--ghost btn--sm is-disabled", title: "Editar cliente",
+              aria: { disabled: "true" },
+              data: { "sale-form-target": "clientEdit" } %>
       </div>
     <% end %>
 
-    <%# Warehouse is preset (single default almacén); carried as a hidden field. %>
-    <%= hidden_field_tag 'sale[warehouse_id]', @sale.warehouse_id %>
+    <div class="field-grid field-grid--5">
+      <div class="field">
+        <%= label_tag 'sale[warehouse_id]', 'Almacén' %>
+        <%= select_tag 'sale[warehouse_id]',
+            options_for_select(@warehouses.map { |w| [w.name, w.id] }, @sale.warehouse_id),
+            include_blank: 'Seleccione un almacén',
+            data: { 'sale-form-target': 'warehouse', action: 'change->sale-form#warehouseChanged' } %>
+      </div>
 
-    <div class="field-grid field-grid--4">
       <div class="field">
         <%= label_tag 'sale[document_type]', 'Tipo de documento' %>
         <%= select_tag 'sale[document_type]',
@@ -87,6 +94,14 @@
     <h3>Líneas de producto</h3>
 
     <table id="line-items-table" class="line-items-table">
+      <%# Producto column is ~4× the width of Cantidad / Precio unitario. %>
+      <colgroup>
+        <col class="col-product">
+        <col class="col-qty">
+        <col class="col-price">
+        <col class="col-subtotal">
+        <col class="col-remove">
+      </colgroup>
       <thead>
         <tr>
           <th>Producto</th>

@@ -16,6 +16,7 @@ class SalesController < ApplicationController
     @sale = Sale.new
     authorize @sale
     @products = product_options
+    @warehouses = Warehouse.order(:name)
   end
 
   # POST /sales
@@ -31,6 +32,7 @@ class SalesController < ApplicationController
       @sale = result.sale || Sale.new
       @errors = result.errors
       @products = product_options
+      @warehouses = Warehouse.order(:name)
       render :new, status: :unprocessable_entity
     end
   end

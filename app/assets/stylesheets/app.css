@@ -624,10 +624,17 @@ li { margin-bottom: var(--sp-1); }
   align-items: start;
   max-width: 900px;
 }
+/* Five short fields on one line (almacén · tipo · forma de pago · cuotas · intervalo) */
+.field-grid--5 {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  align-items: start;
+  max-width: 1040px;
+}
+.field-grid select, .field-grid input { max-width: none; }
 .field { display: flex; flex-direction: column; }
 
 /* Notes: fill the document area width instead of the 28rem input cap */
-.field--full { max-width: 900px; }
+.field--full { max-width: 1040px; }
 .field--full textarea { max-width: none; }
 
 /* Forma de pago — radio group styled to sit beside the other fields */
@@ -710,9 +717,15 @@ li { margin-bottom: var(--sp-1); }
 .combobox-results ul { list-style: none; margin: 0; padding: var(--sp-1); }
 .combobox-results li { margin: 0; }
 
-/* Selected-client document + edit link, shown to the right of the input */
-.client-meta { display: flex; align-items: center; gap: var(--sp-2); white-space: nowrap; }
+/* Keep the client picker tidy so the edit button doesn't drift far from it */
+.client-search { max-width: 640px; }
+
+/* Selected-client document + edit link, pushed to the far right of the row */
+.client-meta { display: flex; align-items: center; gap: var(--sp-2); white-space: nowrap; margin-left: auto; }
 .client-doc { font-size: var(--text-sm); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+/* Disabled action link (e.g. edit-client before a client is selected) */
+.btn.is-disabled { opacity: 0.5; pointer-events: none; cursor: not-allowed; }
 
 /* Each result is a full-width, left-aligned button reset to look like an option */
 .picker-option {
@@ -740,9 +753,17 @@ li { margin-bottom: var(--sp-1); }
 .picker-empty { margin: 0; padding: var(--sp-2) var(--sp-3); color: var(--muted); font-size: var(--text-sm); }
 
 /* Line-item editor table: inputs fill their cell, no stacked margins */
+.line-items-table { table-layout: fixed; width: 100%; }
 .line-items-table input { max-width: none; margin-bottom: 0; }
 .line-items-table td { vertical-align: middle; }
 .line-items-table .col-total { text-align: right; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+/* Producto column ~4× Cantidad / Precio unitario (4:1:1) */
+.line-items-table .col-product  { width: 48%; }
+.line-items-table .col-qty      { width: 12%; }
+.line-items-table .col-price    { width: 12%; }
+.line-items-table .col-subtotal { width: 18%; }
+.line-items-table .col-remove   { width: 10%; }
 
 /* Totals summary under the line items */
 .totals-bar {

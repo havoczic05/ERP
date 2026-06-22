@@ -14,6 +14,7 @@ class ProductsController < ApplicationController
     authorize Product, :search?
     term = params[:q].to_s.strip
     scope = Product.kept
+    scope = scope.where(warehouse_id: params[:warehouse_id]) if params[:warehouse_id].present?
     @products = term.present? ? search_products(scope, term) : scope.none
     render partial: "products/results"
   end
