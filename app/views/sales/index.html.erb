@@ -1,38 +1,38 @@
 <div class="toolbar">
   <div class="page-head">
-    <h1>Sales</h1>
-    <p class="page-sub"><%= pluralize(@pagy.count, 'document') %></p>
+    <h1>Ventas</h1>
+    <p class="page-sub"><%= pluralize(@pagy.count, 'documento') %></p>
   </div>
-  <%= link_to 'New Document', new_sale_path, class: 'btn' %>
+  <%= link_to 'Nuevo documento', new_sale_path, class: 'btn' %>
 </div>
 
 <% if @sales.any? %>
   <table>
     <thead>
       <tr>
-        <th>Correlative</th>
-        <th>Type</th>
-        <th>Client</th>
+        <th>Correlativo</th>
+        <th>Tipo</th>
+        <th>Cliente</th>
         <th class="num">Total (USD)</th>
-        <th>Status</th>
-        <th>Actions</th>
+        <th>Estado</th>
+        <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
       <% @sales.each do |sale| %>
         <tr id="<%= dom_id(sale) %>">
           <td><%= sale.correlative %></td>
-          <td><%= sale.document_type.humanize %></td>
+          <td><%= document_type_label(sale.document_type) %></td>
           <td><%= sale.client.full_name %></td>
           <td class="num"><%= number_to_currency(sale.total_usd, unit: 'USD ') %></td>
           <td><%= sale_status_badge(sale) %></td>
           <td>
             <div class="row-actions">
-              <%= link_to 'View', sale %>
+              <%= link_to 'Ver', sale %>
               <% if policy(sale).annul? && sale.confirmada? && sale.venta? %>
-                <%= button_to 'Annul', annul_sale_path(sale), method: :post,
+                <%= button_to 'Anular', annul_sale_path(sale), method: :post,
                               class: 'btn--danger btn--sm',
-                              data: { confirm: 'Annul this sale? This cannot be undone.' } %>
+                              data: { confirm: '¿Anular esta venta? Esta acción no se puede deshacer.' } %>
               <% end %>
             </div>
           </td>
@@ -44,7 +44,7 @@
   <%== @pagy.series_nav if @pagy.pages > 1 %>
 <% else %>
   <div class="empty-state">
-    <p id="no-sales-message">No sales found.</p>
-    <%= link_to 'New Document', new_sale_path, class: 'btn' %>
+    <p id="no-sales-message">No se encontraron ventas.</p>
+    <%= link_to 'Nuevo documento', new_sale_path, class: 'btn' %>
   </div>
 <% end %>

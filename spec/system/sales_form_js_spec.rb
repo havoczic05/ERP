@@ -62,7 +62,7 @@ RSpec.describe "Sale form (JS)", type: :system, js: true do
 
       expect(page).to have_css("tr.line-item", count: 1)
 
-      fire(find_button("Add Line Item"), "click")
+      fire(find_button("Agregar línea"), "click")
 
       expect(page).to have_css("tr.line-item", count: 2)
     end
