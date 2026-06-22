@@ -324,6 +324,11 @@ input[type="date"], input[type="file"], select, textarea {
   padding: var(--sp-2) var(--sp-3);
   margin-bottom: var(--sp-4);
 }
+input:disabled, select:disabled, textarea:disabled {
+  background: var(--surface-2);
+  color: var(--muted);
+  cursor: not-allowed;
+}
 input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--brand);
@@ -613,7 +618,37 @@ li { margin-bottom: var(--sp-1); }
   gap: 0 var(--sp-5);
   max-width: 640px;
 }
+/* Four short fields on one line (tipo · forma de pago · cuotas · intervalo) */
+.field-grid--4 {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  align-items: start;
+  max-width: 900px;
+}
 .field { display: flex; flex-direction: column; }
+
+/* Notes: fill the document area width instead of the 28rem input cap */
+.field--full { max-width: 900px; }
+.field--full textarea { max-width: none; }
+
+/* Forma de pago — radio group styled to sit beside the other fields */
+.payment-mode { border: 0; padding: 0; margin: 0 0 var(--sp-4); min-width: 0; }
+.payment-mode legend {
+  padding: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--ink-soft);
+  margin-bottom: var(--sp-1);
+}
+.payment-options { display: flex; gap: var(--sp-4); align-items: center; min-height: 2.4rem; }
+.payment-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  margin: 0;
+  font-weight: var(--weight-normal);
+  color: var(--ink);
+}
+.payment-options input[type="radio"] { width: auto; margin: 0; }
 
 /* Inline hint next to a label (e.g. "leave blank to keep current password") */
 .field-hint { font-size: var(--text-xs); color: var(--muted); font-style: normal; margin-bottom: var(--sp-1); }
