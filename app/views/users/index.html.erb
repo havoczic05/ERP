@@ -1,12 +1,12 @@
-<h1>Users</h1>
+<h1>Usuarios</h1>
 
 <table>
   <thead>
     <tr>
-      <th>Email</th>
-      <th>Role</th>
-      <th>Active</th>
-      <th>Actions</th>
+      <th>Correo electrónico</th>
+      <th>Rol</th>
+      <th>Activo</th>
+      <th>Acciones</th>
     </tr>
   </thead>
   <tbody>
@@ -14,12 +14,12 @@
       <tr id="<%= dom_id(user) %>">
         <td><%= user.email %></td>
         <td><%= user.role.humanize %></td>
-        <td><%= user.active? ? 'Yes' : 'No' %></td>
+        <td><%= user.active? ? 'Sí' : 'No' %></td>
         <td>
-          <%= link_to 'Edit', edit_user_path(user) %>
+          <%= link_to 'Editar', edit_user_path(user) %>
           <% if user.active? %>
-            <%= button_to 'Deactivate', user_path(user), method: :delete,
-                          data: { confirm: "Deactivate #{user.email}?" } %>
+            <%= button_to 'Desactivar', user_path(user), method: :delete,
+                          data: { confirm: "¿Desactivar #{user.email}?" } %>
           <% end %>
         </td>
       </tr>
@@ -28,9 +28,9 @@
 </table>
 
 <% if @users.empty? %>
-  <p id="no-users-message">No users found.</p>
+  <p id="no-users-message">No se encontraron usuarios.</p>
 <% end %>
 
-<%= link_to 'New User', new_user_path %>
+<%= link_to 'Nuevo usuario', new_user_path %>
 
 <%== @pagy.series_nav if @pagy.pages > 1 %>
