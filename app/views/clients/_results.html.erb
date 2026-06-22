@@ -1,11 +1,16 @@
 <%= turbo_frame_tag "client-picker" do %>
   <% if @clients.empty? %>
-    <p>No se encontraron clientes.</p>
+    <p class="picker-empty">No se encontraron clientes.</p>
   <% else %>
-    <ul>
+    <ul role="listbox">
       <% @clients.each do |client| %>
-        <li id="<%= dom_id(client) %>">
-          <%= client.full_name %> — <%= client.document_type.upcase %> <%= client.document_number %>
+        <li id="<%= dom_id(client) %>" role="option">
+          <%= button_tag type: "button", class: "picker-option",
+                data: { action: "click->sale-form#selectClient",
+                        client_id: client.id, client_name: client.full_name } do %>
+            <span class="picker-name"><%= client.full_name %></span>
+            <span class="picker-meta"><%= client.document_type.upcase %> <%= client.document_number %></span>
+          <% end %>
         </li>
       <% end %>
     </ul>

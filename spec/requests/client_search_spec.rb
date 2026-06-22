@@ -46,6 +46,22 @@ RSpec.describe 'GET /clients/search', type: :request do
   end
 
   # ---------------------------------------------------------------------------
+  # Results are selectable: each row carries the data the picker needs to set
+  # sale[client_id] and wires the Stimulus selectClient action.
+  # ---------------------------------------------------------------------------
+  describe 'result rows' do
+    it 'render a selectable option with the client id, name and select action' do
+      match = create(:client, :ruc_client, full_name: 'Selectable SAC', document_number: '20111111119')
+
+      get search_clients_path, params: { q: 'Selectable' }
+
+      expect(response.body).to include("data-client-id=\"#{match.id}\"")
+      expect(response.body).to include('data-client-name="Selectable SAC"')
+      expect(response.body).to include('sale-form#selectClient')
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # No match — returns a valid Turbo Frame (no 404/422/500)
   # ---------------------------------------------------------------------------
   describe 'when q matches nothing' do

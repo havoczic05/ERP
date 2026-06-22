@@ -95,25 +95,36 @@ RSpec.describe "Sale form (JS)", type: :system, js: true do
   # 3. Turbo Frame client-search swap via Stimulus searchClient()
   # ---------------------------------------------------------------------------
   describe "swaps client-search results inline via Turbo Frame" do
-    it "loads matching clients into the client-picker frame when typing in the search field" do
+    it "loads matching clients into the client-picker dropdown when typing in the search field" do
       visit new_sale_path
 
-      # The client-picker frame lazy-loads with an empty query first, rendering
-      # "No se encontraron clientes.". Wait for that initial fetch to settle before
-      # searching so the two frame fetches don't race and overwrite each other.
-      within("turbo-frame#client-picker") do
-        expect(page).to have_content("No se encontraron clientes.")
-      end
-
-      # Typing fires input->sale-form#searchClient, which updates the frame's src
-      # to /clients/search?q=ACME and prompts Turbo to swap in the results. Set
-      # the query and fire the `input` event the controller is wired to.
+      # Typing fires input->sale-form#searchClient, which opens the dropdown and
+      # sets the frame's src to /clients/search?q=ACME so Turbo swaps in results.
       set_and_fire(find_field("q"), "ACME", "input")
 
-      # Capybara auto-waits for the frame content to arrive.
-      within("turbo-frame#client-picker") do
-        expect(page).to have_content("ACME Corp")
-      end
+      # Capybara auto-waits for the now-visible result option to arrive.
+      expect(page).to have_css("button.picker-option", text: "ACME Corp")
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # 4. Selecting a client from the dropdown sets the hidden client_id
+  # ---------------------------------------------------------------------------
+  describe "selecting a client from the picker dropdown" do
+    it "fills the hidden client_id, shows the name in the input, and closes the dropdown" do
+      visit new_sale_path
+
+      set_and_fire(find_field("q"), "ACME", "input")
+
+      option = find("button.picker-option", text: "ACME Corp")
+      fire(option, "click")
+
+      # The hidden field carries the selected client's id on submit.
+      expect(find("input[name='sale[client_id]']", visible: :all).value).to eq(client.id.to_s)
+
+      # The search input reflects the chosen client; the dropdown is closed.
+      expect(find_field("q").value).to eq("ACME Corp")
+      expect(page).to have_no_css("button.picker-option")
     end
   end
 end
