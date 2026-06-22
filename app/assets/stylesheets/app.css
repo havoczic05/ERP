@@ -344,7 +344,7 @@ button, input[type="submit"], .btn, a.btn {
   background: var(--brand);
   color: var(--on-brand);
   cursor: pointer;
-  transition: background 150ms ease, border-color 150ms ease;
+  transition: background 150ms ease, border-color 150ms ease, color 150ms ease, transform 80ms ease;
 }
 button:hover, input[type="submit"]:hover, .btn:hover, a.btn:hover {
   background: var(--brand-hover);
@@ -352,6 +352,8 @@ button:hover, input[type="submit"]:hover, .btn:hover, a.btn:hover {
   color: var(--on-brand);
   text-decoration: none;
 }
+/* Tactile press — a half-pixel settle, instant under reduced-motion */
+button:active, input[type="submit"]:active, .btn:active, a.btn:active { transform: translateY(0.5px); }
 button:disabled, .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 button:focus-visible, input[type="submit"]:focus-visible, .btn:focus-visible, a.btn:focus-visible {
   outline: 2px solid var(--brand);
@@ -365,21 +367,53 @@ button:focus-visible, input[type="submit"]:focus-visible, .btn:focus-visible, a.
 /* button_to renders <form class="button_to"> — keep it inert in the layout flow */
 .button_to { display: inline-flex; margin: 0; }
 
-/* Neutral / secondary button */
-.btn--ghost, button.btn--ghost {
+/* Neutral / secondary button.
+   `a.`/`button.` qualifiers match the base `a.btn`/`button` specificity so the
+   modifier wins on links too (a bare `.btn--ghost` loses to `a.btn`). */
+.btn--ghost, a.btn--ghost, button.btn--ghost {
   background: var(--bg);
   color: var(--ink);
   border-color: var(--line-strong);
 }
-.btn--ghost:hover { background: var(--surface-2); color: var(--ink); border-color: var(--line-strong); }
+.btn--ghost:hover, a.btn--ghost:hover, button.btn--ghost:hover {
+  background: var(--surface-2); color: var(--ink); border-color: var(--line-strong);
+}
 
 /* Destructive button (e.g. Annul) */
-.btn--danger, button.btn--danger {
+.btn--danger, a.btn--danger, button.btn--danger {
   background: var(--bg);
   color: var(--danger-ink);
   border-color: var(--danger);
 }
-.btn--danger:hover { background: var(--danger-weak); color: var(--danger-ink); }
+.btn--danger:hover, a.btn--danger:hover, button.btn--danger:hover {
+  background: var(--danger-weak); color: var(--danger-ink);
+}
+.btn--danger:focus-visible, a.btn--danger:focus-visible { outline-color: var(--danger); }
+
+/* In-table actions read quiet at rest so numbers stay first-class; the button
+   chrome (surface + border) appears only on hover/focus. Destructive actions
+   keep their danger ink at rest so they remain recognizable. Labels are always
+   visible, so this subdues decoration without hiding the control. */
+.row-actions .btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ink-soft);
+}
+.row-actions .btn--ghost:hover,
+.row-actions .btn--ghost:focus-visible {
+  background: var(--surface-2);
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+.row-actions .btn--danger {
+  background: transparent;
+  border-color: transparent;
+}
+.row-actions .btn--danger:hover,
+.row-actions .btn--danger:focus-visible {
+  background: var(--danger-weak);
+  border-color: var(--danger);
+}
 
 /* =============================================================================
    Badges / status pills — semantic, color + text (never color alone)
@@ -507,7 +541,7 @@ li { margin-bottom: var(--sp-1); }
 .chart h2 { margin: 0 0 var(--sp-3); }
 .chart-caption { color: var(--muted); font-size: var(--text-xs); margin: var(--sp-2) 0 0; font-variant-numeric: tabular-nums; }
 
-svg {
+.chart svg {
   display: block;
   width: 100%;
   height: 140px;
@@ -516,8 +550,8 @@ svg {
   border-radius: var(--r);
   padding: var(--sp-3);
 }
-svg .bar, rect.bar { fill: var(--brand); }
-svg .bar:hover, rect.bar:hover { fill: var(--brand-hover); }
+.chart svg .bar, .chart rect.bar { fill: var(--brand); }
+.chart svg .bar:hover, .chart rect.bar:hover { fill: var(--brand-hover); }
 
 /* =============================================================================
    Sales flow — toolbar, row actions, detail header, line-item editor
