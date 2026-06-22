@@ -1,13 +1,21 @@
-<%= turbo_frame_tag "product_search_results" do %>
-  <% if @products.empty? %>
-    <p>No se encontraron productos</p>
-  <% else %>
-    <ul>
-      <% @products.each do |product| %>
-        <li id="<%= dom_id(product) %>">
-          <%= product.name %> — <%= product.sku %> (<%= product.warehouse&.name %>)
-        </li>
-      <% end %>
-    </ul>
-  <% end %>
+<%# Combobox options for the product search (combobox_controller fetches this).
+    Selecting an option fills the row's product_id and autofills the unit price. %>
+<% if @products.empty? %>
+  <p class="picker-empty">No se encontraron productos.</p>
+<% else %>
+  <ul role="listbox">
+    <% @products.each do |product| %>
+      <li role="option">
+        <%= button_tag type: "button", class: "picker-option",
+              data: { action: "click->combobox#select",
+                      id: product.id, label: product.name,
+                      price: product.base_price_usd, sku: product.sku, stock: product.stock } do %>
+          <span class="picker-name"><%= product.name %></span>
+          <span class="picker-meta">
+            <%= number_to_currency(product.base_price_usd, unit: "USD ") %> · Stock: <%= product.stock %>
+          </span>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
 <% end %>

@@ -50,48 +50,50 @@ RSpec.describe 'GET /clients/search', type: :request do
   # sale[client_id] and wires the Stimulus selectClient action.
   # ---------------------------------------------------------------------------
   describe 'result rows' do
-    it 'render a selectable option with the client id, name and select action' do
+    it 'render a selectable combobox option with id, label, document and edit path' do
       match = create(:client, :ruc_client, full_name: 'Selectable SAC', document_number: '20111111119')
 
       get search_clients_path, params: { q: 'Selectable' }
 
-      expect(response.body).to include("data-client-id=\"#{match.id}\"")
-      expect(response.body).to include('data-client-name="Selectable SAC"')
-      expect(response.body).to include('sale-form#selectClient')
+      expect(response.body).to include("data-id=\"#{match.id}\"")
+      expect(response.body).to include('data-label="Selectable SAC"')
+      expect(response.body).to include('data-document="RUC 20111111119"')
+      expect(response.body).to include("data-edit-path=\"#{edit_client_path(match)}\"")
+      expect(response.body).to include('combobox#select')
     end
   end
 
   # ---------------------------------------------------------------------------
-  # No match — returns a valid Turbo Frame (no 404/422/500)
+  # No match — returns the empty-state options (no 404/422/500)
   # ---------------------------------------------------------------------------
   describe 'when q matches nothing' do
-    it 'returns 200 with a valid Turbo Frame and no client rows' do
+    it 'returns 200 with the empty state and no client rows' do
       create(:client, :ruc_client, full_name: 'Existing Corp', document_number: '20111111114')
 
       get search_clients_path, params: { q: 'ZZZNOMATCH' }
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('turbo-frame')
+      expect(response.body).to include('No se encontraron clientes')
       expect(response.body).not_to include('Existing Corp')
     end
   end
 
   # ---------------------------------------------------------------------------
-  # Blank q — must NOT raise error; returns a valid Turbo Frame
+  # Blank q — must NOT raise error; returns the empty state
   # ---------------------------------------------------------------------------
   describe 'when q is blank' do
-    it 'returns 200 with a valid Turbo Frame (no 5xx)' do
+    it 'returns 200 (no 5xx)' do
       get search_clients_path, params: { q: '' }
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('turbo-frame')
+      expect(response.body).to include('No se encontraron clientes')
     end
 
     it 'returns 200 when q param is absent' do
       get search_clients_path
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('turbo-frame')
+      expect(response.body).to include('No se encontraron clientes')
     end
   end
 

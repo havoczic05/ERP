@@ -281,6 +281,15 @@ RSpec.describe 'Products', type: :request do
       expect(response.body).not_to include('Other')
     end
 
+    it 'renders selectable combobox options with id, label, price and stock' do
+      get search_products_path, params: { q: 'SearchMe' }
+      expect(response.body).to include("data-id=\"#{match.id}\"")
+      expect(response.body).to include('data-label="SearchMe"')
+      expect(response.body).to include("data-price=\"#{match.base_price_usd}\"")
+      expect(response.body).to include("data-stock=\"#{match.stock}\"")
+      expect(response.body).to include('combobox#select')
+    end
+
     it 'returns 200 for vendedor' do
       allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(vendedor)
       get search_products_path, params: { q: 'SearchMe' }

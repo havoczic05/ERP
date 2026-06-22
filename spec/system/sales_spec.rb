@@ -141,24 +141,22 @@ RSpec.describe 'Sales', type: :system do
       expect(page).to have_field('sale[items][][unit_price_usd]')
     end
 
-    it 'lets the user search products by name via a datalist (not a raw id field)' do
-      create(:product, warehouse: warehouse, name: 'Searchable Widget', sku: 'SKU-XYZ')
+    it 'lets the user search products by name via a combobox (name display + hidden product_id)' do
       visit new_sale_path
 
-      # The product field is a name-searchable text input backed by a datalist,
-      # NOT a raw numeric product_id field (users don't know internal ids).
+      # The product field is a name-searchable combobox: a visible query input plus
+      # a hidden product_id the JS combobox fills on select. No raw datalist.
       expect(page).to have_field('sale[items][][product_query]')
-      expect(page).not_to have_field('sale[items][][product_id]')
-      expect(page).to have_css('datalist#products-datalist')
-      expect(page).to have_css("datalist#products-datalist option[value*='Searchable Widget']")
+      expect(page).to have_css("input[name='sale[items][][product_id]']", visible: :all)
+      expect(page).to have_css('.combobox.product-search')
+      expect(page).to have_no_css('datalist#products-datalist')
     end
 
-    it 'renders a client search turbo frame placeholder' do
+    it 'renders the client search combobox' do
       visit new_sale_path
-      # The Turbo Frame tag for client search must be present in the server HTML.
-      # rack_test does not execute JS, but the turbo-frame element is rendered
-      # statically and can be asserted via CSS selector.
-      expect(page).to have_css('turbo-frame#client-picker')
+      expect(page).to have_css('.combobox.client-search')
+      expect(page).to have_field('q')
+      expect(page).to have_css("input[name='sale[client_id]']", visible: :all)
     end
 
     it 'renders a client search input' do
@@ -310,14 +308,12 @@ RSpec.describe 'Sales', type: :system do
       expect(page).to have_content('No se encontraron clientes.')
     end
 
-    it 'wraps results in the client-picker turbo frame so Turbo can swap them in place' do
-      # The search response MUST be wrapped in a turbo-frame whose id matches the
-      # picker frame in the sales form (new.html.erb: turbo-frame#client-picker).
-      # If the ids differ, Turbo cannot find a matching frame in the response and
-      # renders its "Content missing" fallback instead of the results.
+    it 'renders selectable combobox options the client picker can pick' do
+      # The search response is a list of selectable options the combobox controller
+      # injects and wires to combobox#select (no Turbo frame).
       create(:client, :ruc_client, full_name: 'Turbo Corp')
       visit search_clients_path(q: 'Turbo')
-      expect(page).to have_css('turbo-frame#client-picker')
+      expect(page).to have_css('button.picker-option', text: 'Turbo Corp')
     end
   end
 end

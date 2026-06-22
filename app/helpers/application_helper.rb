@@ -126,6 +126,22 @@ module ApplicationHelper
                 "aria-hidden": "true", focusable: "false")
   end
 
+  # Renders a reusable searchable combobox (see app/views/shared/_combobox + the
+  # combobox Stimulus controller). `hidden_name` carries the selected id on submit;
+  # `query_name` is the visible display/text input. `select_action` wires the
+  # `combobox:select` event to an embedding controller (e.g. "combobox:select->sale-form#x").
+  # An optional block renders a suffix next to the input (e.g. selected-item meta).
+  def combobox(query_name:, hidden_name:, search_path:, label: nil,
+               hidden_value: nil, query_value: nil, placeholder: nil,
+               select_action: nil, wrapper_class: nil, &suffix)
+    render "shared/combobox",
+           label: label, query_name: query_name, hidden_name: hidden_name,
+           search_path: search_path, hidden_value: hidden_value, query_value: query_value,
+           placeholder: placeholder, select_action: select_action,
+           wrapper_class: wrapper_class,
+           suffix: (capture(&suffix) if suffix)
+  end
+
   private
 
   # Builds the button class string. :primary uses the bare .btn (filled brand);

@@ -92,39 +92,64 @@ RSpec.describe "Sale form (JS)", type: :system, js: true do
   end
 
   # ---------------------------------------------------------------------------
-  # 3. Turbo Frame client-search swap via Stimulus searchClient()
+  # 3. Client combobox: typing fetches selectable options
   # ---------------------------------------------------------------------------
-  describe "swaps client-search results inline via Turbo Frame" do
-    it "loads matching clients into the client-picker dropdown when typing in the search field" do
+  describe "client combobox search" do
+    it "loads matching clients into the dropdown when typing in the search field" do
       visit new_sale_path
 
-      # Typing fires input->sale-form#searchClient, which opens the dropdown and
-      # sets the frame's src to /clients/search?q=ACME so Turbo swaps in results.
+      # Typing fires input->combobox#search, which fetches /clients/search?q=ACME
+      # and injects the selectable options.
       set_and_fire(find_field("q"), "ACME", "input")
 
-      # Capybara auto-waits for the now-visible result option to arrive.
       expect(page).to have_css("button.picker-option", text: "ACME Corp")
     end
   end
 
   # ---------------------------------------------------------------------------
-  # 4. Selecting a client from the dropdown sets the hidden client_id
+  # 4. Selecting a client fills client_id and reveals its document + edit link
   # ---------------------------------------------------------------------------
-  describe "selecting a client from the picker dropdown" do
-    it "fills the hidden client_id, shows the name in the input, and closes the dropdown" do
+  describe "selecting a client from the dropdown" do
+    it "fills the hidden client_id, shows the name, closes, and reveals the document + edit link" do
       visit new_sale_path
 
       set_and_fire(find_field("q"), "ACME", "input")
+      fire(find("button.picker-option", text: "ACME Corp"), "click")
 
-      option = find("button.picker-option", text: "ACME Corp")
-      fire(option, "click")
-
-      # The hidden field carries the selected client's id on submit.
+      # Hidden field carries the id; input shows the name; dropdown closes.
       expect(find("input[name='sale[client_id]']", visible: :all).value).to eq(client.id.to_s)
-
-      # The search input reflects the chosen client; the dropdown is closed.
       expect(find_field("q").value).to eq("ACME Corp")
       expect(page).to have_no_css("button.picker-option")
+
+      # The selected client's document + an edit link (new tab) appear.
+      within("[data-sale-form-target='clientMeta']") do
+        expect(page).to have_text("RUC #{client.document_number}")
+        expect(page).to have_css("a[href='#{edit_client_path(client)}'][target='_blank']")
+      end
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # 5. Product combobox: selecting a product autofills its unit price
+  # ---------------------------------------------------------------------------
+  describe "product combobox autofill" do
+    let!(:keyboard) do
+      create(:product, warehouse: warehouse, name: "Teclado Mecanico",
+             sku: "KEY-001", base_price_usd: 49.90, stock: 25)
+    end
+
+    it "fills the row's product_id and unit price, and recomputes the line total" do
+      visit new_sale_path
+
+      query = find("input[name='sale[items][][product_query]']")
+      set_and_fire(query, "Teclado", "input")
+      fire(find("button.picker-option", text: "Teclado Mecanico"), "click")
+
+      expect(find("input[name='sale[items][][product_id]']", visible: :all).value).to eq(keyboard.id.to_s)
+      expect(find("input[name='sale[items][][unit_price_usd]']").value).to eq("49.90")
+
+      # qty defaults to 1, so the line total reflects the autofilled price.
+      expect(page).to have_css("[data-sale-form-target='lineTotal']", text: "USD 49.90")
     end
   end
 end

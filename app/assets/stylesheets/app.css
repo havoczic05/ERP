@@ -644,21 +644,24 @@ li { margin-bottom: var(--sp-1); }
 }
 
 /* =============================================================================
-   Client search combobox (sales/new) — results float as a dropdown overlay
-   instead of pushing the form down. Driven by sale_form_controller.js, which
-   toggles `.is-open` on the wrapper.
+   Reusable combobox (combobox_controller.js) — results float as a dropdown
+   overlay instead of pushing the form down; `.is-open` on the wrapper reveals
+   them. Used by the client and product pickers on sales/new.
    ========================================================================== */
-.client-search { position: relative; }
+.combobox { position: relative; }
 
-/* The Turbo Frame is a custom element (display:inline by default). Make it the
-   dropdown surface, anchored under the input, hidden until the picker opens. */
-.client-search #client-picker {
+/* Input + optional suffix (e.g. selected-client document + edit link) on a row */
+.combobox-row { display: flex; align-items: center; gap: var(--sp-2); }
+.combobox-row input { flex: 1; margin-bottom: 0; }
+
+.combobox-results {
   display: none;
   position: absolute;
-  top: calc(100% - var(--sp-3));
+  top: 100%;
   left: 0;
   right: 0;
   z-index: var(--z-dropdown);
+  min-width: 16rem;
   max-width: 28rem;
   max-height: 16rem;
   overflow-y: auto;
@@ -667,10 +670,14 @@ li { margin-bottom: var(--sp-1); }
   border-radius: var(--r);
   box-shadow: var(--shadow);
 }
-.client-search.is-open #client-picker { display: block; }
+.combobox.is-open .combobox-results { display: block; }
 
-.client-search #client-picker ul { list-style: none; margin: 0; padding: var(--sp-1); }
-.client-search #client-picker li { margin: 0; }
+.combobox-results ul { list-style: none; margin: 0; padding: var(--sp-1); }
+.combobox-results li { margin: 0; }
+
+/* Selected-client document + edit link, shown to the right of the input */
+.client-meta { display: flex; align-items: center; gap: var(--sp-2); white-space: nowrap; }
+.client-doc { font-size: var(--text-sm); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 
 /* Each result is a full-width, left-aligned button reset to look like an option */
 .picker-option {

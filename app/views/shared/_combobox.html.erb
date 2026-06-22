@@ -1,0 +1,16 @@
+<%# Reusable searchable combobox. Rendered via the `combobox` view helper.
+    Driven by combobox_controller.js: typing fetches `search_path?q=...` and
+    injects selectable options; picking one fills the hidden id + the display
+    input and dispatches `combobox:select`. %>
+<%= tag.div class: [ "combobox", "field", wrapper_class ].compact,
+      data: { controller: "combobox", "combobox-url-value": search_path, action: select_action }.compact do %>
+  <%= label_tag query_name, label if label.present? %>
+  <div class="combobox-row">
+    <%= text_field_tag query_name, query_value, placeholder: placeholder, autocomplete: "off",
+          "aria-label": (label.presence || placeholder),
+          data: { "combobox-target": "input", action: "input->combobox#search" } %>
+    <%= suffix %>
+  </div>
+  <%= hidden_field_tag hidden_name, hidden_value, data: { "combobox-target": "hidden" } %>
+  <div class="combobox-results" data-combobox-target="results"></div>
+<% end %>
