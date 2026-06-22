@@ -28,12 +28,12 @@ RSpec.describe 'Products', type: :system do
 
     it 'shows a link to create a new product' do
       visit products_path
-      expect(page).to have_link('New Product', href: new_product_path)
+      expect(page).to have_link('Nuevo producto', href: new_product_path)
     end
 
     it 'shows a no-results message when no kept products match' do
       visit products_path(q: 'ZZZNOMATCH')
-      expect(page).to have_content('No products found')
+      expect(page).to have_content('No se encontraron productos')
     end
 
     it 'shows only kept products' do
@@ -86,13 +86,13 @@ RSpec.describe 'Products', type: :system do
     context 'with valid params' do
       it 'creates the product and shows it' do
         visit new_product_path
-        fill_in 'Sku', with: 'NEW-001'
-        fill_in 'Name', with: 'Brand New Item'
-        fill_in 'Brand', with: 'ACME'
-        select warehouse.name, from: 'Warehouse'
+        fill_in 'SKU', with: 'NEW-001'
+        fill_in 'Nombre', with: 'Brand New Item'
+        fill_in 'Marca', with: 'ACME'
+        select warehouse.name, from: 'Almacén'
         fill_in 'Stock', with: '5'
-        fill_in 'Base price usd', with: '9.99'
-        click_button 'Create Product'
+        fill_in 'Precio base USD', with: '9.99'
+        click_button 'Crear producto'
 
         expect(page).to have_content('Brand New Item')
         expect(Product.kept.find_by(sku: 'NEW-001')).not_to be_nil
@@ -109,15 +109,15 @@ RSpec.describe 'Products', type: :system do
     context 'with blank name' do
       it 'shows validation error' do
         visit new_product_path
-        fill_in 'Name', with: ''
-        fill_in 'Sku', with: 'ERR-001'
-        fill_in 'Brand', with: 'X'
-        select warehouse.name, from: 'Warehouse'
-        fill_in 'Base price usd', with: '1.00'
-        click_button 'Create Product'
+        fill_in 'Nombre', with: ''
+        fill_in 'SKU', with: 'ERR-001'
+        fill_in 'Marca', with: 'X'
+        select warehouse.name, from: 'Almacén'
+        fill_in 'Precio base USD', with: '1.00'
+        click_button 'Crear producto'
 
-        expect(page).to have_content("can't be blank")
-        expect(page).to have_button('Create Product')
+        expect(page).to have_content("no puede estar en blanco")
+        expect(page).to have_button('Crear producto')
       end
     end
   end
@@ -130,7 +130,7 @@ RSpec.describe 'Products', type: :system do
 
     it 'pre-fills the form with existing data' do
       visit edit_product_path(product)
-      expect(page).to have_field('Name', with: 'Old Name')
+      expect(page).to have_field('Nombre', with: 'Old Name')
     end
 
     it 'renders stock as plain text, NOT a writable input (RF-PM-3)' do
@@ -143,8 +143,8 @@ RSpec.describe 'Products', type: :system do
 
     it 'updates the product and reflects new name' do
       visit edit_product_path(product)
-      fill_in 'Name', with: 'Updated Name'
-      click_button 'Update Product'
+      fill_in 'Nombre', with: 'Updated Name'
+      click_button 'Actualizar producto'
 
       expect(page).to have_content('Updated Name')
     end
@@ -160,7 +160,7 @@ RSpec.describe 'Products', type: :system do
         visit products_path
 
         within("#product_#{product.id}") do
-          click_button 'Delete'
+          click_button 'Eliminar'
         end
 
         expect(page).to have_current_path(products_path)
@@ -175,9 +175,9 @@ RSpec.describe 'Products', type: :system do
         create(:sale_item, product: product)
 
         visit product_path(product)
-        click_button 'Delete'
+        click_button 'Eliminar'
 
-        expect(page).to have_content('cannot be deleted')
+        expect(page).to have_content('No se puede eliminar este producto porque tiene ítems de venta asociados.')
         expect(product.reload.discarded_at).to be_nil
       end
     end

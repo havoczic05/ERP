@@ -33,7 +33,7 @@ class ProductsController < ApplicationController
     authorize @product
 
     if @product.save
-      redirect_to @product, notice: "Product was successfully created."
+      redirect_to @product, notice: "Producto creado correctamente."
     else
       @warehouses = Warehouse.order(:name)
       render :new, status: :unprocessable_entity
@@ -53,7 +53,7 @@ class ProductsController < ApplicationController
     authorize @product
 
     if @product.update(product_update_params)
-      redirect_to @product, notice: "Product was successfully updated."
+      redirect_to @product, notice: "Producto actualizado correctamente."
     else
       @warehouses = Warehouse.order(:name)
       render :edit, status: :unprocessable_entity
@@ -69,9 +69,9 @@ class ProductsController < ApplicationController
 
     if @product.destroyable?
       @product.discard
-      redirect_to products_path, notice: "Product was successfully archived."
+      redirect_to products_path, notice: "Producto archivado correctamente."
     else
-      flash.now[:alert] = "This product cannot be deleted because it has associated sale items."
+      flash.now[:alert] = "No se puede eliminar este producto porque tiene ítems de venta asociados."
       render :show, status: :unprocessable_entity
     end
   end

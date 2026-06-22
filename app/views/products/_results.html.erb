@@ -1,6 +1,6 @@
 <%= turbo_frame_tag "product_search_results" do %>
   <% if @products.empty? %>
-    <p>No products found.</p>
+    <p>No se encontraron productos</p>
   <% else %>
     <ul>
       <% @products.each do |product| %>

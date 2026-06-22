@@ -8,18 +8,18 @@ class Product < ApplicationRecord
   # ---------------------------------------------------------------------------
   # Validations
   # ---------------------------------------------------------------------------
-  validates :name, presence: true
-  validates :sku, presence: true
-  validates :brand, presence: true
-  validates :stock, numericality: { greater_than_or_equal_to: 0 }
-  validates :base_price_usd, numericality: { greater_than: 0 }
+  validates :name, presence: { message: "no puede estar en blanco" }
+  validates :sku, presence: { message: "no puede estar en blanco" }
+  validates :brand, presence: { message: "no puede estar en blanco" }
+  validates :stock, numericality: { greater_than_or_equal_to: 0, message: "debe ser mayor o igual a 0" }
+  validates :base_price_usd, numericality: { greater_than: 0, message: "debe ser mayor que 0" }
 
   # Model-level uniqueness scoped to active (non-discarded) products.
   # DB partial index (WHERE discarded_at IS NULL) provides race-condition safety.
   validates :sku,
             uniqueness: {
               conditions: -> { where(discarded_at: nil) },
-              message: "is already taken by an active product"
+              message: "ya está en uso por un producto activo"
             }
 
   # ---------------------------------------------------------------------------
