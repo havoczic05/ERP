@@ -12,10 +12,10 @@
   <div id="alert"><%= flash[:alert] %></div>
 <% end %>
 
-<p>
-  <%= link_to 'Editar', edit_warehouse_path(@warehouse) %>
-  <%= button_to 'Eliminar', @warehouse, method: :delete,
-                data: { confirm: '¿Eliminar este almacén?' } %>
-</p>
-
-<%= link_to 'Volver a almacenes', warehouses_path %>
+<div class="action-bar">
+  <%= action_link 'Editar', edit_warehouse_path(@warehouse), size: :md, icon: :pencil %>
+  <%= action_button 'Eliminar', @warehouse, method: :delete, size: :md, icon: :trash,
+                    confirm: '¿Eliminar este almacén?' %>
+  <span class="spacer"></span>
+  <%= action_link 'Volver a almacenes', warehouses_path, size: :md, icon: "arrow-left" %>
+</div>

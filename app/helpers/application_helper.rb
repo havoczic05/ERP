@@ -57,4 +57,85 @@ module ApplicationHelper
             class: class_names("nav-item", "is-active" => active),
             aria: { current: active ? "page" : nil }
   end
+
+  # ---------------------------------------------------------------------------
+  # Action controls — single source of truth for the visual hierarchy of
+  # buttons/links across index ".row-actions" cells and ".action-bar" footers.
+  #
+  #   primary  -> filled brand button (one CTA per screen)
+  #   ghost    -> neutral outline (routine: Ver / Editar / Volver / PDF)
+  #   danger   -> red outline (destructive: Eliminar / Anular / Archivar)
+  #
+  # Both helpers keep the exact visible Spanish label so system specs that match
+  # on have_link / have_button / click_button stay green.
+  # ---------------------------------------------------------------------------
+
+  # Renders a styled <a> for a navigation/routine action.
+  def action_link(label, path, variant: :ghost, size: :sm, icon: nil, **opts)
+    link_to path, **opts.merge(class: btn_classes(variant, size, opts[:class])) do
+      action_content(label, icon)
+    end
+  end
+
+  # Renders a styled button_to (a small inline <form><button>) for a state-changing
+  # action. `confirm:` becomes a Turbo confirmation dialog.
+  def action_button(label, path, variant: :danger, size: :sm, icon: nil,
+                     method: :post, confirm: nil, **opts)
+    data = (opts.delete(:data) || {})
+    data = data.merge(turbo_confirm: confirm) if confirm
+    button_to path, **opts.merge(
+      method: method,
+      data: data,
+      form: { class: "button_to" },
+      class: btn_classes(variant, size, opts[:class])
+    ) do
+      action_content(label, icon)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Inline SVG icons — curated Lucide-style set (stroke 1.5). No gem, no Node.
+  # Returns an html_safe <svg>, or nil for an unknown name.
+  # ---------------------------------------------------------------------------
+  ICON_PATHS = {
+    eye:        '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+    pencil:     '<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>',
+    trash:      '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
+    ban:        '<circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/>',
+    archive:    '<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
+    "user-x":   '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" x2="22" y1="8" y2="13"/><line x1="22" x2="17" y1="8" y2="13"/>',
+    download:   '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>',
+    plus:       '<path d="M5 12h14"/><path d="M12 5v14"/>',
+    "arrow-left": '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>'
+  }.freeze
+
+  def icon(name)
+    body = ICON_PATHS[name.to_sym]
+    return nil unless body
+
+    content_tag(:svg, body.html_safe,
+                class: "icon", viewBox: "0 0 24 24", width: 16, height: 16,
+                fill: "none", stroke: "currentColor", "stroke-width": 1.5,
+                "stroke-linecap": "round", "stroke-linejoin": "round",
+                "aria-hidden": "true", focusable: "false")
+  end
+
+  private
+
+  # Builds the button class string. :primary uses the bare .btn (filled brand);
+  # :ghost / :danger add their modifier; :sm adds the compact size.
+  def btn_classes(variant, size, extra = nil)
+    class_names(
+      "btn",
+      "btn--ghost"  => variant == :ghost,
+      "btn--danger" => variant == :danger,
+      "btn--sm"     => size == :sm,
+      extra.to_s    => extra.present?
+    )
+  end
+
+  # Icon + label, so the visible text is always present for accessibility and specs.
+  def action_content(label, icon_name)
+    safe_join([ icon_name ? icon(icon_name) : nil, content_tag(:span, label) ].compact)
+  end
 end

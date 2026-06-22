@@ -3,7 +3,7 @@
     <h1>Ventas</h1>
     <p class="page-sub"><%= pluralize(@pagy.count, 'documento') %></p>
   </div>
-  <%= link_to 'Nuevo documento', new_sale_path, class: 'btn' %>
+  <%= action_link 'Nuevo documento', new_sale_path, variant: :primary, size: :md, icon: :plus %>
 </div>
 
 <% if @sales.any? %>
@@ -26,13 +26,12 @@
           <td><%= sale.client.full_name %></td>
           <td class="num"><%= number_to_currency(sale.total_usd, unit: 'USD ') %></td>
           <td><%= sale_status_badge(sale) %></td>
-          <td>
+          <td class="col-actions">
             <div class="row-actions">
-              <%= link_to 'Ver', sale %>
+              <%= action_link 'Ver', sale, icon: :eye %>
               <% if policy(sale).annul? && sale.confirmada? && sale.venta? %>
-                <%= button_to 'Anular', annul_sale_path(sale), method: :post,
-                              class: 'btn--danger btn--sm',
-                              data: { confirm: '¿Anular esta venta? Esta acción no se puede deshacer.' } %>
+                <%= action_button 'Anular', annul_sale_path(sale), method: :post, icon: :ban,
+                                  confirm: '¿Anular esta venta? Esta acción no se puede deshacer.' %>
               <% end %>
             </div>
           </td>
@@ -45,6 +44,6 @@
 <% else %>
   <div class="empty-state">
     <p id="no-sales-message">No se encontraron ventas.</p>
-    <%= link_to 'Nuevo documento', new_sale_path, class: 'btn' %>
+    <%= action_link 'Nuevo documento', new_sale_path, variant: :primary, size: :md, icon: :plus %>
   </div>
 <% end %>

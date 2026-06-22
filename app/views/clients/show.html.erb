@@ -14,14 +14,14 @@
   <dd><%= @client.phone %></dd>
 </dl>
 
-<p>
-  <%= link_to 'Editar', edit_client_path(@client) %>
-  <%= button_to 'Archivar', @client, method: :delete,
-                data: { confirm: '¿Archivar este cliente?' } %>
-</p>
-
 <% if flash[:alert].present? %>
   <div id="alert"><%= flash[:alert] %></div>
 <% end %>
 
-<%= link_to 'Volver a clientes', clients_path %>
+<div class="action-bar">
+  <%= action_link 'Editar', edit_client_path(@client), size: :md, icon: :pencil %>
+  <%= action_button 'Archivar', @client, method: :delete, size: :md, icon: :archive,
+                    confirm: '¿Archivar este cliente?' %>
+  <span class="spacer"></span>
+  <%= action_link 'Volver a clientes', clients_path, size: :md, icon: "arrow-left" %>
+</div>

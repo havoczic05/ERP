@@ -80,17 +80,18 @@
 
 <div class="action-bar">
   <% if @sale.cotizacion? && @sale.confirmada? && policy(@sale).convert_to_sale? %>
-    <%= button_to 'Convertir a venta', convert_to_sale_sale_path(@sale), method: :post,
-                  params: { num_installments: 1, interval_days: 30 } %>
+    <%= action_button 'Convertir a venta', convert_to_sale_sale_path(@sale), method: :post,
+                      variant: :primary, size: :md, icon: :plus,
+                      params: { num_installments: 1, interval_days: 30 } %>
   <% end %>
 
   <% if policy(@sale).annul? && @sale.confirmada? && @sale.venta? %>
-    <%= button_to 'Anular venta', annul_sale_path(@sale), method: :post,
-                  class: 'btn--danger',
-                  data: { confirm: '¿Anular esta venta? Esta acción no se puede deshacer.' } %>
+    <%= action_button 'Anular venta', annul_sale_path(@sale), method: :post,
+                      variant: :danger, size: :md, icon: :ban,
+                      confirm: '¿Anular esta venta? Esta acción no se puede deshacer.' %>
   <% end %>
 
   <span class="spacer"></span>
-  <%= link_to 'Descargar PDF', sale_path(@sale, format: :pdf), class: 'btn btn--ghost' %>
-  <%= link_to 'Volver a ventas', sales_path %>
+  <%= action_link 'Descargar PDF', sale_path(@sale, format: :pdf), size: :md, icon: :download %>
+  <%= action_link 'Volver a ventas', sales_path, size: :md, icon: "arrow-left" %>
 </div>

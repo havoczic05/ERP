@@ -353,6 +353,17 @@ button:hover, input[type="submit"]:hover, .btn:hover, a.btn:hover {
   text-decoration: none;
 }
 button:disabled, .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+button:focus-visible, input[type="submit"]:focus-visible, .btn:focus-visible, a.btn:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* Inline icons inside buttons/links: never shrink, scale with button size */
+.icon { flex: none; width: 16px; height: 16px; }
+.btn--sm .icon { width: 14px; height: 14px; }
+
+/* button_to renders <form class="button_to"> — keep it inert in the layout flow */
+.button_to { display: inline-flex; margin: 0; }
 
 /* Neutral / secondary button */
 .btn--ghost, button.btn--ghost {
@@ -527,8 +538,11 @@ svg .bar:hover, rect.bar:hover { fill: var(--brand-hover); }
 .btn--sm { padding: var(--sp-1) var(--sp-3); font-size: var(--text-xs); }
 
 /* Inline row actions in tables (View / Annul). button_to renders a <form>. */
-.row-actions { display: flex; align-items: center; gap: var(--sp-3); white-space: nowrap; }
+.row-actions { display: flex; align-items: center; gap: var(--sp-2); white-space: nowrap; }
 .row-actions form { margin: 0; }
+
+/* Actions column: shrink to its content so the data columns get the width */
+.col-actions { width: 1%; white-space: nowrap; }
 
 /* Detail header: correlative + status badge on one baseline */
 .detail-head { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; margin-bottom: var(--sp-2); }
