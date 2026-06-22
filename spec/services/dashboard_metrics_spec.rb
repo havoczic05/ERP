@@ -7,10 +7,13 @@ RSpec.describe DashboardMetrics do
   let(:metrics)   { described_class.new(today: today) }
 
   # Helper: a confirmed venta with a given amount and creation timestamp.
+  # Use midday in the app time zone so the synthetic created_at lands
+  # unambiguously inside that day's window regardless of the host's TZ
+  # (the service queries `today.all_day`/`all_month` in Time.zone).
   def venta(total:, on:, **attrs)
     create(:sale, :venta, client: client, warehouse: warehouse,
            subtotal_usd: total, total_usd: total,
-           created_at: on.to_time, **attrs)
+           created_at: on.in_time_zone.noon, **attrs)
   end
 
   describe "monthly metrics" do
