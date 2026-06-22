@@ -53,6 +53,15 @@ RSpec.describe 'Sales', type: :system do
       expect(page).to have_link('Ver', href: sale_path(sale))
     end
 
+    it 'shows the document creation date in dd/mm/aaaa' do
+      sale = create(:sale, client: client, warehouse: warehouse, correlative: 'COT-00002')
+      visit sales_path
+      expect(page).to have_content('Fecha')
+      within("#sale_#{sale.id}") do
+        expect(page).to have_content(sale.created_at.strftime('%d/%m/%Y'))
+      end
+    end
+
     it 'shows annulled sales in the index for audit purposes' do
       # Per spec (RF3.1): "Annulled sales (status=anulada) MUST still appear in the
       # index for audit purposes." Annulment soft-deletes (sets discarded_at), so the
