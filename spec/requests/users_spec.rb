@@ -137,7 +137,7 @@ RSpec.describe 'Users', type: :request do
         delete user_path(admin)
         expect(response).to redirect_to(users_path)
         follow_redirect!
-        expect(response.body).to include('Cannot deactivate the last active administrator')
+        expect(response.body).to include('No se puede desactivar al último administrador activo')
         expect(admin.reload.active).to be true
       end
     end
@@ -149,7 +149,7 @@ RSpec.describe 'Users', type: :request do
         delete user_path(admin)
         expect(response).to redirect_to(users_path)
         follow_redirect!
-        expect(response.body).to include('You cannot deactivate your own account')
+        expect(response.body).to include('No puede desactivar su propia cuenta')
         expect(admin.reload.active).to be true
       end
     end

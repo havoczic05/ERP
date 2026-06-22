@@ -11,7 +11,7 @@
   <% end %>
 
   <div>
-    <%= f.label :email %>
+    <%= f.label :email, 'Correo electrónico' %>
     <%= f.email_field :email %>
     <% if user.errors[:email].any? %>
       <span class="error"><%= user.errors[:email].join(', ') %></span>
@@ -19,17 +19,17 @@
   </div>
 
   <div>
-    <%= f.label :role %>
-    <%= f.select :role, User::ROLES.map { |r| [r.humanize, r] }, { include_blank: 'Select role' } %>
+    <%= f.label :role, 'Rol' %>
+    <%= f.select :role, User::ROLES.map { |r| [r.humanize, r] }, { include_blank: 'Seleccionar rol' } %>
     <% if user.errors[:role].any? %>
       <span class="error"><%= user.errors[:role].join(', ') %></span>
     <% end %>
   </div>
 
   <div>
-    <%= f.label :password %>
+    <%= f.label :password, 'Contraseña' %>
     <% if user.persisted? %>
-      <em>(leave blank to keep current password)</em>
+      <em>(dejar en blanco para mantener la contraseña actual)</em>
     <% end %>
     <%= f.password_field :password %>
     <% if user.errors[:password].any? %>
@@ -38,11 +38,11 @@
   </div>
 
   <div>
-    <%= f.label :password_confirmation %>
+    <%= f.label :password_confirmation, 'Confirmación de contraseña' %>
     <%= f.password_field :password_confirmation %>
   </div>
 
   <div>
-    <%= f.submit %>
+    <%= f.submit user.persisted? ? 'Actualizar usuario' : 'Crear usuario' %>
   </div>
 <% end %>

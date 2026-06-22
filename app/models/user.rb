@@ -5,7 +5,7 @@ class User < ApplicationRecord
 
   scope :active, -> { where(active: true) }
 
-  validates :email, presence: true
+  validates :email, presence: { message: "no puede estar en blanco" }
   validates :role, inclusion: { in: ROLES }
 
   def admin?

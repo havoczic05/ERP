@@ -16,7 +16,7 @@ class UsersController < ApplicationController
     authorize @user
 
     if @user.save
-      redirect_to users_path, notice: "User was successfully created."
+      redirect_to users_path, notice: "Usuario creado correctamente."
     else
       render :new, status: :unprocessable_content
     end
@@ -31,14 +31,14 @@ class UsersController < ApplicationController
 
     # Guard: cannot demote the last active administrador
     if demoting_last_active_admin?
-      flash.now[:alert] = "Cannot demote the last active administrator."
+      flash.now[:alert] = "No se puede degradar al último administrador activo."
       render :edit, status: :unprocessable_content
       return
     end
 
     filtered = user_params_for_update
     if @user.update(filtered)
-      redirect_to users_path, notice: "User was successfully updated."
+      redirect_to users_path, notice: "Usuario actualizado correctamente."
     else
       render :edit, status: :unprocessable_content
     end
@@ -49,18 +49,18 @@ class UsersController < ApplicationController
 
     # Guard: cannot deactivate yourself
     if @user == current_user
-      redirect_to users_path, alert: "You cannot deactivate your own account."
+      redirect_to users_path, alert: "No puede desactivar su propia cuenta."
       return
     end
 
     # Guard: cannot deactivate the last active administrador
     if User.last_active_admin?(@user)
-      redirect_to users_path, alert: "Cannot deactivate the last active administrator."
+      redirect_to users_path, alert: "No se puede desactivar al último administrador activo."
       return
     end
 
     @user.update!(active: false)
-    redirect_to users_path, notice: "User was successfully deactivated."
+    redirect_to users_path, notice: "Usuario desactivado correctamente."
   end
 
   private
