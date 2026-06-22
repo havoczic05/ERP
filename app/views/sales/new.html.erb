@@ -21,16 +21,19 @@
 
     <%# Client picker — Turbo Frame renders /clients/search results inline.
         The hidden field carries the selected client_id on submit. %>
-    <div class="field">
+    <div class="field client-search" data-sale-form-target="clientPicker">
       <%= label_tag :q, 'Buscar cliente' %>
       <%= text_field_tag :q, '', placeholder: 'Nombre o número de documento',
-          data: { action: 'input->sale-form#searchClient' } %>
-      <%= hidden_field_tag 'sale[client_id]', @sale.client_id %>
+          autocomplete: 'off',
+          data: { 'sale-form-target': 'clientSearch',
+                  action: 'input->sale-form#searchClient' } %>
+      <%= hidden_field_tag 'sale[client_id]', @sale.client_id,
+          data: { 'sale-form-target': 'clientId' } %>
 
-      <%= turbo_frame_tag 'client-picker',
-          src: search_clients_path,
-          loading: 'lazy' do %>
-        <p class="page-sub">Escriba para buscar un cliente.</p>
+      <%# Eager frame (no src/lazy): hidden until the user types, then
+          searchClient sets frame.src and Turbo loads the results. %>
+      <%= turbo_frame_tag 'client-picker' do %>
+        <p class="picker-empty">Escriba para buscar un cliente.</p>
       <% end %>
     </div>
 

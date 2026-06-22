@@ -27,10 +27,30 @@ export default class extends Controller {
     "unitPrice",
     "numInstallments",
     "intervalDays",
+    "clientId",
+    "clientSearch",
+    "clientPicker",
   ]
 
   static values = {
     searchUrl: String,
+  }
+
+  // Close the client dropdown on outside click or Escape; clean up on teardown.
+  connect() {
+    this._onDocClick = (event) => {
+      if (!this.element.contains(event.target)) this.closePicker()
+    }
+    this._onKeydown = (event) => {
+      if (event.key === "Escape") this.closePicker()
+    }
+    document.addEventListener("click", this._onDocClick)
+    document.addEventListener("keydown", this._onKeydown)
+  }
+
+  disconnect() {
+    document.removeEventListener("click", this._onDocClick)
+    document.removeEventListener("keydown", this._onKeydown)
   }
 
   // -------------------------------------------------------------------------
@@ -106,8 +126,9 @@ export default class extends Controller {
   }
 
   // -------------------------------------------------------------------------
-  // Drive the Turbo Frame client picker by updating its src attribute.
-  // The Turbo Frame observes src changes and fetches /clients/search?q=...
+  // Drive the Turbo Frame client picker by updating its src attribute and
+  // open the dropdown. The Turbo Frame observes src changes and fetches
+  // /clients/search?q=... rendering selectable options.
   // -------------------------------------------------------------------------
   searchClient(event) {
     const q = event.currentTarget.value.trim()
@@ -117,5 +138,27 @@ export default class extends Controller {
     const url = new URL(this.searchUrlValue, window.location.origin)
     url.searchParams.set("q", q)
     frame.src = url.toString()
+
+    if (q.length > 0) this.openPicker()
+    else this.closePicker()
+  }
+
+  // -------------------------------------------------------------------------
+  // Select a client from the dropdown: carry its id on the hidden field,
+  // echo the name in the search input, and close the dropdown.
+  // -------------------------------------------------------------------------
+  selectClient(event) {
+    const option = event.currentTarget
+    if (this.hasClientIdTarget) this.clientIdTarget.value = option.dataset.clientId
+    if (this.hasClientSearchTarget) this.clientSearchTarget.value = option.dataset.clientName
+    this.closePicker()
+  }
+
+  openPicker() {
+    if (this.hasClientPickerTarget) this.clientPickerTarget.classList.add("is-open")
+  }
+
+  closePicker() {
+    if (this.hasClientPickerTarget) this.clientPickerTarget.classList.remove("is-open")
   }
 }
