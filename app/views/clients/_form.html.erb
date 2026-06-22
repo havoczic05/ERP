@@ -2,7 +2,7 @@
   <%= form_with model: client, local: false do |f| %>
     <% if client.errors.any? %>
       <div id="error_explanation">
-        <h2><%= pluralize(client.errors.count, 'error') %> prohibited this client from being saved:</h2>
+        <h2>No se pudo guardar el cliente. Corrija los siguientes errores:</h2>
         <ul>
           <% client.errors.each do |error| %>
             <li><%= error.full_message %></li>
@@ -11,7 +11,7 @@
       </div>
     <% end %>
 
-    <div>
+    <div class="field">
       <%= f.label :full_name, 'Nombre completo' %>
       <%= f.text_field :full_name %>
       <% if client.errors[:full_name].any? %>
@@ -19,24 +19,26 @@
       <% end %>
     </div>
 
-    <div>
-      <%= f.label :document_type, 'Tipo de documento' %>
-      <%= f.select :document_type, Client.document_types.keys.map { |k| [k.humanize, k] },
-                   { include_blank: 'Select type' } %>
-      <% if client.errors[:document_type].any? %>
-        <span class="error"><%= client.errors[:document_type].join(', ') %></span>
-      <% end %>
+    <div class="field-grid">
+      <div class="field">
+        <%= f.label :document_type, 'Tipo de documento' %>
+        <%= f.select :document_type, Client.document_types.keys.map { |k| [k.humanize, k] },
+                     { include_blank: 'Seleccionar tipo' } %>
+        <% if client.errors[:document_type].any? %>
+          <span class="error"><%= client.errors[:document_type].join(', ') %></span>
+        <% end %>
+      </div>
+
+      <div class="field">
+        <%= f.label :document_number, 'Número de documento' %>
+        <%= f.text_field :document_number %>
+        <% if client.errors[:document_number].any? %>
+          <span class="error"><%= client.errors[:document_number].join(', ') %></span>
+        <% end %>
+      </div>
     </div>
 
-    <div>
-      <%= f.label :document_number, 'Número de documento' %>
-      <%= f.text_field :document_number %>
-      <% if client.errors[:document_number].any? %>
-        <span class="error"><%= client.errors[:document_number].join(', ') %></span>
-      <% end %>
-    </div>
-
-    <div>
+    <div class="field">
       <%= f.label :phone, 'Teléfono' %>
       <%= f.text_field :phone %>
       <% if client.errors[:phone].any? %>
@@ -44,7 +46,7 @@
       <% end %>
     </div>
 
-    <div>
+    <div class="form-actions">
       <%= f.submit client.persisted? ? 'Actualizar cliente' : 'Crear cliente' %>
     </div>
   <% end %>

@@ -2,7 +2,7 @@
   <%= form_with model: product, local: false do |f| %>
     <% if product.errors.any? %>
       <div id="error_explanation">
-        <h2><%= pluralize(product.errors.count, 'error') %> prohibited this product from being saved:</h2>
+        <h2>No se pudo guardar el producto. Corrija los siguientes errores:</h2>
         <ul>
           <% product.errors.each do |error| %>
             <li><%= error.full_message %></li>
@@ -11,65 +11,71 @@
       </div>
     <% end %>
 
-    <div>
-      <%= f.label :sku, 'SKU' %>
-      <%= f.text_field :sku %>
-      <% if product.errors[:sku].any? %>
-        <span class="error"><%= product.errors[:sku].join(', ') %></span>
-      <% end %>
-    </div>
-
-    <div>
-      <%= f.label :name, 'Nombre' %>
-      <%= f.text_field :name %>
-      <% if product.errors[:name].any? %>
-        <span class="error"><%= product.errors[:name].join(', ') %></span>
-      <% end %>
-    </div>
-
-    <div>
-      <%= f.label :brand, 'Marca' %>
-      <%= f.text_field :brand %>
-      <% if product.errors[:brand].any? %>
-        <span class="error"><%= product.errors[:brand].join(', ') %></span>
-      <% end %>
-    </div>
-
-    <div>
-      <%= f.label :warehouse_id, 'Almacén' %>
-      <%= f.collection_select :warehouse_id, @warehouses, :id, :name,
-                              { include_blank: 'Seleccionar almacén' } %>
-      <% if product.errors[:warehouse_id].any? %>
-        <span class="error"><%= product.errors[:warehouse_id].join(', ') %></span>
-      <% end %>
-    </div>
-
-    <% if product.persisted? %>
-      <%# RF-PM-3: stock is read-only on edit — render as plain text, no input %>
-      <div>
-        <label>Stock</label>
-        <span><%= product.stock %></span>
-      </div>
-    <% else %>
-      <%# RF-PM-3: stock is writable only at creation %>
-      <div>
-        <%= f.label :stock, 'Stock' %>
-        <%= f.number_field :stock, min: 0 %>
-        <% if product.errors[:stock].any? %>
-          <span class="error"><%= product.errors[:stock].join(', ') %></span>
+    <div class="field-grid">
+      <div class="field">
+        <%= f.label :sku, 'SKU' %>
+        <%= f.text_field :sku %>
+        <% if product.errors[:sku].any? %>
+          <span class="error"><%= product.errors[:sku].join(', ') %></span>
         <% end %>
       </div>
-    <% end %>
 
-    <div>
-      <%= f.label :base_price_usd, 'Precio base USD' %>
-      <%= f.number_field :base_price_usd, step: 0.01, min: 0.01 %>
-      <% if product.errors[:base_price_usd].any? %>
-        <span class="error"><%= product.errors[:base_price_usd].join(', ') %></span>
-      <% end %>
+      <div class="field">
+        <%= f.label :name, 'Nombre' %>
+        <%= f.text_field :name %>
+        <% if product.errors[:name].any? %>
+          <span class="error"><%= product.errors[:name].join(', ') %></span>
+        <% end %>
+      </div>
     </div>
 
-    <div>
+    <div class="field-grid">
+      <div class="field">
+        <%= f.label :brand, 'Marca' %>
+        <%= f.text_field :brand %>
+        <% if product.errors[:brand].any? %>
+          <span class="error"><%= product.errors[:brand].join(', ') %></span>
+        <% end %>
+      </div>
+
+      <div class="field">
+        <%= f.label :warehouse_id, 'Almacén' %>
+        <%= f.collection_select :warehouse_id, @warehouses, :id, :name,
+                                { include_blank: 'Seleccionar almacén' } %>
+        <% if product.errors[:warehouse_id].any? %>
+          <span class="error"><%= product.errors[:warehouse_id].join(', ') %></span>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="field-grid">
+      <% if product.persisted? %>
+        <%# RF-PM-3: stock is read-only on edit — render as plain text, no input %>
+        <div class="field">
+          <label>Stock</label>
+          <span><%= product.stock %></span>
+        </div>
+      <% else %>
+        <%# RF-PM-3: stock is writable only at creation %>
+        <div class="field">
+          <%= f.label :stock, 'Stock' %>
+          <%= f.number_field :stock, min: 0 %>
+          <% if product.errors[:stock].any? %>
+            <span class="error"><%= product.errors[:stock].join(', ') %></span>
+          <% end %>
+        </div>
+      <% end %>
+
+      <div class="field">
+        <%= f.label :base_price_usd, 'Precio base USD' %>
+        <%= f.number_field :base_price_usd, step: 0.01, min: 0.01 %>
+        <% if product.errors[:base_price_usd].any? %>
+          <span class="error"><%= product.errors[:base_price_usd].join(', ') %></span>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="form-actions">
       <%= f.submit product.persisted? ? 'Actualizar producto' : 'Crear producto' %>
     </div>
   <% end %>

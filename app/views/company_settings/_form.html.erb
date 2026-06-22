@@ -1,7 +1,7 @@
 <%= form_with model: company_settings, url: company_settings_path, method: :patch, multipart: true do |f| %>
   <% if company_settings.errors.any? %>
     <div id="error_explanation">
-      <h2><%= pluralize(company_settings.errors.count, "error") %> prohibited these settings from being saved:</h2>
+      <h2>No se pudo guardar la configuración. Corrija los siguientes errores:</h2>
       <ul>
         <% company_settings.errors.each do |error| %>
           <li><%= error.full_message %></li>
@@ -10,7 +10,7 @@
     </div>
   <% end %>
 
-  <div>
+  <div class="field">
     <%= f.label :razon_social, "Razón social" %>
     <%= f.text_field :razon_social %>
     <% if company_settings.errors[:razon_social].any? %>
@@ -18,15 +18,25 @@
     <% end %>
   </div>
 
-  <div>
-    <%= f.label :ruc, "RUC" %>
-    <%= f.text_field :ruc %>
-    <% if company_settings.errors[:ruc].any? %>
-      <span class="error"><%= company_settings.errors[:ruc].join(", ") %></span>
-    <% end %>
+  <div class="field-grid">
+    <div class="field">
+      <%= f.label :ruc, "RUC" %>
+      <%= f.text_field :ruc %>
+      <% if company_settings.errors[:ruc].any? %>
+        <span class="error"><%= company_settings.errors[:ruc].join(", ") %></span>
+      <% end %>
+    </div>
+
+    <div class="field">
+      <%= f.label :telefono, "Teléfono" %>
+      <%= f.text_field :telefono %>
+      <% if company_settings.errors[:telefono].any? %>
+        <span class="error"><%= company_settings.errors[:telefono].join(", ") %></span>
+      <% end %>
+    </div>
   </div>
 
-  <div>
+  <div class="field">
     <%= f.label :direccion, "Dirección" %>
     <%= f.text_field :direccion %>
     <% if company_settings.errors[:direccion].any? %>
@@ -34,20 +44,12 @@
     <% end %>
   </div>
 
-  <div>
-    <%= f.label :telefono, "Teléfono" %>
-    <%= f.text_field :telefono %>
-    <% if company_settings.errors[:telefono].any? %>
-      <span class="error"><%= company_settings.errors[:telefono].join(", ") %></span>
-    <% end %>
-  </div>
-
-  <div>
+  <div class="field">
     <%= f.label :logo, "Logo" %>
     <%= f.file_field :logo %>
   </div>
 
-  <div>
+  <div class="form-actions">
     <%= f.submit "Guardar cambios" %>
   </div>
 <% end %>
