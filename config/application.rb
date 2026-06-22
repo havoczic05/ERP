@@ -21,7 +21,9 @@ module Erp
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
-    # config.time_zone = "Central Time (US & Canada)"
+    # Single-company Peruvian ERP: display timestamps in Lima local time.
+    # Storage stays UTC (default); this only affects how datetimes render.
+    config.time_zone = "America/Lima"
     # config.eager_load_paths << Rails.root.join("extras")
   end
 end

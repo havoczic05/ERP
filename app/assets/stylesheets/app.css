@@ -578,6 +578,9 @@ li { margin-bottom: var(--sp-1); }
 /* Actions column: shrink to its content so the data columns get the width */
 .col-actions { width: 1%; white-space: nowrap; }
 
+/* Date column: keep dd/mm/aaaa on one line with aligned digits */
+.col-date { white-space: nowrap; font-variant-numeric: tabular-nums; }
+
 /* Detail header: correlative + status badge on one baseline */
 .detail-head { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; margin-bottom: var(--sp-2); }
 .detail-head h1 { margin: 0; }

@@ -203,4 +203,21 @@ RSpec.describe ApplicationHelper, type: :helper do
       expect(html).to have_button('Eliminar')
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # format_date — dd/mm/aaaa in the app's local time zone (no i18n)
+  # ---------------------------------------------------------------------------
+  describe '#format_date' do
+    it 'formats a time as dd/mm/aaaa' do
+      expect(helper.format_date(Time.zone.local(2026, 6, 22, 20, 0))).to eq('22/06/2026')
+    end
+
+    it 'formats a date as dd/mm/aaaa' do
+      expect(helper.format_date(Date.new(2026, 1, 5))).to eq('05/01/2026')
+    end
+
+    it 'returns an empty string for nil' do
+      expect(helper.format_date(nil)).to eq('')
+    end
+  end
 end
