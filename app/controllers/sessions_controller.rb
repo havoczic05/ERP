@@ -11,15 +11,15 @@ class SessionsController < ApplicationController
     if user&.active? && user.authenticate(params[:password])
       reset_session # session-fixation protection
       session[:user_id] = user.id
-      redirect_to root_path, notice: "Welcome back!"
+      redirect_to root_path, notice: "Bienvenido de nuevo."
     else
-      flash.now[:alert] = "Invalid email or password"
+      flash.now[:alert] = "Correo o contraseña inválidos"
       render :new, status: :unprocessable_content
     end
   end
 
   def destroy
     reset_session
-    redirect_to login_path, notice: "You have been signed out."
+    redirect_to login_path, notice: "Sesión cerrada."
   end
 end

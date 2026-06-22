@@ -20,9 +20,9 @@ RSpec.describe 'Sessions', type: :system do
 
       visit login_path
 
-      fill_in 'Email', with: 'admin@example.com'
-      fill_in 'Password', with: 'password123'
-      click_button 'Log in'
+      fill_in 'Correo electrónico', with: 'admin@example.com'
+      fill_in 'Contraseña',         with: 'password123'
+      click_button 'Iniciar sesión'
 
       expect(page).to have_current_path(root_path)
     end
@@ -32,11 +32,11 @@ RSpec.describe 'Sessions', type: :system do
 
       visit login_path
 
-      fill_in 'Email', with: 'admin@example.com'
-      fill_in 'Password', with: 'wrongpassword'
-      click_button 'Log in'
+      fill_in 'Correo electrónico', with: 'admin@example.com'
+      fill_in 'Contraseña',         with: 'wrongpassword'
+      click_button 'Iniciar sesión'
 
-      expect(page).to have_content('Invalid email or password')
+      expect(page).to have_content('Correo o contraseña inválidos')
       expect(page).to have_current_path(session_path)
     end
   end
@@ -50,9 +50,9 @@ RSpec.describe 'Sessions', type: :system do
 
       # Log in via form
       visit login_path
-      fill_in 'Email', with: 'admin@example.com'
-      fill_in 'Password', with: 'password123'
-      click_button 'Log in'
+      fill_in 'Correo electrónico', with: 'admin@example.com'
+      fill_in 'Contraseña',         with: 'password123'
+      click_button 'Iniciar sesión'
 
       expect(page).to have_current_path(root_path)
 

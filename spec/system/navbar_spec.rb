@@ -14,18 +14,18 @@ RSpec.describe "Sidebar navigation", type: :system do
 
   # Sections every authenticated role can reach (authorization already allows them).
   OPERATIONS = {
-    "Sales"               => "/sales",
-    "Clients"             => "/clients",
-    "Products"            => "/products",
-    "Accounts Receivable" => "/accounts_receivable",
-    "Warehouses"          => "/warehouses"
+    "Ventas"            => "/sales",
+    "Clientes"          => "/clients",
+    "Productos"         => "/products",
+    "Cuentas por Cobrar" => "/accounts_receivable",
+    "Almacenes"         => "/warehouses"
   }.freeze
 
   # Admin-only sections.
   ADMINISTRATION = {
-    "Dashboard"        => "/dashboard",
-    "Users"            => "/users",
-    "Company Settings" => "/company_settings"
+    "Dashboard"      => "/dashboard",
+    "Usuarios"       => "/users",
+    "Configuración"  => "/company_settings"
   }.freeze
 
   describe "vendedor" do
@@ -48,7 +48,7 @@ RSpec.describe "Sidebar navigation", type: :system do
     it "shows the role and a log out control" do
       visit root_path
       expect(page).to have_content("Vendedor")
-      expect(page).to have_button("Log out")
+      expect(page).to have_button("Cerrar sesión")
     end
   end
 
@@ -75,9 +75,9 @@ RSpec.describe "Sidebar navigation", type: :system do
 
     it "marks the current section with aria-current across its nested pages" do
       visit products_path
-      expect(page).to have_css('a.nav-item.is-active[aria-current="page"]', text: "Products")
+      expect(page).to have_css('a.nav-item.is-active[aria-current="page"]', text: "Productos")
       # Other sections are not marked active.
-      expect(page).to have_no_css('a.nav-item.is-active', text: "Sales")
+      expect(page).to have_no_css('a.nav-item.is-active', text: "Ventas")
     end
   end
 end

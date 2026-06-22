@@ -45,7 +45,7 @@ module SystemAuthenticationHelper
       document.querySelector('input[type="password"]').value = arguments[1];
       document.querySelector('form').requestSubmit();
     JS
-    expect(page).to have_button("Log out")
+    expect(page).to have_button("Cerrar sesión")
   end
 end
 
