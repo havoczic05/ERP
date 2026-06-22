@@ -1,5 +1,17 @@
 module ApplicationHelper
   # ---------------------------------------------------------------------------
+  # Document type display labels (enum values stay English/lowercase)
+  # ---------------------------------------------------------------------------
+  DOCUMENT_TYPE_LABELS = {
+    "cotizacion" => "Cotización",
+    "venta"      => "Venta"
+  }.freeze
+
+  def document_type_label(type)
+    DOCUMENT_TYPE_LABELS.fetch(type.to_s, type.to_s.humanize)
+  end
+
+  # ---------------------------------------------------------------------------
   # Status badge variant maps
   # ---------------------------------------------------------------------------
   SALE_BADGE_VARIANT = {

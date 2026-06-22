@@ -28,10 +28,10 @@ RSpec.describe 'Sales', type: :system do
   # Index — list of kept sales
   # ---------------------------------------------------------------------------
   describe 'index page' do
-    it 'renders the page heading and "New Document" link' do
+    it 'renders the page heading and "Nuevo documento" link' do
       visit sales_path
-      expect(page).to have_content('Sales')
-      expect(page).to have_link('New Document', href: new_sale_path)
+      expect(page).to have_content('Ventas')
+      expect(page).to have_link('Nuevo documento', href: new_sale_path)
     end
 
     it 'lists existing sales with correlative, type, client, total, status' do
@@ -47,10 +47,10 @@ RSpec.describe 'Sales', type: :system do
       expect(page).to have_content('Confirmada')
     end
 
-    it 'shows a "View" link for each sale' do
+    it 'shows a "Ver" link for each sale' do
       sale = create(:sale, client: client, warehouse: warehouse)
       visit sales_path
-      expect(page).to have_link('View', href: sale_path(sale))
+      expect(page).to have_link('Ver', href: sale_path(sale))
     end
 
     it 'shows annulled sales in the index for audit purposes' do
@@ -69,14 +69,14 @@ RSpec.describe 'Sales', type: :system do
       expect(page).to have_content('COT-00011')
     end
 
-    it 'shows "Annul" button for admin on confirmed ventas' do
+    it 'shows "Anular" button for admin on confirmed ventas' do
       venta = create(:sale, :venta, client: client, warehouse: warehouse,
                                     correlative: 'VTA-00001', status: 'confirmada')
       visit sales_path
-      expect(page).to have_button('Annul')
+      expect(page).to have_button('Anular')
     end
 
-    it 'does not show "Annul" button for vendedor' do
+    it 'does not show "Anular" button for vendedor' do
       let_user = vendedor
       allow_any_instance_of(ApplicationController)
         .to receive(:current_user).and_return(let_user)
@@ -84,7 +84,7 @@ RSpec.describe 'Sales', type: :system do
       venta = create(:sale, :venta, client: client, warehouse: warehouse,
                                     correlative: 'VTA-00001', status: 'confirmada')
       visit sales_path
-      expect(page).not_to have_button('Annul')
+      expect(page).not_to have_button('Anular')
     end
 
     context 'pagination' do
@@ -108,14 +108,14 @@ RSpec.describe 'Sales', type: :system do
   describe 'new sale form' do
     it 'renders the form heading and submit button' do
       visit new_sale_path
-      expect(page).to have_content('New Sales Document')
-      expect(page).to have_button('Create Document')
+      expect(page).to have_content('Nuevo documento de venta')
+      expect(page).to have_button('Crear documento')
     end
 
     it 'renders document type selector with cotizacion and venta options' do
       visit new_sale_path
       expect(page).to have_select('sale[document_type]',
-                                  with_options: %w[Cotizacion Venta])
+                                  with_options: [ 'Cotización', 'Venta' ])
     end
 
     it 'renders installment fields (num_installments and interval_days)' do
@@ -165,7 +165,7 @@ RSpec.describe 'Sales', type: :system do
       # doesn't locate hidden inputs by name.
       find('input[name="sale[client_id]"]', visible: false).set(client.id)
       find('input[name="sale[warehouse_id]"]', visible: false).set(warehouse.id)
-      select 'Cotizacion', from: 'sale[document_type]'
+      select 'Cotización', from: 'sale[document_type]'
       fill_in 'sale[num_installments]', with: '1'
       # The user searches the product by name; the submitted value is the
       # "Name (SKU)" datalist label, which the controller resolves to product_id.
@@ -173,10 +173,10 @@ RSpec.describe 'Sales', type: :system do
       find('input[name="sale[items][][quantity]"]').set('5')
       find('input[name="sale[items][][unit_price_usd]"]').set('10.00')
 
-      click_button 'Create Document'
+      click_button 'Crear documento'
 
       expect(page).to have_content('COT-')
-      expect(page).to have_content('Document was successfully created.')
+      expect(page).to have_content('Documento creado correctamente.')
       expect(Sale.kept.last.document_type).to eq('cotizacion')
       expect(Sale.kept.last.total_usd).to eq(50.00)
     end
@@ -184,16 +184,16 @@ RSpec.describe 'Sales', type: :system do
     it 'shows validation errors when submitted with missing client_id' do
       visit new_sale_path
 
-      select 'Cotizacion', from: 'sale[document_type]'
+      select 'Cotización', from: 'sale[document_type]'
       fill_in 'sale[items][][product_query]', with: "#{product.name} (#{product.sku})"
       fill_in 'sale[items][][quantity]', with: '1'
       fill_in 'sale[items][][unit_price_usd]', with: '10.00'
       # Intentionally omit client_id and warehouse_id
 
-      click_button 'Create Document'
+      click_button 'Crear documento'
 
       # Form re-rendered with error
-      expect(page).to have_button('Create Document')
+      expect(page).to have_button('Crear documento')
     end
 
     # JS behaviors (add row, live totals, Turbo Frame client search) are covered
@@ -213,7 +213,7 @@ RSpec.describe 'Sales', type: :system do
       visit sale_path(sale)
 
       expect(page).to have_content('COT-00042')
-      expect(page).to have_content('Cotizacion')
+      expect(page).to have_content('Cotización')
       expect(page).to have_content('Confirmada')
       expect(page).to have_content('ACME Corp')
       expect(page).to have_content('75')
@@ -243,7 +243,7 @@ RSpec.describe 'Sales', type: :system do
 
       visit sale_path(venta)
 
-      expect(page).to have_content('Installments')
+      expect(page).to have_content('Cuotas')
       expect(page).to have_content('Pendiente')
     end
 
@@ -254,7 +254,7 @@ RSpec.describe 'Sales', type: :system do
 
       visit sale_path(cotizacion)
 
-      expect(page).to have_button('Convert to Venta')
+      expect(page).to have_button('Convertir a venta')
     end
 
     it 'shows "Annul Sale" button for confirmed venta (admin)' do
@@ -263,13 +263,13 @@ RSpec.describe 'Sales', type: :system do
 
       visit sale_path(venta)
 
-      expect(page).to have_button('Annul Sale')
+      expect(page).to have_button('Anular venta')
     end
 
     it 'shows "Back to Sales" link' do
       sale = create(:sale, client: client, warehouse: warehouse)
       visit sale_path(sale)
-      expect(page).to have_link('Back to Sales', href: sales_path)
+      expect(page).to have_link('Volver a ventas', href: sales_path)
     end
 
     it 'displays flash notice after create' do
