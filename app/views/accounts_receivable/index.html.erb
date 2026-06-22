@@ -1,16 +1,16 @@
-<h1>Accounts Receivable</h1>
+<h1>Cuentas por Cobrar</h1>
 
 <table>
   <thead>
     <tr>
-      <th>Client</th>
-      <th>Sale</th>
-      <th>Installment #</th>
-      <th>Amount (USD)</th>
-      <th>Balance (USD)</th>
-      <th>Due Date</th>
-      <th>Status</th>
-      <th>Payment</th>
+      <th>Cliente</th>
+      <th>Venta</th>
+      <th>N° de cuota</th>
+      <th>Monto (USD)</th>
+      <th>Saldo (USD)</th>
+      <th>Vencimiento</th>
+      <th>Estado</th>
+      <th>Pago</th>
     </tr>
   </thead>
   <tbody>
@@ -22,20 +22,14 @@
         <td class="num"><%= number_to_currency(installment.amount_usd, unit: 'USD ') %></td>
         <td class="num"><%= number_to_currency(installment.balance_usd, unit: 'USD ') %></td>
         <td><%= installment.due_date %></td>
-        <td>
-          <% if installment.overdue? %>
-            <span class="badge badge--danger">Overdue</span>
-          <% else %>
-            <span class="badge badge--warning">Pendiente</span>
-          <% end %>
-        </td>
+        <td><%= installment_status_badge(installment) %></td>
         <td>
           <%= form_with url: installment_amortizations_path(installment), method: :post do |f| %>
             <%= f.number_field :amount_usd, step: '0.01', min: '0.01',
-                                placeholder: 'Amount', name: 'amortization[amount_usd]' %>
-            <%= f.text_field :notes, placeholder: 'Notes (optional)',
+                                placeholder: 'Monto', name: 'amortization[amount_usd]' %>
+            <%= f.text_field :notes, placeholder: 'Notas (opcional)',
                               name: 'amortization[notes]' %>
-            <%= f.submit 'Record Payment' %>
+            <%= f.submit 'Registrar pago' %>
           <% end %>
         </td>
       </tr>
@@ -44,7 +38,7 @@
 </table>
 
 <% if @installments.empty? %>
-  <p id="no-installments-message">No pending installments.</p>
+  <p id="no-installments-message">No hay cuotas pendientes.</p>
 <% end %>
 
 <%== @pagy.series_nav if @pagy.pages > 1 %>

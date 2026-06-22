@@ -43,15 +43,15 @@ RSpec.describe ApplicationHelper, type: :helper do
   # installment_status_badge
   # ---------------------------------------------------------------------------
   describe '#installment_status_badge' do
-    context 'when installment status is pendiente' do
-      let(:installment) { instance_double('Installment', status: 'pendiente') }
+    context 'when installment status is pendiente (not overdue)' do
+      let(:installment) { instance_double('Installment', status: 'pendiente', overdue?: false) }
 
       it 'returns a span with badge--warning class' do
         result = helper.installment_status_badge(installment)
         expect(result).to include('badge--warning')
       end
 
-      it 'returns a span with humanized status text' do
+      it 'returns a span with the Spanish status text' do
         result = helper.installment_status_badge(installment)
         expect(result).to include('Pendiente')
       end
@@ -62,8 +62,18 @@ RSpec.describe ApplicationHelper, type: :helper do
       end
     end
 
+    context 'when installment is pendiente but overdue' do
+      let(:installment) { instance_double('Installment', status: 'pendiente', overdue?: true) }
+
+      it 'renders the Vencida label with the danger variant' do
+        result = helper.installment_status_badge(installment)
+        expect(result).to include('badge--danger')
+        expect(result).to include('Vencida')
+      end
+    end
+
     context 'when installment status is pagada' do
-      let(:installment) { instance_double('Installment', status: 'pagada') }
+      let(:installment) { instance_double('Installment', status: 'pagada', overdue?: false) }
 
       it 'returns a span with badge--success class' do
         result = helper.installment_status_badge(installment)
@@ -77,7 +87,7 @@ RSpec.describe ApplicationHelper, type: :helper do
     end
 
     context 'when installment status is vencida' do
-      let(:installment) { instance_double('Installment', status: 'vencida') }
+      let(:installment) { instance_double('Installment', status: 'vencida', overdue?: false) }
 
       it 'returns a span with badge--danger class' do
         result = helper.installment_status_badge(installment)
@@ -91,7 +101,7 @@ RSpec.describe ApplicationHelper, type: :helper do
     end
 
     context 'when installment status is anulada' do
-      let(:installment) { instance_double('Installment', status: 'anulada') }
+      let(:installment) { instance_double('Installment', status: 'anulada', overdue?: false) }
 
       it 'returns a span with badge--danger class' do
         result = helper.installment_status_badge(installment)

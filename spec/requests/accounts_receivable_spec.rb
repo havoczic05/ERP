@@ -53,7 +53,7 @@ RSpec.describe 'AccountsReceivable', type: :request do
 
         # The pagada installment should not appear; we check its specific balance
         # that distinguishes it from the pendiente row.
-        expect(response.body).not_to include('pagada')
+        expect(response.body).not_to include('Pagada')
       end
 
       it 'shows an overdue indicator for a past-due installment' do
@@ -65,7 +65,7 @@ RSpec.describe 'AccountsReceivable', type: :request do
 
         get accounts_receivable_path
 
-        expect(response.body).to include('Overdue')
+        expect(response.body).to include('Vencida')
       end
 
       it 'does not show overdue indicator for an installment due today' do
@@ -77,7 +77,7 @@ RSpec.describe 'AccountsReceivable', type: :request do
 
         get accounts_receivable_path
 
-        expect(response.body).not_to include('Overdue')
+        expect(response.body).not_to include('Vencida')
       end
     end
 
