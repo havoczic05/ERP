@@ -1,4 +1,4 @@
-<h1>Cuentas por Cobrar</h1>
+<div class="page-head"><h1>Cuentas por Cobrar</h1></div>
 
 <table>
   <thead>
@@ -41,4 +41,4 @@
   <p id="no-installments-message">No hay cuotas pendientes.</p>
 <% end %>
 
-<%== @pagy.series_nav if @pagy.pages > 1 %>
+<%= pagination_nav(@pagy) %>

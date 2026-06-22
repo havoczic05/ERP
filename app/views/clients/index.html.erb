@@ -1,10 +1,16 @@
-<h1>Clientes</h1>
+<div class="page-head"><h1>Clientes</h1></div>
 
-<%= form_with url: clients_path, method: :get, local: true do |f| %>
-  <%= f.label :q, 'Buscar' %>
-  <%= f.text_field :q, value: params[:q], placeholder: 'Nombre o número de documento' %>
-  <%= f.submit 'Buscar' %>
-<% end %>
+<div class="toolbar">
+  <%= form_with url: clients_path, method: :get, local: true, class: "filters" do |f| %>
+    <div class="field">
+      <%= f.label :q, 'Buscar' %>
+      <%= f.text_field :q, value: params[:q], placeholder: 'Nombre o número de documento' %>
+    </div>
+    <%= f.submit 'Buscar' %>
+  <% end %>
+
+  <%= action_link 'Nuevo cliente', new_client_path, variant: :primary, size: :md, icon: :plus %>
+</div>
 
 <table>
   <thead>
@@ -25,6 +31,4 @@
   <p id="no-clients-message">No se encontraron clientes.</p>
 <% end %>
 
-<%= action_link 'Nuevo cliente', new_client_path, variant: :primary, size: :md, icon: :plus %>
-
-<%== @pagy.series_nav if @pagy.pages > 1 %>
+<%= pagination_nav(@pagy) %>

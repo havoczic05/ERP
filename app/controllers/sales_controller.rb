@@ -8,7 +8,8 @@ class SalesController < ApplicationController
     # Annulled sales soft-delete (discarded_at), but per spec RF3.1 they MUST remain
     # visible in the index for audit purposes — hence kept OR anulada.
     scope = Sale.kept.or(Sale.anulada).order(created_at: :desc)
-    @pagy, @sales = pagy(:offset, scope)
+    # ~15 rows so the pagination/footer fits on screen without much scrolling.
+    @pagy, @sales = pagy(:offset, scope, limit: 15)
   end
 
   # GET /sales/new

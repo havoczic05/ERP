@@ -1,8 +1,9 @@
+<div class="page-head">
+  <h1>Ventas</h1>
+  <p class="page-sub"><%= pluralize(@pagy.count, 'documento') %></p>
+</div>
+
 <div class="toolbar">
-  <div class="page-head">
-    <h1>Ventas</h1>
-    <p class="page-sub"><%= pluralize(@pagy.count, 'documento') %></p>
-  </div>
   <%= action_link 'Nuevo documento', new_sale_path, variant: :primary, size: :md, icon: :plus %>
 </div>
 
@@ -42,7 +43,7 @@
     </tbody>
   </table>
 
-  <%== @pagy.series_nav if @pagy.pages > 1 %>
+  <%= pagination_nav(@pagy) %>
 <% else %>
   <div class="empty-state">
     <p id="no-sales-message">No se encontraron ventas.</p>

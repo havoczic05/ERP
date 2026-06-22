@@ -1,21 +1,29 @@
-<h1>Productos</h1>
+<div class="page-head"><h1>Productos</h1></div>
 
-<form action="<%= products_path %>" method="get">
-  <label for="q">Buscar (nombre o SKU)</label>
-  <input type="text" id="q" name="q" value="<%= params[:q] %>">
+<div class="toolbar">
+  <form action="<%= products_path %>" method="get" class="filters">
+    <div class="field">
+      <label for="q">Buscar (nombre o SKU)</label>
+      <input type="text" id="q" name="q" value="<%= params[:q] %>">
+    </div>
 
-  <label for="warehouse_id">Almacén</label>
-  <select id="warehouse_id" name="warehouse_id">
-    <option value="">Todos los almacenes</option>
-    <% @warehouses.each do |wh| %>
-      <option value="<%= wh.id %>" <%= 'selected' if params[:warehouse_id].to_s == wh.id.to_s %>>
-        <%= wh.name %>
-      </option>
-    <% end %>
-  </select>
+    <div class="field">
+      <label for="warehouse_id">Almacén</label>
+      <select id="warehouse_id" name="warehouse_id">
+        <option value="">Todos los almacenes</option>
+        <% @warehouses.each do |wh| %>
+          <option value="<%= wh.id %>" <%= 'selected' if params[:warehouse_id].to_s == wh.id.to_s %>>
+            <%= wh.name %>
+          </option>
+        <% end %>
+      </select>
+    </div>
 
-  <button type="submit">Buscar</button>
-</form>
+    <button type="submit">Buscar</button>
+  </form>
+
+  <%= action_link 'Nuevo producto', new_product_path, variant: :primary, size: :md, icon: :plus %>
+</div>
 
 <table>
   <thead>
@@ -38,6 +46,4 @@
   <p id="no-products-message">No se encontraron productos</p>
 <% end %>
 
-<%= action_link 'Nuevo producto', new_product_path, variant: :primary, size: :md, icon: :plus %>
-
-<%== @pagy.series_nav if @pagy.pages > 1 %>
+<%= pagination_nav(@pagy) %>

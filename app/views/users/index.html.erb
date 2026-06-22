@@ -1,4 +1,8 @@
-<h1>Usuarios</h1>
+<div class="page-head"><h1>Usuarios</h1></div>
+
+<div class="toolbar">
+  <%= action_link 'Nuevo usuario', new_user_path, variant: :primary, size: :md, icon: :plus %>
+</div>
 
 <table>
   <thead>
@@ -33,6 +37,4 @@
   <p id="no-users-message">No se encontraron usuarios.</p>
 <% end %>
 
-<%= action_link 'Nuevo usuario', new_user_path, variant: :primary, size: :md, icon: :plus %>
-
-<%== @pagy.series_nav if @pagy.pages > 1 %>
+<%= pagination_nav(@pagy) %>
