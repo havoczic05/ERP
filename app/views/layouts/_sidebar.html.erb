@@ -3,20 +3,20 @@
 
   <nav class="sidebar-nav" aria-label="Primary">
     <div class="nav-group">
-      <p class="nav-group-label">Operations</p>
-      <%= nav_link_to "Sales", sales_path, controllers: "sales" if policy(Sale).index? %>
-      <%= nav_link_to "Clients", clients_path, controllers: "clients" if policy(Client).index? %>
-      <%= nav_link_to "Products", products_path, controllers: "products" if policy(Product).index? %>
-      <%= nav_link_to "Accounts Receivable", accounts_receivable_path, controllers: "accounts_receivable" if policy(Amortization).index? %>
-      <%= nav_link_to "Warehouses", warehouses_path, controllers: "warehouses" if policy(Warehouse).index? %>
+      <p class="nav-group-label">Operaciones</p>
+      <%= nav_link_to "Ventas", sales_path, controllers: "sales" if policy(Sale).index? %>
+      <%= nav_link_to "Clientes", clients_path, controllers: "clients" if policy(Client).index? %>
+      <%= nav_link_to "Productos", products_path, controllers: "products" if policy(Product).index? %>
+      <%= nav_link_to "Cuentas por Cobrar", accounts_receivable_path, controllers: "accounts_receivable" if policy(Amortization).index? %>
+      <%= nav_link_to "Almacenes", warehouses_path, controllers: "warehouses" if policy(Warehouse).index? %>
     </div>
 
     <% if current_user.admin? %>
       <div class="nav-group">
-        <p class="nav-group-label">Administration</p>
+        <p class="nav-group-label">Administración</p>
         <%= nav_link_to "Dashboard", dashboard_path, controllers: "dashboards" if policy(:dashboard).show? %>
-        <%= nav_link_to "Users", users_path, controllers: "users" if policy(User).index? %>
-        <%= nav_link_to "Company Settings", company_settings_path, controllers: "company_settings" %>
+        <%= nav_link_to "Usuarios", users_path, controllers: "users" if policy(User).index? %>
+        <%= nav_link_to "Configuración", company_settings_path, controllers: "company_settings" %>
       </div>
     <% end %>
   </nav>
@@ -26,6 +26,6 @@
       <span class="sidebar-user-email"><%= current_user.email %></span>
       <span class="badge"><%= current_user.role.humanize %></span>
     </div>
-    <%= button_to "Log out", logout_path, method: :delete, class: "btn--ghost btn--block" %>
+    <%= button_to "Cerrar sesión", logout_path, method: :delete, class: "btn--ghost btn--block" %>
   </div>
 </aside>

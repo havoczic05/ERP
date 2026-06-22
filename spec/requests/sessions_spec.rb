@@ -51,7 +51,7 @@ RSpec.describe 'Sessions', type: :request do
 
     it 'shows a generic error message (no user enumeration)' do
       post session_path, params: { email: user.email, password: 'wrongpassword' }
-      expect(response.body).to include('Invalid email or password')
+      expect(response.body).to include('Correo o contraseña inválidos')
     end
 
     it 'does not set session[:user_id]' do
@@ -73,7 +73,7 @@ RSpec.describe 'Sessions', type: :request do
 
     it 'shows the generic error message (no user enumeration)' do
       post session_path, params: { email: 'nobody@example.com', password: 'whatever' }
-      expect(response.body).to include('Invalid email or password')
+      expect(response.body).to include('Correo o contraseña inválidos')
     end
 
     it 'does not set session[:user_id]' do
@@ -98,7 +98,7 @@ RSpec.describe 'Sessions', type: :request do
 
     it 'shows the generic error message' do
       post session_path, params: { email: inactive_user.email, password: 'password123' }
-      expect(response.body).to include('Invalid email or password')
+      expect(response.body).to include('Correo o contraseña inválidos')
     end
   end
 

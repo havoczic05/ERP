@@ -22,7 +22,7 @@ class ApplicationController < ActionController::Base
   # Authentication gate: nil current_user -> redirect to login.
   # Distinct from authz (Pundit NotAuthorizedError -> head :forbidden).
   def authenticate_user!
-    redirect_to login_path, alert: "Please sign in to continue." unless current_user
+    redirect_to login_path, alert: "Inicie sesión para continuar." unless current_user
   end
 
   def user_not_authorized

@@ -1,4 +1,4 @@
-<h1>Log in</h1>
+<h1>Iniciar sesión</h1>
 
 <% if flash[:alert] %>
   <div id="flash_alert"><%= flash[:alert] %></div>
@@ -6,16 +6,16 @@
 
 <%= form_with url: session_path, method: :post do |f| %>
   <div>
-    <%= f.label :email, "Email" %>
+    <%= f.label :email, "Correo electrónico" %>
     <%= f.email_field :email, autocomplete: "email", required: true %>
   </div>
 
   <div>
-    <%= f.label :password, "Password" %>
+    <%= f.label :password, "Contraseña" %>
     <%= f.password_field :password, autocomplete: "current-password", required: true %>
   </div>
 
   <div>
-    <%= f.submit "Log in" %>
+    <%= f.submit "Iniciar sesión" %>
   </div>
 <% end %>
