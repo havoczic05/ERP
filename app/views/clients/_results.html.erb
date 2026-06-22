@@ -1,18 +1,19 @@
-<%= turbo_frame_tag "client-picker" do %>
-  <% if @clients.empty? %>
-    <p class="picker-empty">No se encontraron clientes.</p>
-  <% else %>
-    <ul role="listbox">
-      <% @clients.each do |client| %>
-        <li id="<%= dom_id(client) %>" role="option">
-          <%= button_tag type: "button", class: "picker-option",
-                data: { action: "click->sale-form#selectClient",
-                        client_id: client.id, client_name: client.full_name } do %>
-            <span class="picker-name"><%= client.full_name %></span>
-            <span class="picker-meta"><%= client.document_type.upcase %> <%= client.document_number %></span>
-          <% end %>
-        </li>
-      <% end %>
-    </ul>
-  <% end %>
+<%# Combobox options for the client search (combobox_controller fetches this). %>
+<% if @clients.empty? %>
+  <p class="picker-empty">No se encontraron clientes.</p>
+<% else %>
+  <ul role="listbox">
+    <% @clients.each do |client| %>
+      <% document = "#{client.document_type.upcase} #{client.document_number}" %>
+      <li role="option">
+        <%= button_tag type: "button", class: "picker-option",
+              data: { action: "click->combobox#select",
+                      id: client.id, label: client.full_name,
+                      document: document, edit_path: edit_client_path(client) } do %>
+          <span class="picker-name"><%= client.full_name %></span>
+          <span class="picker-meta"><%= document %></span>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
 <% end %>

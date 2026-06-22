@@ -19,23 +19,22 @@
   <section class="form-section">
     <h2>Documento</h2>
 
-    <%# Client picker — Turbo Frame renders /clients/search results inline.
-        The hidden field carries the selected client_id on submit. %>
-    <div class="field client-search" data-sale-form-target="clientPicker">
-      <%= label_tag :q, 'Buscar cliente' %>
-      <%= text_field_tag :q, '', placeholder: 'Nombre o número de documento',
-          autocomplete: 'off',
-          data: { 'sale-form-target': 'clientSearch',
-                  action: 'input->sale-form#searchClient' } %>
-      <%= hidden_field_tag 'sale[client_id]', @sale.client_id,
-          data: { 'sale-form-target': 'clientId' } %>
-
-      <%# Eager frame (no src/lazy): hidden until the user types, then
-          searchClient sets frame.src and Turbo loads the results. %>
-      <%= turbo_frame_tag 'client-picker' do %>
-        <p class="picker-empty">Escriba para buscar un cliente.</p>
-      <% end %>
-    </div>
+    <%# Client picker — reusable combobox. On select, sale-form#clientSelected
+        reveals the selected client's document + an edit link (new tab). %>
+    <%= combobox label: 'Buscar cliente', query_name: :q,
+          hidden_name: 'sale[client_id]', hidden_value: @sale.client_id,
+          search_path: search_clients_path,
+          placeholder: 'Nombre o número de documento', wrapper_class: 'client-search',
+          select_action: 'combobox:select->sale-form#clientSelected' do %>
+      <div class="client-meta" data-sale-form-target="clientMeta" hidden>
+        <span class="client-doc" data-sale-form-target="clientDoc"></span>
+        <%= link_to "#", target: "_blank", rel: "noopener",
+              class: "btn btn--ghost btn--sm", title: "Editar cliente",
+              data: { "sale-form-target": "clientEdit" } do %>
+          <%= icon(:pencil) %>
+        <% end %>
+      </div>
+    <% end %>
 
     <%# Warehouse is preset (single default almacén); carried as a hidden field. %>
     <%= hidden_field_tag 'sale[warehouse_id]', @sale.warehouse_id %>
@@ -73,15 +72,6 @@
   <section class="form-section" id="line-items">
     <h3>Líneas de producto</h3>
 
-    <%# Product is chosen by NAME via a native datalist (shared by every row).
-        The submitted value is the "Name (SKU)" label; SalesController resolves it
-        to a product_id by the unique SKU. No JS required — works under rack_test. %>
-    <datalist id="products-datalist">
-      <% @products.each do |product| %>
-        <option value="<%= "#{product.name} (#{product.sku})" %>"></option>
-      <% end %>
-    </datalist>
-
     <table id="line-items-table" class="line-items-table">
       <thead>
         <tr>
@@ -94,9 +84,12 @@
       </thead>
       <tbody data-sale-form-target="lineItemsBody">
         <tr class="line-item">
-          <td><%= text_field_tag 'sale[items][][product_query]', nil,
-                  list: 'products-datalist', placeholder: 'Escriba el nombre del producto',
-                  autocomplete: 'off' %></td>
+          <td><%= combobox query_name: 'sale[items][][product_query]',
+                    hidden_name: 'sale[items][][product_id]',
+                    search_path: search_products_path,
+                    placeholder: 'Escriba el nombre del producto',
+                    wrapper_class: 'product-search',
+                    select_action: 'combobox:select->sale-form#productSelected' %></td>
           <td><%= number_field_tag 'sale[items][][quantity]', 1, min: 1,
                   data: { 'sale-form-target': 'quantity',
                           action: 'input->sale-form#recompute' } %></td>
