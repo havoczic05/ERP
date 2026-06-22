@@ -44,7 +44,7 @@ RSpec.describe 'Clients', type: :system do
 
     it 'shows a link to create a new client' do
       visit clients_path
-      expect(page).to have_link('New Client', href: new_client_path)
+      expect(page).to have_link('Nuevo cliente', href: new_client_path)
     end
   end
 
@@ -75,7 +75,7 @@ RSpec.describe 'Clients', type: :system do
       # Table is present but has no client rows
       expect(page).not_to have_css('table tbody tr[id^="client_"]')
       # Spec requires a visible "no records found" message
-      expect(page).to have_content('No clients found.')
+      expect(page).to have_content('No se encontraron clientes.')
     end
   end
 
@@ -87,11 +87,11 @@ RSpec.describe 'Clients', type: :system do
       it 'creates the client and redirects to show' do
         visit new_client_path
 
-        fill_in 'Full name', with: 'Test Client SA'
-        select 'Ruc', from: 'Document type'
-        fill_in 'Document number', with: '20123456789'
-        fill_in 'Phone', with: '987654321'
-        click_button 'Create Client'
+        fill_in 'Nombre completo', with: 'Test Client SA'
+        select 'Ruc', from: 'Tipo de documento'
+        fill_in 'Número de documento', with: '20123456789'
+        fill_in 'Teléfono', with: '987654321'
+        click_button 'Crear cliente'
 
         expect(page).to have_content('Test Client SA')
         expect(Client.kept.find_by(document_number: '20123456789')).not_to be_nil
@@ -105,15 +105,15 @@ RSpec.describe 'Clients', type: :system do
       it 'shows validation errors without leaving the form' do
         visit new_client_path
 
-        fill_in 'Full name', with: ''
-        select 'Ruc', from: 'Document type'
-        fill_in 'Document number', with: ''
-        fill_in 'Phone', with: ''
-        click_button 'Create Client'
+        fill_in 'Nombre completo', with: ''
+        select 'Ruc', from: 'Tipo de documento'
+        fill_in 'Número de documento', with: ''
+        fill_in 'Teléfono', with: ''
+        click_button 'Crear cliente'
 
-        expect(page).to have_content("can't be blank")
+        expect(page).to have_content("no puede estar en blanco")
         # Still on new client page (form re-rendered in-frame)
-        expect(page).to have_button('Create Client')
+        expect(page).to have_button('Crear cliente')
       end
     end
   end
@@ -140,8 +140,8 @@ RSpec.describe 'Clients', type: :system do
       client = create(:client, :ruc_client, full_name: 'Before Update')
 
       visit edit_client_path(client)
-      fill_in 'Full name', with: 'After Update'
-      click_button 'Update Client'
+      fill_in 'Nombre completo', with: 'After Update'
+      click_button 'Actualizar cliente'
 
       expect(page).to have_content('After Update')
     end
@@ -160,7 +160,7 @@ RSpec.describe 'Clients', type: :system do
       # Click the Archive button for this specific client row.
       # dom_id is an ActionView helper; build the CSS id manually here.
       within("#client_#{client.id}") do
-        click_button 'Archive'
+        click_button 'Archivar'
       end
 
       expect(client.reload.discarded?).to be true

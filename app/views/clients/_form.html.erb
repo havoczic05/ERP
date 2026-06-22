@@ -12,7 +12,7 @@
     <% end %>
 
     <div>
-      <%= f.label :full_name %>
+      <%= f.label :full_name, 'Nombre completo' %>
       <%= f.text_field :full_name %>
       <% if client.errors[:full_name].any? %>
         <span class="error"><%= client.errors[:full_name].join(', ') %></span>
@@ -20,7 +20,7 @@
     </div>
 
     <div>
-      <%= f.label :document_type %>
+      <%= f.label :document_type, 'Tipo de documento' %>
       <%= f.select :document_type, Client.document_types.keys.map { |k| [k.humanize, k] },
                    { include_blank: 'Select type' } %>
       <% if client.errors[:document_type].any? %>
@@ -29,7 +29,7 @@
     </div>
 
     <div>
-      <%= f.label :document_number %>
+      <%= f.label :document_number, 'Número de documento' %>
       <%= f.text_field :document_number %>
       <% if client.errors[:document_number].any? %>
         <span class="error"><%= client.errors[:document_number].join(', ') %></span>
@@ -37,7 +37,7 @@
     </div>
 
     <div>
-      <%= f.label :phone %>
+      <%= f.label :phone, 'Teléfono' %>
       <%= f.text_field :phone %>
       <% if client.errors[:phone].any? %>
         <span class="error"><%= client.errors[:phone].join(', ') %></span>
@@ -45,7 +45,7 @@
     </div>
 
     <div>
-      <%= f.submit %>
+      <%= f.submit client.persisted? ? 'Actualizar cliente' : 'Crear cliente' %>
     </div>
   <% end %>
 <% end %>

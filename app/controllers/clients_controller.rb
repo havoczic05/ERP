@@ -30,12 +30,12 @@ class ClientsController < ApplicationController
     authorize @client
 
     if @client.save
-      redirect_to @client, notice: "Client was successfully created."
+      redirect_to @client, notice: "Cliente creado correctamente."
     else
       render :new, status: :unprocessable_entity
     end
   rescue ActiveRecord::RecordNotUnique
-    @client.errors.add(:document_number, "is already registered")
+    @client.errors.add(:document_number, "ya está registrado")
     render :new, status: :unprocessable_entity
   end
 
@@ -47,12 +47,12 @@ class ClientsController < ApplicationController
     authorize @client
 
     if @client.update(client_params)
-      redirect_to @client, notice: "Client was successfully updated."
+      redirect_to @client, notice: "Cliente actualizado correctamente."
     else
       render :edit, status: :unprocessable_entity
     end
   rescue ActiveRecord::RecordNotUnique
-    @client.errors.add(:document_number, "is already registered")
+    @client.errors.add(:document_number, "ya está registrado")
     render :edit, status: :unprocessable_entity
   end
 
@@ -61,9 +61,9 @@ class ClientsController < ApplicationController
 
     if @client.destroyable?
       @client.discard
-      redirect_to clients_path, notice: "Client was successfully archived."
+      redirect_to clients_path, notice: "Cliente archivado correctamente."
     else
-      flash.now[:alert] = "This client cannot be deleted because it has associated sales."
+      flash.now[:alert] = "No se puede eliminar este cliente porque tiene ventas asociadas."
       render :show, status: :unprocessable_entity
     end
   end
