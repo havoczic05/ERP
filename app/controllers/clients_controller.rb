@@ -1,11 +1,20 @@
 class ClientsController < ApplicationController
+  include CsvExport
+
   before_action :set_client, only: %i[show edit update destroy]
+
+  CSV_HEADERS = [ "Nombre completo", "Tipo de documento", "Número de documento", "Teléfono", "Dirección" ].freeze
 
   def index
     authorize Client
     scope = Client.kept.order(:full_name)
     scope = search_clients(scope, params[:q]) if params[:q].present?
-    @pagy, @clients = pagy(:offset, scope)
+    scope = scope.where(document_type: params[:document_type]) if Client.document_types.key?(params[:document_type])
+
+    respond_to do |format|
+      format.html { @pagy, @clients = pagy(:offset, scope) }
+      format.csv { send_csv("clientes", CSV_HEADERS, clients_csv_rows(scope)) }
+    end
   end
 
   def search
@@ -75,7 +84,19 @@ class ClientsController < ApplicationController
   end
 
   def client_params
-    params.require(:client).permit(:full_name, :document_type, :document_number, :phone)
+    params.require(:client).permit(:full_name, :document_type, :document_number, :phone, :direccion)
+  end
+
+  def clients_csv_rows(scope)
+    scope.map do |client|
+      [
+        client.full_name,
+        client.document_type.upcase,
+        client.document_number,
+        client.phone,
+        client.direccion
+      ]
+    end
   end
 
   def search_clients(scope, query)

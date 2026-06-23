@@ -1,8 +1,9 @@
 <tr id="<%= dom_id(client) %>">
   <td><%= client.full_name %></td>
-  <td><%= client.document_type %></td>
+  <td><%= client.document_type.upcase %></td>
   <td><%= client.document_number %></td>
   <td><%= client.phone %></td>
+  <td><%= client.direccion %></td>
   <td class="col-actions">
     <div class="row-actions">
       <%= action_link 'Ver', client, icon: :eye %>

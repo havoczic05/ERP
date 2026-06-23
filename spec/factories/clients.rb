@@ -2,6 +2,7 @@ FactoryBot.define do
   factory :client do
     sequence(:full_name) { |n| "Client #{n}" }
     phone { '999999999' }
+    direccion { 'Av. Siempre Viva 123' }
 
     trait :ruc_client do
       document_type { 'ruc' }

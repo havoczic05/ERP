@@ -3,7 +3,8 @@ class Client < ApplicationRecord
     "full_name" => "Nombre completo",
     "document_type" => "Tipo de documento",
     "document_number" => "Número de documento",
-    "phone" => "Teléfono"
+    "phone" => "Teléfono",
+    "direccion" => "Dirección"
   }.freeze
   include SpanishAttributeNames
 

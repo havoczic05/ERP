@@ -78,6 +78,33 @@ RSpec.describe 'Products', type: :request do
   end
 
   # ---------------------------------------------------------------------------
+  # CSV export (RF-PM-5)
+  # ---------------------------------------------------------------------------
+  describe 'GET /products.csv' do
+    it 'exports a CSV with headers and product rows (incl. warehouse name)' do
+      create(:product, sku: 'CSV-001', name: 'Exportable Widget', brand: 'ACME',
+                       warehouse: warehouse, stock: 7, base_price_usd: 12.50)
+
+      get products_path(format: :csv)
+      expect(response.media_type).to eq('text/csv')
+      expect(response.body).to include('SKU,Nombre,Marca,Almacén,Stock,Precio base USD')
+      expect(response.body).to include('CSV-001')
+      expect(response.body).to include('Exportable Widget')
+      expect(response.body).to include(warehouse.name)
+    end
+
+    it 'respects the warehouse_id filter' do
+      warehouse2 = create(:warehouse)
+      create(:product, name: 'Here Product', warehouse: warehouse)
+      create(:product, name: 'There Product', warehouse: warehouse2)
+
+      get products_path(format: :csv, warehouse_id: warehouse.id)
+      expect(response.body).to include('Here Product')
+      expect(response.body).not_to include('There Product')
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # Show (RF-PM-1)
   # ---------------------------------------------------------------------------
   describe 'GET /products/:id' do
