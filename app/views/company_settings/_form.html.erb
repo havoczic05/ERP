@@ -50,6 +50,8 @@
   </div>
 
   <div class="form-actions">
-    <%= f.submit "Guardar cambios" %>
+    <%= submit_button f, "Guardar cambios" %>
+    <%= action_link "Volver a configuración", company_settings_path, variant: :ghost, size: :md,
+                    icon: "arrow-left", data: { turbo_frame: "_top" } %>
   </div>
 <% end %>
