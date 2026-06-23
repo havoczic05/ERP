@@ -48,6 +48,7 @@ class SalesController < ApplicationController
   # GET /sales/:id(.pdf)
   def show
     authorize @sale
+    @amortizations = @sale.amortizations.includes(:installment).order(:paid_at)
 
     respond_to do |format|
       format.html

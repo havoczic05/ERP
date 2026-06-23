@@ -1,13 +1,35 @@
 class AccountsReceivableController < ApplicationController
+  include CsvExport
+
+  CSV_HEADERS = [ "Cliente", "Venta", "N° de cuota", "Monto (USD)", "Saldo (USD)", "Vencimiento", "Estado" ].freeze
+
   # GET /accounts_receivable
   def index
     authorize Amortization, :index?
     scope = filter_installments(Installment.outstanding.includes(sale: :client))
     @subtotal = scope.sum(:balance_usd)
-    @pagy, @installments = pagy(:offset, scope)
+
+    respond_to do |format|
+      format.html { @pagy, @installments = pagy(:offset, scope) }
+      format.csv { send_csv("cuentas-por-cobrar", CSV_HEADERS, ar_csv_rows(scope)) }
+    end
   end
 
   private
+
+  def ar_csv_rows(scope)
+    scope.map do |inst|
+      [
+        inst.sale.client.full_name,
+        inst.sale.correlative,
+        inst.installment_number,
+        inst.amount_usd,
+        inst.balance_usd,
+        helpers.format_date(inst.due_date),
+        inst.overdue? ? "Vencida" : "Pendiente"
+      ]
+    end
+  end
 
   # Filters the outstanding-installments scope, mirroring the sales toolbar:
   # - q: client name OR sale correlative (ILIKE)

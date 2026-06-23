@@ -122,9 +122,16 @@ RSpec.describe 'AccountsReceivable index', type: :system do
       expect(page).not_to have_content('Beta SA') # due in 25 days
     end
 
-    it 'shows the outstanding subtotal in the footer' do
+    it 'shows the outstanding subtotal aligned under the Saldo column' do
       visit accounts_receivable_path
-      expect(page).to have_content('Saldo total:')
+      expect(page).to have_css('tfoot .ar-total-label', text: 'Saldo total')
+      expect(page).to have_css('tfoot .ar-total-value')
+    end
+
+    it 'offers a CSV export link at the bottom-right of the table' do
+      visit accounts_receivable_path
+      expect(page).to have_css('.table-footer', text: 'Descargar Excel')
+      expect(page.find_link('Descargar Excel')[:href]).to include('format=csv')
     end
   end
 end

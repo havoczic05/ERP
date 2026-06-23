@@ -29,6 +29,7 @@ class Sale < ApplicationRecord
              foreign_key: :source_cotizacion_id
   has_many :sale_items, dependent: :destroy
   has_many :installments, dependent: :destroy
+  has_many :amortizations, through: :installments
   has_one :credit_note
 
   # ---------------------------------------------------------------------------

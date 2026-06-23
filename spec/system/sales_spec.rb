@@ -324,4 +324,32 @@ RSpec.describe 'Sales', type: :system do
       expect(page).to have_css('button.picker-option', text: 'Turbo Corp')
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # Payment history on the sale detail page (surfaces amortization notes)
+  # ---------------------------------------------------------------------------
+  describe 'payment history on show' do
+    let(:sale) { create(:sale, :venta, :with_items, client: client, warehouse: warehouse) }
+    let(:installment) do
+      create(:installment, sale: sale, installment_number: 1,
+                           amount_usd: 300, balance_usd: 100, due_date: 10.days.from_now)
+    end
+
+    it 'lists recorded payments with date, amount and notes' do
+      create(:amortization, installment: installment, amount_usd: 200,
+                            paid_at: Time.zone.local(2026, 6, 10, 12), notes: 'Pago parcial en efectivo')
+
+      visit sale_path(sale)
+
+      expect(page).to have_content('Historial de pagos')
+      expect(page).to have_content('10/06/2026')
+      expect(page).to have_content('Pago parcial en efectivo')
+    end
+
+    it 'does not render the payment history section when there are no payments' do
+      installment # exists but unpaid
+      visit sale_path(sale)
+      expect(page).not_to have_content('Historial de pagos')
+    end
+  end
 end

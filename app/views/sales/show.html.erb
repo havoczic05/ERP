@@ -70,6 +70,30 @@
   </table>
 <% end %>
 
+<% if @amortizations.any? %>
+  <h2>Historial de pagos</h2>
+  <table>
+    <thead>
+      <tr>
+        <th class="num">Cuota</th>
+        <th>Fecha de pago</th>
+        <th class="num">Monto</th>
+        <th>Notas</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @amortizations.each do |amort| %>
+        <tr>
+          <td class="num"><%= amort.installment.installment_number %></td>
+          <td class="col-date"><%= format_date(amort.paid_at) %></td>
+          <td><%= money(amort.amount_usd) %></td>
+          <td><%= amort.notes.presence || "—" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
+
 <% if @sale.credit_note %>
   <h2>Nota de crédito</h2>
   <p class="note-card">
