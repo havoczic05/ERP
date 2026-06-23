@@ -1,12 +1,11 @@
 class WarehousePolicy < ApplicationPolicy
-  ADMIN_ROLE  = "administrador"
-  READER_ROLES = %w[administrador vendedor].freeze
+  ADMIN_ROLE = "administrador"
 
-  # Both roles can list and view warehouses.
-  def index? = reader?
-  def show?  = reader?
-
-  # Only administrador can mutate warehouses.
+  # Warehouses are owner-only configuration: every action (incl. read) is
+  # admin-only. The warehouse selects in product/sale forms load data directly
+  # (Warehouse.order(:name)), not through this policy, so they are unaffected.
+  def index?   = admin?
+  def show?    = admin?
   def new?     = admin?
   def create?  = admin?
   def edit?    = admin?
@@ -17,9 +16,5 @@ class WarehousePolicy < ApplicationPolicy
 
   def admin?
     user.present? && user.role == ADMIN_ROLE
-  end
-
-  def reader?
-    user.present? && user.role.in?(READER_ROLES)
   end
 end
