@@ -37,8 +37,8 @@
       <tr>
         <td><%= item.product.name %></td>
         <td class="num"><%= item.quantity %></td>
-        <td class="num"><%= number_to_currency(item.unit_price_usd, unit: 'USD ') %></td>
-        <td class="num"><%= number_to_currency(item.line_total_usd, unit: 'USD ') %></td>
+        <td><%= money(item.unit_price_usd) %></td>
+        <td><%= money(item.line_total_usd) %></td>
       </tr>
     <% end %>
   </tbody>
@@ -60,9 +60,9 @@
       <% @sale.installments.order(:installment_number).each do |inst| %>
         <tr>
           <td class="num"><%= inst.installment_number %></td>
-          <td class="num"><%= number_to_currency(inst.amount_usd, unit: 'USD ') %></td>
-          <td class="num"><%= number_to_currency(inst.balance_usd, unit: 'USD ') %></td>
-          <td><%= inst.due_date %></td>
+          <td><%= money(inst.amount_usd) %></td>
+          <td><%= money(inst.balance_usd) %></td>
+          <td class="col-date"><%= format_date(inst.due_date) %></td>
           <td><%= installment_status_badge(inst) %></td>
         </tr>
       <% end %>
@@ -73,7 +73,7 @@
 <% if @sale.credit_note %>
   <h2>Nota de crédito</h2>
   <p class="note-card">
-    Emitida: <%= @sale.credit_note.issued_at %> —
+    Emitida: <%= format_date(@sale.credit_note.issued_at) %> —
     Total: <%= number_to_currency(@sale.credit_note.total_usd, unit: 'USD ') %>
   </p>
 <% end %>

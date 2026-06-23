@@ -19,9 +19,9 @@
         <td><%= installment.sale.client.full_name %></td>
         <td><%= installment.sale.correlative %></td>
         <td><%= installment.installment_number %></td>
-        <td class="num"><%= number_to_currency(installment.amount_usd, unit: 'USD ') %></td>
-        <td class="num"><%= number_to_currency(installment.balance_usd, unit: 'USD ') %></td>
-        <td><%= installment.due_date %></td>
+        <td><%= money(installment.amount_usd) %></td>
+        <td><%= money(installment.balance_usd) %></td>
+        <td class="col-date"><%= format_date(installment.due_date) %></td>
         <td><%= installment_status_badge(installment) %></td>
         <td>
           <%= form_with url: installment_amortizations_path(installment), method: :post do |f| %>

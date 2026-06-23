@@ -888,6 +888,10 @@ li {
 .footer-subtotal { margin: 0; font-size: var(--text-md); font-variant-numeric: tabular-nums; }
 .footer-subtotal strong { color: var(--ink); }
 
+/* Money cell: USD pinned left, amount pinned right */
+.money { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-4); font-variant-numeric: tabular-nums; }
+.money-cur { color: var(--muted); }
+
 /* Compact button variant for in-table / inline actions */
 .btn--sm {
     padding: var(--sp-1) var(--sp-3);

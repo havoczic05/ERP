@@ -4,7 +4,7 @@
   <td><%= product.brand %></td>
   <td><%= product.warehouse&.name %></td>
   <td><%= product.stock %></td>
-  <td class="num"><%= product.base_price_usd %></td>
+  <td><%= money(product.base_price_usd) %></td>
   <td class="col-actions">
     <div class="row-actions">
       <%= action_link 'Ver', product, icon: :eye %>

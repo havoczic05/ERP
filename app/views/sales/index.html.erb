@@ -1,6 +1,5 @@
 <div class="page-head">
   <h1>Ventas</h1>
-  <p class="page-sub"><%= pluralize(@pagy.count, 'documento') %></p>
 </div>
 
 <div class="toolbar">
@@ -55,7 +54,7 @@
           <td class="col-date"><%= format_date(sale.created_at) %></td>
           <td><%= document_type_label(sale.document_type) %></td>
           <td><%= sale.client.full_name %></td>
-          <td class="num"><%= number_to_currency(sale.total_usd, unit: 'USD ') %></td>
+          <td><%= money(sale.total_usd) %></td>
           <td><%= sale_status_badge(sale) %></td>
           <td class="col-actions">
             <div class="row-actions">
