@@ -142,6 +142,25 @@ RSpec.describe 'Clients', type: :request do
         expect(response).to have_http_status(:unprocessable_entity)
       end
     end
+
+    context 'as a Turbo Stream request (modal flow)' do
+      let(:valid_params) do
+        { client: { full_name: 'Toast SA', document_type: 'ruc',
+                    document_number: '20999888777', phone: '999000111' } }
+      end
+      let(:turbo_headers) { { 'Accept' => 'text/vnd.turbo-stream.html' } }
+
+      it 'closes the modal, prepends the row and appends a toast' do
+        post clients_path, params: valid_params, headers: turbo_headers
+
+        expect(response.media_type).to eq('text/vnd.turbo-stream.html')
+        expect(response.body).to include('action="update"', 'target="modal"')
+        expect(response.body).to include('action="prepend"', 'target="clients"')
+        expect(response.body).to include('action="append"', 'target="toasts"')
+        expect(response.body).to include('Cliente creado correctamente.')
+        expect(response.body).to include('Toast SA')
+      end
+    end
   end
 
   # ---------------------------------------------------------------------------
@@ -166,6 +185,21 @@ RSpec.describe 'Clients', type: :request do
               params: { client: { full_name: 'Updated Name' } }
         expect(response).to have_http_status(:found)
         expect(client.reload.full_name).to eq('Updated Name')
+      end
+    end
+
+    context 'as a Turbo Stream request (modal flow)' do
+      it 'replaces the row, closes the modal and appends a toast' do
+        client = create(:client, :ruc_client)
+        patch client_path(client),
+              params: { client: { full_name: 'Updated Name' } },
+              headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
+
+        expect(response.media_type).to eq('text/vnd.turbo-stream.html')
+        expect(response.body).to include('action="replace"', %(target="client_#{client.id}"))
+        expect(response.body).to include('action="update"', 'target="modal"')
+        expect(response.body).to include('Cliente actualizado correctamente.')
+        expect(response.body).to include('Updated Name')
       end
     end
 

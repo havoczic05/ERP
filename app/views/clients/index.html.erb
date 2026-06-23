@@ -14,7 +14,8 @@
     <%= f.submit 'Buscar' %>
   <% end %>
 
-  <%= action_link 'Nuevo cliente', new_client_path, variant: :primary, size: :md, icon: :plus %>
+  <%= action_link 'Nuevo cliente', new_client_path, variant: :primary, size: :md, icon: :plus,
+                  data: { turbo_frame: 'modal' } %>
 </div>
 
 <table>
@@ -28,7 +29,7 @@
       <th>Acciones</th>
     </tr>
   </thead>
-  <tbody>
+  <tbody id="clients">
     <%= render @clients %>
   </tbody>
 </table>
@@ -42,3 +43,5 @@
   <%= export_link 'Descargar Excel',
         clients_path(request.query_parameters.except('page').merge(format: 'csv')) %>
 </div>
+
+<%= render "shared/modal_frame" %>

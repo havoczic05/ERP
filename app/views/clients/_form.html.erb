@@ -1,5 +1,4 @@
-<%= turbo_frame_tag "client_form" do %>
-  <%= form_with model: client, local: false do |f| %>
+<%= form_with model: client, local: false do |f| %>
     <% if client.errors.any? %>
       <div id="error_explanation">
         <h2>No se pudo guardar el cliente. Corrija los siguientes errores:</h2>
@@ -52,7 +51,8 @@
     </div>
 
     <div class="form-actions">
-      <%= f.submit client.persisted? ? 'Actualizar cliente' : 'Crear cliente' %>
+      <%= submit_button f, client.persisted? ? 'Actualizar cliente' : 'Crear cliente' %>
+      <%= action_link 'Volver a clientes', clients_path, variant: :ghost, size: :md,
+                      icon: 'arrow-left', data: { turbo_frame: '_top' } %>
     </div>
   <% end %>
-<% end %>
