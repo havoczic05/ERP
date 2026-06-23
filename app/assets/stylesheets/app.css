@@ -1193,6 +1193,24 @@ li {
     margin-top: var(--sp-3);
 }
 
+/* ---------------------------------------------------------------------------
+   Modal forms: every control fills the dialog width so single fields and the
+   two-column document grid all align to the same edges; action buttons centered.
+   Scoped to .modal__body so full-page forms (e.g. /sales/new) keep their caps.
+   --------------------------------------------------------------------------- */
+.modal__body .field input,
+.modal__body .field select,
+.modal__body .field textarea {
+    max-width: none;
+}
+.modal__body .field-grid {
+    max-width: none;
+}
+.modal__body .form-actions {
+    justify-content: center;
+    margin-top: var(--sp-4);
+}
+
 /* Validation: summary box + per-field message (semantic danger tint) */
 #error_explanation {
     background: var(--danger-weak);
