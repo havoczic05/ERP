@@ -174,10 +174,11 @@ RSpec.describe 'Products', type: :system do
         product = create(:product, name: 'Guarded Item', warehouse: warehouse)
         create(:sale_item, product: product)
 
-        visit product_path(product)
-        click_button 'Eliminar'
+        visit products_path
+        within("#product_#{product.id}") { click_button 'Eliminar' }
 
         expect(page).to have_content('No se puede eliminar este producto porque tiene ítems de venta asociados.')
+        expect(page).to have_current_path(products_path)
         expect(product.reload.discarded_at).to be_nil
       end
     end

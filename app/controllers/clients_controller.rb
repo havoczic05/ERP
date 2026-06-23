@@ -78,8 +78,7 @@ class ClientsController < ApplicationController
       @client.discard
       redirect_to clients_path, notice: "Cliente archivado correctamente."
     else
-      flash.now[:alert] = "No se puede eliminar este cliente porque tiene ventas asociadas."
-      render :show, status: :unprocessable_entity
+      redirect_to clients_path, alert: "No se puede eliminar este cliente porque tiene ventas asociadas."
     end
   end
 

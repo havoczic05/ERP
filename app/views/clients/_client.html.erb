@@ -6,7 +6,7 @@
   <td><%= client.direccion %></td>
   <td class="col-actions">
     <div class="row-actions">
-      <%= action_link 'Ver', client, icon: :eye %>
+      <%= action_link 'Ver', client, icon: :eye, data: { turbo_frame: 'modal' } %>
       <% if policy(client).edit? %>
         <%= action_link 'Editar', edit_client_path(client), icon: :pencil,
                         data: { turbo_frame: 'modal' } %>

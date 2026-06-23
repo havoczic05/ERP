@@ -298,13 +298,14 @@ RSpec.describe 'Products', type: :request do
     end
 
     context 'when product has sale_items (guard blocks)' do
-      it 'returns 422 and product remains undiscarded' do
+      it 'redirects to index with an alert and product remains undiscarded' do
         product = create(:product, warehouse: warehouse)
         create(:sale_item, product: product)
         expect {
           delete product_path(product)
         }.not_to change { product.reload.discarded_at }
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to redirect_to(products_path)
+        expect(flash[:alert]).to include('No se puede eliminar')
         expect(product.reload.discarded_at).to be_nil
       end
     end

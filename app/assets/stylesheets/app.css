@@ -723,6 +723,23 @@ dialog.modal::backdrop {
     padding: var(--sp-5);
 }
 
+/* Read-only detail list inside a "Ver" modal (label above value). */
+.modal-details {
+    margin: 0;
+}
+.modal-details dt {
+    font-size: var(--text-sm);
+    color: var(--muted);
+    margin-bottom: var(--sp-1);
+}
+.modal-details dd {
+    margin: 0 0 var(--sp-4);
+    color: var(--ink);
+}
+.modal-details dd:last-of-type {
+    margin-bottom: 0;
+}
+
 /* =============================================================================
    Settings section — sub-navigation + hub cards
    ========================================================================== */

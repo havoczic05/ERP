@@ -70,6 +70,30 @@ RSpec.describe "Clients modal (JS)", type: :system, js: true do
     expect(page).to have_css(".toast", text: "Cliente actualizado correctamente.")
   end
 
+  it "opens a read-only detail modal from Ver and switches to edit" do
+    client = create(:client, :ruc_client, full_name: "Ver Me Co")
+    visit clients_path
+
+    within("##{ActionView::RecordIdentifier.dom_id(client)}") { click_link "Ver" }
+
+    expect(page).to have_css("dialog.modal[open]", wait: 10)
+    within("dialog.modal") do
+      expect(page).to have_content("Detalle del cliente")
+      expect(page).to have_content("Ver Me Co")
+      click_link "Editar"
+    end
+
+    # The modal now shows the editable form, pre-filled.
+    expect(page).to have_field("Nombre completo", with: "Ver Me Co", wait: 10)
+    within("dialog.modal") do
+      fill_in "Nombre completo", with: "Edited From Ver"
+      click_button "Actualizar cliente"
+    end
+
+    within("#clients") { expect(page).to have_content("Edited From Ver", wait: 10) }
+    expect(page).to have_css(".toast", text: "Cliente actualizado correctamente.")
+  end
+
   it "auto-dismisses the toast after its timeout" do
     visit clients_path
     click_link "Nuevo cliente"
