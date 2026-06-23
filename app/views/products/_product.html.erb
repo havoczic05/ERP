@@ -7,7 +7,7 @@
   <td><%= money(product.base_price_usd) %></td>
   <td class="col-actions">
     <div class="row-actions">
-      <%= action_link 'Ver', product, icon: :eye %>
+      <%= action_link 'Ver', product, icon: :eye, data: { turbo_frame: 'modal' } %>
       <% if policy(product).edit? %>
         <%= action_link 'Editar', edit_product_path(product), icon: :pencil,
                         data: { turbo_frame: 'modal' } %>

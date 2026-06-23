@@ -226,14 +226,14 @@ RSpec.describe 'Clients', type: :request do
     end
 
     context 'when client has sales (destroy guard trips)' do
-      it 'returns 422, does not discard the client, and displays an error message' do
+      it 'redirects to index with an alert and does not discard the client' do
         client = create(:client, :ruc_client)
         # Simulate sales existing by stubbing destroyable? to return false.
         allow_any_instance_of(Client).to receive(:destroyable?).and_return(false)
         delete client_path(client)
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to redirect_to(clients_path)
         expect(client.reload.discarded?).to be false
-        expect(response.body).to include('No se puede eliminar')
+        expect(flash[:alert]).to include('No se puede eliminar')
       end
     end
   end

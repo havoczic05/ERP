@@ -86,8 +86,7 @@ class ProductsController < ApplicationController
       @product.discard
       redirect_to products_path, notice: "Producto archivado correctamente."
     else
-      flash.now[:alert] = "No se puede eliminar este producto porque tiene ítems de venta asociados."
-      render :show, status: :unprocessable_entity
+      redirect_to products_path, alert: "No se puede eliminar este producto porque tiene ítems de venta asociados."
     end
   end
 
