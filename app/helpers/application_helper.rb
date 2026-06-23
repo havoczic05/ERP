@@ -142,6 +142,17 @@ module ApplicationHelper
            suffix: (capture(&suffix) if suffix)
   end
 
+  # Money cell: "USD" pinned left, the amount pinned right (2 decimals, tabular).
+  # Reusable across every money column so currency reads consistently.
+  def money(amount)
+    tag.div(class: "money") do
+      safe_join([
+        tag.span("USD", class: "money-cur"),
+        tag.span(number_with_precision(amount, precision: 2, delimiter: ","), class: "money-val")
+      ])
+    end
+  end
+
   # Reusable export button — opens the export (e.g. a CSV) in a new tab. Same
   # ghost style as the other actions; pass a path with the desired format/filters.
   def export_link(label, path)
