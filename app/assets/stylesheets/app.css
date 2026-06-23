@@ -888,6 +888,13 @@ li {
 .footer-subtotal { margin: 0; font-size: var(--text-md); font-variant-numeric: tabular-nums; }
 .footer-subtotal strong { color: var(--ink); }
 
+/* Accounts Receivable — inline payment form (monto : notas = 1 : 3) */
+.pago-form { display: flex; align-items: center; gap: var(--sp-2); }
+.pago-inputs { display: flex; gap: var(--sp-2); flex: 1; min-width: 0; }
+.pago-inputs input { margin-bottom: 0; }
+.pago-monto { flex: 1; min-width: 0; }
+.pago-notas { flex: 3; min-width: 0; }
+
 /* Money cell: USD pinned left, amount pinned right */
 .money { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-4); font-variant-numeric: tabular-nums; }
 .money-cur { color: var(--muted); }

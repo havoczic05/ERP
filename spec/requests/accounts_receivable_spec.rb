@@ -65,7 +65,9 @@ RSpec.describe 'AccountsReceivable', type: :request do
 
         get accounts_receivable_path
 
-        expect(response.body).to include('Vencida')
+        # Assert on the danger badge element, not the bare word "Vencida"
+        # (the estado filter select also contains that label).
+        expect(response.body).to include('badge--danger')
       end
 
       it 'does not show overdue indicator for an installment due today' do
@@ -77,7 +79,66 @@ RSpec.describe 'AccountsReceivable', type: :request do
 
         get accounts_receivable_path
 
-        expect(response.body).not_to include('Vencida')
+        expect(response.body).not_to include('badge--danger')
+      end
+    end
+
+    # -------------------------------------------------------------------------
+    # Filters (toolbar mirroring sales): q, estado, vencimiento
+    # -------------------------------------------------------------------------
+    context 'filters' do
+      before { login_as(admin_user) }
+
+      let(:acme)      { create(:client, :ruc_client, full_name: 'Acme Corp') }
+      let(:beta)      { create(:client, :ruc_client, full_name: 'Beta SA') }
+      let(:acme_sale) { create(:sale, :venta, client: acme, correlative: 'VTA-AAA01') }
+      let(:beta_sale) { create(:sale, :venta, client: beta, correlative: 'VTA-BBB01') }
+
+      let!(:acme_inst) do
+        create(:installment, sale: acme_sale, status: 'pendiente',
+                             due_date: 10.days.from_now, amount_usd: 100, balance_usd: 100)
+      end
+      let!(:beta_inst) do
+        create(:installment, sale: beta_sale, status: 'pendiente',
+                             due_date: 20.days.from_now, amount_usd: 200, balance_usd: 200)
+      end
+
+      it 'filters by client name (q)' do
+        get accounts_receivable_path(q: 'Acme')
+        expect(response.body).to include('Acme Corp')
+        expect(response.body).not_to include('Beta SA')
+      end
+
+      it 'filters by sale correlative (q)' do
+        get accounts_receivable_path(q: 'BBB01')
+        expect(response.body).to include('Beta SA')
+        expect(response.body).not_to include('Acme Corp')
+      end
+
+      it 'filters by estado=vencida (past-due within outstanding)' do
+        create(:installment, sale: acme_sale, installment_number: 2, status: 'pendiente',
+                             due_date: 2.days.ago, amount_usd: 50, balance_usd: 50)
+        get accounts_receivable_path(status: 'vencida')
+        expect(response.body).to include('Acme Corp')   # only its overdue row passes
+        expect(response.body).not_to include('Beta SA') # 20 days out → excluded
+      end
+
+      it 'filters by estado=pendiente (not yet due)' do
+        create(:installment, sale: acme_sale, installment_number: 2, status: 'pendiente',
+                             due_date: 2.days.ago, amount_usd: 50, balance_usd: 50)
+        get accounts_receivable_path(status: 'pendiente')
+        expect(response.body).to include('Beta SA')     # 20 days out → still pending
+      end
+
+      it 'filters by vencimiento (due within N days)' do
+        get accounts_receivable_path(due_within: '15')
+        expect(response.body).to include('Acme Corp')   # due in 10 days → in range
+        expect(response.body).not_to include('Beta SA') # due in 20 days → out of range
+      end
+
+      it 'shows the outstanding subtotal of the filtered set' do
+        get accounts_receivable_path(q: 'Acme')
+        expect(response.body).to include('Saldo total:')
       end
     end
 
