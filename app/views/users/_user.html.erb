@@ -4,6 +4,7 @@
   <td><%= user.active? ? 'Sí' : 'No' %></td>
   <td class="col-actions">
     <div class="row-actions">
+      <%= action_link 'Ver', user_path(user), icon: :eye, data: { turbo_frame: 'modal' } %>
       <%= action_link 'Editar', edit_user_path(user), icon: :pencil,
                       data: { turbo_frame: 'modal' } %>
       <% if user.active? %>

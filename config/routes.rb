@@ -17,7 +17,7 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root "sales#index"
 
-  resources :users, except: :show
+  resources :users
 
   resources :clients do
     collection do

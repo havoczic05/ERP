@@ -166,36 +166,37 @@ RSpec.describe 'Warehouses', type: :request do
     end
 
     context 'when warehouse has a product' do
-      it 'returns 422 and warehouse persists' do
+      it 'redirects with an alert and warehouse persists' do
         wh = create(:warehouse)
         create(:product, warehouse: wh)
         expect {
           delete warehouse_path(wh)
         }.not_to change(Warehouse, :count)
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to redirect_to(warehouses_path)
+        expect(flash[:alert]).to include('No se puede eliminar')
       end
     end
 
     context 'when warehouse has a sale (no products)' do
-      it 'returns 422 and warehouse persists' do
+      it 'redirects with an alert and warehouse persists' do
         wh = create(:warehouse)
         create(:sale, warehouse: wh)
         expect {
           delete warehouse_path(wh)
         }.not_to change(Warehouse, :count)
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to redirect_to(warehouses_path)
       end
     end
 
     context 'when warehouse has both products and sales' do
-      it 'returns 422 and warehouse persists' do
+      it 'redirects with an alert and warehouse persists' do
         wh = create(:warehouse)
         create(:product, warehouse: wh)
         create(:sale, warehouse: wh)
         expect {
           delete warehouse_path(wh)
         }.not_to change(Warehouse, :count)
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to redirect_to(warehouses_path)
       end
     end
 

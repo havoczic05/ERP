@@ -1,9 +1,13 @@
 class UsersController < ApplicationController
-  before_action :set_user, only: %i[edit update destroy]
+  before_action :set_user, only: %i[show edit update destroy]
 
   def index
     authorize User
     @pagy, @users = pagy(:offset, User.order(:email))
+  end
+
+  def show
+    authorize @user
   end
 
   def new
