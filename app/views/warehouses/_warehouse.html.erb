@@ -4,7 +4,8 @@
   <td class="col-actions">
     <div class="row-actions">
       <%= action_link 'Ver', warehouse, icon: :eye %>
-      <%= action_link 'Editar', edit_warehouse_path(warehouse), icon: :pencil %>
+      <%= action_link 'Editar', edit_warehouse_path(warehouse), icon: :pencil,
+                      data: { turbo_frame: 'modal' } %>
       <%= action_button 'Eliminar', warehouse, method: :delete, icon: :trash,
                         confirm: '¿Eliminar este almacén?' %>
     </div>

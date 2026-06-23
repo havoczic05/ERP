@@ -1,7 +1,8 @@
 <div class="page-head"><h1>Almacenes</h1></div>
 
 <div class="toolbar">
-  <%= action_link 'Nuevo almacén', new_warehouse_path, variant: :primary, size: :md, icon: :plus %>
+  <%= action_link 'Nuevo almacén', new_warehouse_path, variant: :primary, size: :md, icon: :plus,
+                  data: { turbo_frame: 'modal' } %>
 </div>
 
 <table>
@@ -12,7 +13,7 @@
       <th>Acciones</th>
     </tr>
   </thead>
-  <tbody>
+  <tbody id="warehouses">
     <%= render @warehouses %>
   </tbody>
 </table>
@@ -22,3 +23,5 @@
 <% end %>
 
 <%= pagination_nav(@pagy) %>
+
+<%= render "shared/modal_frame" %>

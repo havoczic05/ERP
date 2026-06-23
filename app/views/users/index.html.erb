@@ -1,7 +1,8 @@
 <div class="page-head"><h1>Usuarios</h1></div>
 
 <div class="toolbar">
-  <%= action_link 'Nuevo usuario', new_user_path, variant: :primary, size: :md, icon: :plus %>
+  <%= action_link 'Nuevo usuario', new_user_path, variant: :primary, size: :md, icon: :plus,
+                  data: { turbo_frame: 'modal' } %>
 </div>
 
 <table>
@@ -13,23 +14,8 @@
       <th>Acciones</th>
     </tr>
   </thead>
-  <tbody>
-    <% @users.each do |user| %>
-      <tr id="<%= dom_id(user) %>">
-        <td><%= user.email %></td>
-        <td><%= user.role.humanize %></td>
-        <td><%= user.active? ? 'Sí' : 'No' %></td>
-        <td class="col-actions">
-          <div class="row-actions">
-            <%= action_link 'Editar', edit_user_path(user), icon: :pencil %>
-            <% if user.active? %>
-              <%= action_button 'Desactivar', user_path(user), method: :delete, icon: "user-x",
-                                confirm: "¿Desactivar #{user.email}?" %>
-            <% end %>
-          </div>
-        </td>
-      </tr>
-    <% end %>
+  <tbody id="users">
+    <%= render @users %>
   </tbody>
 </table>
 
@@ -38,3 +24,5 @@
 <% end %>
 
 <%= pagination_nav(@pagy) %>
+
+<%= render "shared/modal_frame" %>

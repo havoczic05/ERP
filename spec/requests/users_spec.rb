@@ -62,6 +62,20 @@ RSpec.describe 'Users', type: :request do
         expect(response).to have_http_status(:unprocessable_content)
       end
     end
+
+    context 'as a Turbo Stream request (modal flow)' do
+      it 'closes the modal, prepends the row and appends a toast' do
+        post users_path, params: valid_params,
+                         headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
+
+        expect(response.media_type).to eq('text/vnd.turbo-stream.html')
+        expect(response.body).to include('action="update"', 'target="modal"')
+        expect(response.body).to include('action="prepend"', 'target="users"')
+        expect(response.body).to include('action="append"', 'target="toasts"')
+        expect(response.body).to include('Usuario creado correctamente.')
+        expect(response.body).to include('new@example.com')
+      end
+    end
   end
 
   # ---------------------------------------------------------------------------
@@ -89,6 +103,20 @@ RSpec.describe 'Users', type: :request do
         expect(response).to have_http_status(:found)
         expect(target.reload.password_digest).to eq(digest_before)
         expect(target.reload.authenticate('oldpassword')).to be_truthy
+      end
+    end
+
+    context 'as a Turbo Stream request (modal flow)' do
+      it 'replaces the row, closes the modal and appends a toast' do
+        patch user_path(target),
+              params: { user: { email: target.email, role: 'vendedor',
+                                password: '', password_confirmation: '' } },
+              headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
+
+        expect(response.media_type).to eq('text/vnd.turbo-stream.html')
+        expect(response.body).to include('action="replace"', %(target="user_#{target.id}"))
+        expect(response.body).to include('action="update"', 'target="modal"')
+        expect(response.body).to include('Usuario actualizado correctamente.')
       end
     end
 

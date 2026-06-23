@@ -1,6 +1,3 @@
-<h1>Editar almacén</h1>
-
-<%= render 'form', warehouse: @warehouse %>
-
-<%= link_to 'Volver al almacén', @warehouse %>
-<%= link_to 'Volver a almacenes', warehouses_path %>
+<%= render layout: "shared/modal", locals: { title: "Editar almacén" } do %>
+  <%= render "form", warehouse: @warehouse %>
+<% end %>
