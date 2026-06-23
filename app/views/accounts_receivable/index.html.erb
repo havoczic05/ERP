@@ -1,5 +1,33 @@
 <div class="page-head"><h1>Cuentas por Cobrar</h1></div>
 
+<div class="toolbar">
+  <%= form_with url: accounts_receivable_path, method: :get, class: "filters" do |f| %>
+    <div class="field">
+      <%= label_tag :q, 'Buscar' %>
+      <%= text_field_tag :q, params[:q], placeholder: 'Cliente o correlativo' %>
+    </div>
+    <div class="field">
+      <%= label_tag :status, 'Estado' %>
+      <%= select_tag :status,
+            options_for_select([ [ 'Todos', '' ], [ 'Pendiente', 'pendiente' ], [ 'Vencida', 'vencida' ] ],
+                               params[:status]) %>
+    </div>
+    <div class="field">
+      <%= label_tag :due_within, 'Vence en' %>
+      <%= select_tag :due_within, options_for_select(DateRange::DUE_OPTIONS, params[:due_within]) %>
+    </div>
+    <div class="field">
+      <%= label_tag :date_range, 'Vencimiento' %>
+      <%= select_tag :date_range, options_for_select(DateRange::OPTIONS, params[:date_range]) %>
+    </div>
+    <div class="field">
+      <%= label_tag :on, 'Día específico' %>
+      <%= date_field_tag :on, params[:on] %>
+    </div>
+    <%= f.submit 'Filtrar' %>
+  <% end %>
+</div>
+
 <table>
   <thead>
     <tr>
@@ -24,11 +52,13 @@
         <td class="col-date"><%= format_date(installment.due_date) %></td>
         <td><%= installment_status_badge(installment) %></td>
         <td>
-          <%= form_with url: installment_amortizations_path(installment), method: :post do |f| %>
-            <%= f.number_field :amount_usd, step: '0.01', min: '0.01',
-                                placeholder: 'Monto', name: 'amortization[amount_usd]' %>
-            <%= f.text_field :notes, placeholder: 'Notas (opcional)',
-                              name: 'amortization[notes]' %>
+          <%= form_with url: installment_amortizations_path(installment), method: :post, class: "pago-form" do |f| %>
+            <div class="pago-inputs">
+              <%= f.number_field :amount_usd, step: '0.01', min: '0.01',
+                                  placeholder: 'Monto', name: 'amortization[amount_usd]', class: 'pago-monto' %>
+              <%= f.text_field :notes, placeholder: 'Notas (opcional)',
+                                name: 'amortization[notes]', class: 'pago-notas' %>
+            </div>
             <%= f.submit 'Registrar pago' %>
           <% end %>
         </td>
@@ -41,4 +71,9 @@
   <p id="no-installments-message">No hay cuotas pendientes.</p>
 <% end %>
 
-<%= pagination_nav(@pagy) %>
+<div class="table-footer">
+  <%= pagination_nav(@pagy) %>
+  <p class="footer-subtotal">
+    Saldo total: <strong><%= number_to_currency(@subtotal, unit: 'USD ') %></strong>
+  </p>
+</div>

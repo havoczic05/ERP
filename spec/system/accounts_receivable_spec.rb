@@ -56,7 +56,8 @@ RSpec.describe 'AccountsReceivable index', type: :system do
 
     visit accounts_receivable_path
 
-    expect(page).to have_content('Vencida')
+    # Target the badge element — the estado filter select also has a "Vencida" option.
+    expect(page).to have_css('.badge--danger', text: 'Vencida')
   end
 
   it 'does not show Vencida badge for installments due today' do
@@ -68,7 +69,7 @@ RSpec.describe 'AccountsReceivable index', type: :system do
 
     visit accounts_receivable_path
 
-    expect(page).not_to have_content('Vencida')
+    expect(page).not_to have_css('.badge--danger')
   end
 
   it 'shows the "No hay cuotas pendientes." message when no records exist' do
@@ -87,5 +88,43 @@ RSpec.describe 'AccountsReceivable index', type: :system do
 
     expect(page).to have_button('Registrar pago')
     expect(page).to have_field('amortization[amount_usd]')
+    expect(page).to have_field('amortization[notes]')
+  end
+
+  describe 'filters' do
+    let(:acme)      { create(:client, :ruc_client, full_name: 'Acme Corp') }
+    let(:beta)      { create(:client, :ruc_client, full_name: 'Beta SA') }
+    let(:acme_sale) { create(:sale, :venta, client: acme, correlative: 'VTA-AAA01') }
+    let(:beta_sale) { create(:sale, :venta, client: beta, correlative: 'VTA-BBB01') }
+
+    before do
+      create(:installment, sale: acme_sale, status: 'pendiente',
+                           due_date: 3.days.from_now, amount_usd: 100, balance_usd: 100)
+      create(:installment, sale: beta_sale, status: 'pendiente',
+                           due_date: 25.days.from_now, amount_usd: 200, balance_usd: 200)
+    end
+
+    it 'filters by client name or correlative via q' do
+      visit accounts_receivable_path
+      fill_in 'q', with: 'Acme'
+      click_button 'Filtrar'
+
+      expect(page).to have_content('Acme Corp')
+      expect(page).not_to have_content('Beta SA')
+    end
+
+    it 'filters by vencimiento within N days' do
+      visit accounts_receivable_path
+      select 'Próximos 5 días', from: 'due_within'
+      click_button 'Filtrar'
+
+      expect(page).to have_content('Acme Corp')   # due in 3 days
+      expect(page).not_to have_content('Beta SA') # due in 25 days
+    end
+
+    it 'shows the outstanding subtotal in the footer' do
+      visit accounts_receivable_path
+      expect(page).to have_content('Saldo total:')
+    end
   end
 end

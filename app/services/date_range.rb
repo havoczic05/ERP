@@ -10,6 +10,14 @@ class DateRange
     [ "Este mes",     "month" ]
   ].freeze
 
+  # [label, value] pairs for a "vence dentro de N días" <select>.
+  DUE_OPTIONS = [
+    [ "Cualquier vencimiento", "" ],
+    [ "Próximo día",      "1" ],
+    [ "Próximos 3 días",  "3" ],
+    [ "Próximos 5 días",  "5" ]
+  ].freeze
+
   # Range for a preset key, or nil when blank/unknown.
   def self.for(preset)
     case preset.to_s
@@ -26,5 +34,14 @@ class DateRange
     Date.iso8601(day.to_s).all_day
   rescue ArgumentError, Date::Error
     nil
+  end
+
+  # Range from today through N days ahead, for "due within N days".
+  # Returns nil for blank or non-positive input.
+  def self.upcoming(days)
+    n = days.to_i
+    return nil unless n.positive?
+
+    Date.current..(Date.current + n)
   end
 end

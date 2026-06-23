@@ -32,4 +32,20 @@ RSpec.describe DateRange do
       expect(DateRange.for_day("not-a-date")).to be_nil
     end
   end
+
+  describe ".upcoming" do
+    it "returns a range from today through N days ahead" do
+      travel_to Time.zone.local(2026, 6, 22, 14, 0) do
+        expect(DateRange.upcoming("3")).to eq(Date.new(2026, 6, 22)..Date.new(2026, 6, 25))
+        expect(DateRange.upcoming(5)).to eq(Date.new(2026, 6, 22)..Date.new(2026, 6, 27))
+      end
+    end
+
+    it "returns nil for blank, zero, or non-positive input" do
+      expect(DateRange.upcoming("")).to be_nil
+      expect(DateRange.upcoming(nil)).to be_nil
+      expect(DateRange.upcoming("0")).to be_nil
+      expect(DateRange.upcoming("-2")).to be_nil
+    end
+  end
 end
