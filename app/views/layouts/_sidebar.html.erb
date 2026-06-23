@@ -8,15 +8,15 @@
       <%= nav_link_to "Clientes", clients_path, controllers: "clients" if policy(Client).index? %>
       <%= nav_link_to "Productos", products_path, controllers: "products" if policy(Product).index? %>
       <%= nav_link_to "Cuentas por Cobrar", accounts_receivable_path, controllers: "accounts_receivable" if policy(Amortization).index? %>
-      <%= nav_link_to "Almacenes", warehouses_path, controllers: "warehouses" if policy(Warehouse).index? %>
     </div>
 
     <% if current_user.admin? %>
       <div class="nav-group">
         <p class="nav-group-label">Administración</p>
         <%= nav_link_to "Dashboard", dashboard_path, controllers: "dashboards" if policy(:dashboard).show? %>
-        <%= nav_link_to "Usuarios", users_path, controllers: "users" if policy(User).index? %>
-        <%= nav_link_to "Configuración", company_settings_path, controllers: "company_settings" %>
+        <%# Almacenes y Usuarios viven dentro de Configuración (ajustes del negocio) %>
+        <%= nav_link_to "Configuración", company_settings_path,
+                        controllers: %w[company_settings warehouses users] %>
       </div>
     <% end %>
   </nav>

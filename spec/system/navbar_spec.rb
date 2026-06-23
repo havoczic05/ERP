@@ -13,18 +13,17 @@ RSpec.describe "Sidebar navigation", type: :system do
   end
 
   # Sections every authenticated role can reach (authorization already allows them).
+  # Almacenes y Usuarios ya NO están en el navbar: viven dentro de Configuración.
   OPERATIONS = {
     "Ventas"            => "/sales",
     "Clientes"          => "/clients",
     "Productos"         => "/products",
-    "Cuentas por Cobrar" => "/accounts_receivable",
-    "Almacenes"         => "/warehouses"
+    "Cuentas por Cobrar" => "/accounts_receivable"
   }.freeze
 
   # Admin-only sections.
   ADMINISTRATION = {
     "Dashboard"      => "/dashboard",
-    "Usuarios"       => "/users",
     "Configuración"  => "/company_settings"
   }.freeze
 
@@ -78,6 +77,27 @@ RSpec.describe "Sidebar navigation", type: :system do
       expect(page).to have_css('a.nav-item.is-active[aria-current="page"]', text: "Productos")
       # Other sections are not marked active.
       expect(page).to have_no_css('a.nav-item.is-active', text: "Ventas")
+    end
+  end
+
+  describe "Configuración hub (Almacenes + Usuarios moved here)" do
+    before { sign_in_as(admin) }
+
+    it "does not show Almacenes or Usuarios as top-level nav links" do
+      visit root_path
+      expect(page).to have_no_css(".sidebar-nav a", text: "Almacenes")
+      expect(page).to have_no_css(".sidebar-nav a", text: "Usuarios")
+    end
+
+    it "links to Almacenes and Usuarios from the Configuración page" do
+      visit company_settings_path
+      expect(page).to have_link("Almacenes", href: warehouses_path)
+      expect(page).to have_link("Usuarios", href: users_path)
+    end
+
+    it "keeps Configuración marked active while on warehouses/users" do
+      visit warehouses_path
+      expect(page).to have_css('a.nav-item.is-active', text: "Configuración")
     end
   end
 end

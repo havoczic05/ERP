@@ -1,5 +1,8 @@
-<h1>Configuración de la empresa</h1>
+<div class="page-head"><h1>Configuración</h1></div>
 
+<%= render "shared/settings_nav" %>
+
+<h2>Datos de la empresa</h2>
 <dl>
   <dt>Razón social</dt>
   <dd><%= @company_settings.razon_social %></dd>
@@ -21,4 +24,16 @@
 
 <div class="action-bar">
   <%= action_link "Editar configuración", edit_company_settings_path, variant: :primary, size: :md, icon: :pencil %>
+</div>
+
+<h2>Administración</h2>
+<div class="settings-cards">
+  <%= link_to warehouses_path, class: "settings-card" do %>
+    <span class="settings-card__title">Almacenes</span>
+    <span class="settings-card__desc">Gestionar los almacenes del negocio.</span>
+  <% end %>
+  <%= link_to users_path, class: "settings-card" do %>
+    <span class="settings-card__title">Usuarios</span>
+    <span class="settings-card__desc">Gestionar los usuarios y sus roles.</span>
+  <% end %>
 </div>

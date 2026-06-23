@@ -721,6 +721,63 @@ dialog.modal::backdrop {
 }
 
 /* =============================================================================
+   Settings section — sub-navigation + hub cards
+   ========================================================================== */
+
+.settings-nav {
+    display: flex;
+    gap: var(--sp-2);
+    border-bottom: 1px solid var(--line);
+    margin-bottom: var(--sp-5);
+}
+.settings-nav__item {
+    padding: var(--sp-2) var(--sp-3);
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+}
+.settings-nav__item:hover {
+    color: var(--ink);
+}
+.settings-nav__item.is-active {
+    color: var(--brand);
+    border-bottom-color: var(--brand);
+    font-weight: 600;
+}
+
+.settings-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: var(--sp-4);
+    margin-top: var(--sp-3);
+}
+.settings-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    padding: var(--sp-4) var(--sp-5);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    text-decoration: none;
+    background: var(--surface);
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+.settings-card:hover {
+    border-color: var(--brand);
+    background: var(--brand-weak);
+}
+.settings-card__title {
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--ink);
+}
+.settings-card__desc {
+    font-size: var(--text-sm);
+    color: var(--muted);
+}
+
+/* =============================================================================
    Dashboard
    ========================================================================== */
 
