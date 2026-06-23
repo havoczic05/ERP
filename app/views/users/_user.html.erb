@@ -1,0 +1,15 @@
+<tr id="<%= dom_id(user) %>">
+  <td><%= user.email %></td>
+  <td><%= user.role.humanize %></td>
+  <td><%= user.active? ? 'Sí' : 'No' %></td>
+  <td class="col-actions">
+    <div class="row-actions">
+      <%= action_link 'Editar', edit_user_path(user), icon: :pencil,
+                      data: { turbo_frame: 'modal' } %>
+      <% if user.active? %>
+        <%= action_button 'Desactivar', user_path(user), method: :delete, icon: "user-x",
+                          confirm: "¿Desactivar #{user.email}?" %>
+      <% end %>
+    </div>
+  </td>
+</tr>

@@ -16,7 +16,10 @@ class UsersController < ApplicationController
     authorize @user
 
     if @user.save
-      redirect_to users_path, notice: "Usuario creado correctamente."
+      respond_to do |format|
+        format.turbo_stream { render turbo_stream: user_saved_streams(@user, "Usuario creado correctamente.", prepend: true) }
+        format.html { redirect_to users_path, notice: "Usuario creado correctamente." }
+      end
     else
       render :new, status: :unprocessable_content
     end
@@ -38,7 +41,10 @@ class UsersController < ApplicationController
 
     filtered = user_params_for_update
     if @user.update(filtered)
-      redirect_to users_path, notice: "Usuario actualizado correctamente."
+      respond_to do |format|
+        format.turbo_stream { render turbo_stream: user_saved_streams(@user, "Usuario actualizado correctamente.", prepend: false) }
+        format.html { redirect_to users_path, notice: "Usuario actualizado correctamente." }
+      end
     else
       render :edit, status: :unprocessable_content
     end
@@ -71,6 +77,22 @@ class UsersController < ApplicationController
 
   def user_params
     params.require(:user).permit(:email, :role, :password, :password_confirmation)
+  end
+
+  # Turbo Stream set for a saved user: close the modal, refresh its table row
+  # (prepend for new, replace for existing) and append a confirmation toast.
+  def user_saved_streams(user, message, prepend:)
+    row = if prepend
+            turbo_stream.prepend("users", partial: "users/user", locals: { user: user })
+    else
+            turbo_stream.replace(user, partial: "users/user", locals: { user: user })
+    end
+
+    [
+      turbo_stream.update("modal", ""),
+      row,
+      turbo_stream.append("toasts", partial: "layouts/toast", locals: { kind: :notice, message: message })
+    ]
   end
 
   # For updates: strip blank password/confirmation so the existing digest is preserved.

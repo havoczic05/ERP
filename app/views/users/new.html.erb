@@ -1,5 +1,3 @@
-<h1>Nuevo usuario</h1>
-
-<%= render 'form', user: @user %>
-
-<%= link_to 'Volver a usuarios', users_path %>
+<%= render layout: "shared/modal", locals: { title: "Nuevo usuario" } do %>
+  <%= render "form", user: @user %>
+<% end %>

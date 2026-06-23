@@ -76,6 +76,20 @@ RSpec.describe 'Warehouses', type: :request do
       end
     end
 
+    context 'as a Turbo Stream request (modal flow)' do
+      it 'closes the modal, prepends the row and appends a toast' do
+        post warehouses_path, params: { warehouse: { name: 'New Depot', location: 'Lima' } },
+                              headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
+
+        expect(response.media_type).to eq('text/vnd.turbo-stream.html')
+        expect(response.body).to include('action="update"', 'target="modal"')
+        expect(response.body).to include('action="prepend"', 'target="warehouses"')
+        expect(response.body).to include('action="append"', 'target="toasts"')
+        expect(response.body).to include('Almacén creado correctamente.')
+        expect(response.body).to include('New Depot')
+      end
+    end
+
     it 'returns 403 for vendedor' do
       allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(vendedor)
       post warehouses_path, params: { warehouse: { name: 'X' } }
@@ -104,6 +118,20 @@ RSpec.describe 'Warehouses', type: :request do
         patch warehouse_path(wh), params: { warehouse: { name: 'New Name' } }
         expect(response).to have_http_status(:found)
         expect(wh.reload.name).to eq('New Name')
+      end
+    end
+
+    context 'as a Turbo Stream request (modal flow)' do
+      it 'replaces the row, closes the modal and appends a toast' do
+        wh = create(:warehouse, name: 'Old Name')
+        patch warehouse_path(wh), params: { warehouse: { name: 'New Name' } },
+              headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
+
+        expect(response.media_type).to eq('text/vnd.turbo-stream.html')
+        expect(response.body).to include('action="replace"', %(target="warehouse_#{wh.id}"))
+        expect(response.body).to include('action="update"', 'target="modal"')
+        expect(response.body).to include('Almacén actualizado correctamente.')
+        expect(response.body).to include('New Name')
       end
     end
 

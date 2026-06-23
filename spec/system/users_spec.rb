@@ -77,7 +77,7 @@ RSpec.describe 'Users', type: :system do
     before { visit new_user_path }
 
     it 'shows heading "Nuevo usuario"' do
-      expect(page).to have_css('h1', text: 'Nuevo usuario')
+      expect(page).to have_css('.modal__title', text: 'Nuevo usuario')
     end
 
     it 'shows form labels in Spanish' do
@@ -112,7 +112,7 @@ RSpec.describe 'Users', type: :system do
     before { visit edit_user_path(vendedor) }
 
     it 'shows heading "Editar usuario"' do
-      expect(page).to have_css('h1', text: 'Editar usuario')
+      expect(page).to have_css('.modal__title', text: 'Editar usuario')
     end
 
     it 'shows "Actualizar usuario" submit button' do

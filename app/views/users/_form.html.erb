@@ -47,6 +47,8 @@
   </div>
 
   <div class="form-actions">
-    <%= f.submit user.persisted? ? 'Actualizar usuario' : 'Crear usuario' %>
+    <%= submit_button f, user.persisted? ? 'Actualizar usuario' : 'Crear usuario' %>
+    <%= action_link 'Volver a usuarios', users_path, variant: :ghost, size: :md,
+                    icon: 'arrow-left', data: { turbo_frame: '_top' } %>
   </div>
 <% end %>
