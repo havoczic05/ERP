@@ -125,15 +125,15 @@ RSpec.describe 'Products', type: :request do
   # New
   # ---------------------------------------------------------------------------
   describe 'GET /products/new' do
-    it 'returns 200 for both roles' do
+    it 'returns 200 for administrador' do
       get new_product_path
       expect(response).to have_http_status(:ok)
     end
 
-    it 'returns 200 for vendedor' do
+    it 'returns 403 for vendedor (read-only)' do
       allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(vendedor)
       get new_product_path
-      expect(response).to have_http_status(:ok)
+      expect(response).to have_http_status(:forbidden)
     end
   end
 
@@ -199,11 +199,11 @@ RSpec.describe 'Products', type: :request do
       end
     end
 
-    context 'vendedor can create' do
-      it 'returns 302 for vendedor' do
+    context 'vendedor cannot create (read-only)' do
+      it 'returns 403 for vendedor' do
         allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(vendedor)
         post products_path, params: valid_params
-        expect(response).to have_http_status(:found)
+        expect(response).to have_http_status(:forbidden)
       end
     end
   end
@@ -270,14 +270,14 @@ RSpec.describe 'Products', type: :request do
       end
     end
 
-    context 'vendedor can update' do
-      it 'returns 302 for vendedor' do
+    context 'vendedor cannot update (read-only)' do
+      it 'returns 403 for vendedor' do
         allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(vendedor)
         patch product_path(product), params: { product: { name: 'VendedorUpdate', brand: product.brand,
                                                            sku: product.sku,
                                                            warehouse_id: warehouse.id,
                                                            base_price_usd: product.base_price_usd } }
-        expect(response).to have_http_status(:found)
+        expect(response).to have_http_status(:forbidden)
       end
     end
   end
@@ -309,12 +309,12 @@ RSpec.describe 'Products', type: :request do
       end
     end
 
-    context 'vendedor can destroy' do
-      it 'returns 302 for vendedor' do
+    context 'vendedor cannot destroy (read-only)' do
+      it 'returns 403 for vendedor' do
         allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(vendedor)
         product = create(:product, warehouse: warehouse)
         delete product_path(product)
-        expect(response).to have_http_status(:found)
+        expect(response).to have_http_status(:forbidden)
       end
     end
   end

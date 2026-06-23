@@ -182,4 +182,25 @@ RSpec.describe 'Products', type: :system do
       end
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # Vendedor: read-only (view + search only; no create/edit/delete)
+  # ---------------------------------------------------------------------------
+  describe 'vendedor read-only actions' do
+    before do
+      allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(vendedor)
+    end
+
+    it 'shows only "Ver" and hides "Nuevo producto"' do
+      create(:product, name: 'Read Only Widget', warehouse: warehouse)
+      visit products_path
+
+      within('table tbody') do
+        expect(page).to have_link('Ver')
+        expect(page).not_to have_link('Editar')
+        expect(page).not_to have_button('Eliminar')
+      end
+      expect(page).not_to have_link('Nuevo producto')
+    end
+  end
 end

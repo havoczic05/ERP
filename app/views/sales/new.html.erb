@@ -30,11 +30,15 @@
       <div class="client-meta">
         <span class="client-doc" data-sale-form-target="clientDoc"></span>
         <%# Edit link — no href until a client is selected (disabled); the
-            controller sets/removes the href + is-disabled on select/clear. %>
-        <%= content_tag :a, icon(:pencil), target: "_blank", rel: "noopener",
-              class: "btn btn--ghost btn--sm is-disabled", title: "Editar cliente",
-              aria: { disabled: "true" },
-              data: { "sale-form-target": "clientEdit" } %>
+            controller sets/removes the href + is-disabled on select/clear.
+            Only for users who can edit clients (admin); the Stimulus controller
+            guards on hasClientEditTarget so omitting it is safe. %>
+        <% if policy(Client).edit? %>
+          <%= content_tag :a, icon(:pencil), target: "_blank", rel: "noopener",
+                class: "btn btn--ghost btn--sm is-disabled", title: "Editar cliente",
+                aria: { disabled: "true" },
+                data: { "sale-form-target": "clientEdit" } %>
+        <% end %>
       </div>
     <% end %>
 

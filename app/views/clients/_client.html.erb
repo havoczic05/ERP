@@ -7,10 +7,14 @@
   <td class="col-actions">
     <div class="row-actions">
       <%= action_link 'Ver', client, icon: :eye %>
-      <%= action_link 'Editar', edit_client_path(client), icon: :pencil,
-                      data: { turbo_frame: 'modal' } %>
-      <%= action_button 'Archivar', client, method: :delete, icon: :archive,
-                        confirm: '¿Archivar este cliente?' %>
+      <% if policy(client).edit? %>
+        <%= action_link 'Editar', edit_client_path(client), icon: :pencil,
+                        data: { turbo_frame: 'modal' } %>
+      <% end %>
+      <% if policy(client).destroy? %>
+        <%= action_button 'Archivar', client, method: :delete, icon: :archive,
+                          confirm: '¿Archivar este cliente?' %>
+      <% end %>
     </div>
   </td>
 </tr>
