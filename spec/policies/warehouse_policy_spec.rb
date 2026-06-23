@@ -2,7 +2,7 @@ require 'rails_helper'
 
 # TDD spec for WarehousePolicy (RF-WM-3)
 # administrador: all 7 actions allowed
-# vendedor: only index? and show? allowed; denied new?/create?/edit?/update?/destroy?
+# vendedor: denied ALL actions — warehouses are owner-only (config), including read.
 RSpec.describe WarehousePolicy, type: :policy do
   let(:administrador) { build(:user, :administrador) }
   let(:vendedor)      { build(:user, :vendedor) }
@@ -48,17 +48,17 @@ RSpec.describe WarehousePolicy, type: :policy do
   include_examples 'allows all warehouse actions', :administrador
 
   # -----------------------------------------------------------------------
-  # Vendedor: read-only (index + show only)
+  # Vendedor: no access at all (warehouses are owner-only configuration)
   # -----------------------------------------------------------------------
   describe 'vendedor' do
     let(:user) { vendedor }
 
-    it 'grants vendedor index?' do
-      expect(subject.new(user, warehouse).index?).to be true
+    it 'denies vendedor index?' do
+      expect(subject.new(user, warehouse).index?).to be false
     end
 
-    it 'grants vendedor show?' do
-      expect(subject.new(user, warehouse).show?).to be true
+    it 'denies vendedor show?' do
+      expect(subject.new(user, warehouse).show?).to be false
     end
 
     it 'denies vendedor new?' do

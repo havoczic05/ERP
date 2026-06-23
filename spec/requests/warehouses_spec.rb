@@ -208,22 +208,24 @@ RSpec.describe 'Warehouses', type: :request do
   end
 
   # ---------------------------------------------------------------------------
-  # Role enforcement: vendedor can access index and show
+  # Role enforcement: warehouses are owner-only — vendedor cannot even read.
+  # (The warehouse selects in product/sale forms load data directly, not via
+  #  this policy, so they are unaffected.)
   # ---------------------------------------------------------------------------
-  describe 'authorization — vendedor read access' do
+  describe 'authorization — vendedor has no read access' do
     before do
       allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(vendedor)
     end
 
-    it 'allows vendedor index' do
+    it 'denies vendedor index' do
       get warehouses_path
-      expect(response).to have_http_status(:ok)
+      expect(response).to have_http_status(:forbidden)
     end
 
-    it 'allows vendedor show' do
+    it 'denies vendedor show' do
       wh = create(:warehouse)
       get warehouse_path(wh)
-      expect(response).to have_http_status(:ok)
+      expect(response).to have_http_status(:forbidden)
     end
   end
 end
