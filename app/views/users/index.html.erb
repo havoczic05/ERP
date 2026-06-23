@@ -1,5 +1,7 @@
 <div class="page-head"><h1>Usuarios</h1></div>
 
+<%= render "shared/settings_nav" %>
+
 <div class="toolbar">
   <%= action_link 'Nuevo usuario', new_user_path, variant: :primary, size: :md, icon: :plus,
                   data: { turbo_frame: 'modal' } %>

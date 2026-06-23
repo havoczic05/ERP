@@ -38,8 +38,8 @@ RSpec.describe 'Authentication layout', type: :system do
       expect(page).to have_button('Cerrar sesión')
     end
 
-    it 'shows the Users link for admin' do
-      expect(page).to have_link('Usuarios')
+    it 'shows the Configuración link for admin' do
+      expect(page).to have_link('Configuración')
     end
   end
 
@@ -61,8 +61,8 @@ RSpec.describe 'Authentication layout', type: :system do
       expect(page).to have_button('Cerrar sesión')
     end
 
-    it 'does NOT show the Users link for vendedor' do
-      expect(page).not_to have_link('Usuarios')
+    it 'does NOT show the Configuración link for vendedor' do
+      expect(page).not_to have_link('Configuración')
     end
   end
 
