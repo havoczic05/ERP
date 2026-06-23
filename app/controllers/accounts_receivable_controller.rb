@@ -1,7 +1,8 @@
 class AccountsReceivableController < ApplicationController
   include CsvExport
 
-  CSV_HEADERS = [ "Cliente", "Venta", "N° de cuota", "Monto (USD)", "Saldo (USD)", "Vencimiento", "Estado" ].freeze
+  CSV_HEADERS = [ "Cliente", "Venta", "N° de cuota", "Cuotas pagadas", "Cuotas restantes",
+                  "Monto (USD)", "Saldo (USD)", "Vencimiento", "Estado" ].freeze
 
   # GET /accounts_receivable
   def index
@@ -10,19 +11,39 @@ class AccountsReceivableController < ApplicationController
     @subtotal = scope.sum(:balance_usd)
 
     respond_to do |format|
-      format.html { @pagy, @installments = pagy(:offset, scope) }
+      format.html do
+        @pagy, @installments = pagy(:offset, scope)
+        @installment_progress = installment_progress_for(@installments)
+      end
       format.csv { send_csv("cuentas-por-cobrar", CSV_HEADERS, ar_csv_rows(scope)) }
     end
   end
 
   private
 
+  # Per-sale installment progress for the given installments, in ONE grouped
+  # query (avoids N+1 and the row-multiplication that joining installments into
+  # the listing scope would cause on the SUM).
+  # Returns { sale_id => { paid: Integer, pending: Integer } }.
+  def installment_progress_for(installments)
+    sale_ids = installments.map(&:sale_id).uniq
+    counts = Installment.where(sale_id: sale_ids).group(:sale_id, :status).count
+    sale_ids.index_with do |sale_id|
+      { paid: counts[[ sale_id, "pagada" ]] || 0, pending: counts[[ sale_id, "pendiente" ]] || 0 }
+    end
+  end
+
   def ar_csv_rows(scope)
-    scope.map do |inst|
+    rows = scope.to_a
+    progress = installment_progress_for(rows)
+    rows.map do |inst|
+      p = progress[inst.sale_id]
       [
         inst.sale.client.full_name,
         inst.sale.correlative,
         inst.installment_number,
+        p[:paid],
+        p[:pending],
         inst.amount_usd,
         inst.balance_usd,
         helpers.format_date(inst.due_date),

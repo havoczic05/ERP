@@ -34,6 +34,8 @@
       <th>Cliente</th>
       <th>Venta</th>
       <th>N° de cuota</th>
+      <th>Cuotas pagadas</th>
+      <th>Cuotas restantes</th>
       <th>Monto (USD)</th>
       <th>Saldo (USD)</th>
       <th>Vencimiento</th>
@@ -47,6 +49,8 @@
         <td><%= installment.sale.client.full_name %></td>
         <td><%= installment.sale.correlative %></td>
         <td><%= installment.installment_number %></td>
+        <td><%= @installment_progress[installment.sale_id][:paid] %></td>
+        <td><%= @installment_progress[installment.sale_id][:pending] %></td>
         <td><%= money(installment.amount_usd) %></td>
         <td><%= money(installment.balance_usd) %></td>
         <td class="col-date"><%= format_date(installment.due_date) %></td>
@@ -68,7 +72,7 @@
   <% unless @installments.empty? %>
     <tfoot>
       <tr class="ar-total">
-        <th colspan="4" class="ar-total-label">Saldo total</th>
+        <th colspan="6" class="ar-total-label">Saldo total</th>
         <td class="ar-total-value"><%= money(@subtotal) %></td>
         <td colspan="3"></td>
       </tr>
