@@ -22,8 +22,10 @@
     <button type="submit">Buscar</button>
   </form>
 
-  <%= action_link 'Nuevo producto', new_product_path, variant: :primary, size: :md, icon: :plus,
-                  data: { turbo_frame: 'modal' } %>
+  <% if policy(Product).new? %>
+    <%= action_link 'Nuevo producto', new_product_path, variant: :primary, size: :md, icon: :plus,
+                    data: { turbo_frame: 'modal' } %>
+  <% end %>
 </div>
 
 <table>

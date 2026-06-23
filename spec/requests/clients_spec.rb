@@ -239,7 +239,7 @@ RSpec.describe 'Clients', type: :request do
   end
 
   # ---------------------------------------------------------------------------
-  # Authorization: vendedor also has full access
+  # Authorization: vendedor can read + create, but NOT edit/update/archive
   # ---------------------------------------------------------------------------
   describe 'authorization' do
     let(:vendor_user) { create(:user, :vendedor) }
@@ -256,6 +256,31 @@ RSpec.describe 'Clients', type: :request do
     it 'allows vendedor to access new form' do
       get new_client_path
       expect(response).to have_http_status(:ok)
+    end
+
+    it 'allows vendedor to create' do
+      expect {
+        post clients_path, params: { client: { full_name: 'V Client', document_type: 'ruc',
+                                               document_number: '20123456789', phone: '999999999' } }
+      }.to change(Client, :count).by(1)
+    end
+
+    it 'denies vendedor the edit form (403)' do
+      client = create(:client, :ruc_client)
+      get edit_client_path(client)
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it 'denies vendedor update (403)' do
+      client = create(:client, :ruc_client)
+      patch client_path(client), params: { client: { full_name: 'X' } }
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it 'denies vendedor archive/destroy (403)' do
+      client = create(:client, :ruc_client)
+      delete client_path(client)
+      expect(response).to have_http_status(:forbidden)
     end
   end
 end

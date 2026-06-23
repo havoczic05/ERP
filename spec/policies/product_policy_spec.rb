@@ -1,8 +1,8 @@
 require 'rails_helper'
 
 # TDD spec for ProductPolicy (RF-PM-6)
-# Both administrador and vendedor authorized for ALL actions incl. destroy? and search?.
-# destroy? and search? MUST be explicitly declared in ProductPolicy.
+# administrador: all 8 actions. vendedor: read-only (index/show/search) — cannot
+# create, edit or delete products. destroy? and search? MUST be explicitly declared.
 RSpec.describe ProductPolicy, type: :policy do
   let(:administrador) { build(:user, :administrador) }
   let(:vendedor)      { build(:user, :vendedor) }
@@ -26,7 +26,23 @@ RSpec.describe ProductPolicy, type: :policy do
   end
 
   include_examples 'allows all product actions', :administrador
-  include_examples 'allows all product actions', :vendedor
+
+  # Vendedor: read-only. Can view and search, but not create/edit/delete.
+  describe 'vendedor' do
+    let(:user) { vendedor }
+
+    %i[index? show? search?].each do |action|
+      it "grants vendedor #{action}" do
+        expect(subject.new(user, product).public_send(action)).to be true
+      end
+    end
+
+    %i[new? create? edit? update? destroy?].each do |action|
+      it "denies vendedor #{action}" do
+        expect(subject.new(user, product).public_send(action)).to be false
+      end
+    end
+  end
 
   # -----------------------------------------------------------------------
   # destroy? must be EXPLICITLY declared (not delegated to ApplicationPolicy default)

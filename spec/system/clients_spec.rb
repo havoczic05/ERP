@@ -168,4 +168,23 @@ RSpec.describe 'Clients', type: :system do
       expect(page).not_to have_content('To Archive')
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # Vendedor: read-only actions (can view + create, but not edit/archive)
+  # ---------------------------------------------------------------------------
+  describe 'vendedor row actions' do
+    let(:user) { create(:user, :vendedor) }
+
+    it 'shows only "Ver" (no Editar / Archivar) but keeps "Nuevo cliente"' do
+      create(:client, :ruc_client, full_name: 'Read Only Co')
+      visit clients_path
+
+      within('table tbody') do
+        expect(page).to have_link('Ver')
+        expect(page).not_to have_link('Editar')
+        expect(page).not_to have_button('Archivar')
+      end
+      expect(page).to have_link('Nuevo cliente')
+    end
+  end
 end

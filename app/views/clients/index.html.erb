@@ -14,8 +14,10 @@
     <%= f.submit 'Buscar' %>
   <% end %>
 
-  <%= action_link 'Nuevo cliente', new_client_path, variant: :primary, size: :md, icon: :plus,
-                  data: { turbo_frame: 'modal' } %>
+  <% if policy(Client).new? %>
+    <%= action_link 'Nuevo cliente', new_client_path, variant: :primary, size: :md, icon: :plus,
+                    data: { turbo_frame: 'modal' } %>
+  <% end %>
 </div>
 
 <table>
