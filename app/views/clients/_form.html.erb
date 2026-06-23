@@ -46,6 +46,11 @@
       <% end %>
     </div>
 
+    <div class="field">
+      <%= f.label :direccion, 'Dirección' %>
+      <%= f.text_field :direccion %>
+    </div>
+
     <div class="form-actions">
       <%= f.submit client.persisted? ? 'Actualizar cliente' : 'Crear cliente' %>
     </div>

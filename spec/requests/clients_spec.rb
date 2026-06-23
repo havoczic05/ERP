@@ -54,6 +54,56 @@ RSpec.describe 'Clients', type: :request do
   end
 
   # ---------------------------------------------------------------------------
+  # Index filter by document_type
+  # ---------------------------------------------------------------------------
+  describe 'GET /clients with document_type param' do
+    it 'filters by document_type' do
+      ruc = create(:client, :ruc_client, full_name: 'Empresa RUC')
+      dni = create(:client, :dni_client, full_name: 'Persona DNI')
+
+      get clients_path, params: { document_type: 'dni' }
+      expect(response.body).to include(dni.full_name)
+      expect(response.body).not_to include(ruc.full_name)
+    end
+
+    it 'ignores unknown document_type values (no error)' do
+      ruc = create(:client, :ruc_client, full_name: 'Empresa RUC')
+
+      get clients_path, params: { document_type: 'bogus' }
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include(ruc.full_name)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # CSV export
+  # ---------------------------------------------------------------------------
+  describe 'GET /clients.csv' do
+    it 'exports a CSV with headers, upper-cased document type, and direccion' do
+      create(:client, :ruc_client, full_name: 'Acme Corp',
+                                   document_number: '20123456789',
+                                   phone: '999111222', direccion: 'Av. Central 100')
+
+      get clients_path(format: :csv)
+      expect(response.media_type).to eq('text/csv')
+      expect(response.body).to include('Nombre completo,Tipo de documento,Número de documento,Teléfono,Dirección')
+      expect(response.body).to include('Acme Corp')
+      expect(response.body).to include('RUC')
+      expect(response.body).to include('20123456789')
+      expect(response.body).to include('Av. Central 100')
+    end
+
+    it 'respects the document_type filter' do
+      create(:client, :ruc_client, full_name: 'Empresa RUC')
+      create(:client, :dni_client, full_name: 'Persona DNI')
+
+      get clients_path(format: :csv, document_type: 'dni')
+      expect(response.body).to include('Persona DNI')
+      expect(response.body).not_to include('Empresa RUC')
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # New
   # ---------------------------------------------------------------------------
   describe 'GET /clients/new' do

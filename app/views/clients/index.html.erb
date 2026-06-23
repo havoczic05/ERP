@@ -6,6 +6,11 @@
       <%= f.label :q, 'Buscar' %>
       <%= f.text_field :q, value: params[:q], placeholder: 'Nombre o número de documento' %>
     </div>
+    <div class="field">
+      <%= f.label :document_type, 'Tipo de documento' %>
+      <%= select_tag :document_type,
+            options_for_select([['Todos', ''], ['DNI', 'dni'], ['RUC', 'ruc']], params[:document_type]) %>
+    </div>
     <%= f.submit 'Buscar' %>
   <% end %>
 
@@ -19,6 +24,7 @@
       <th>Tipo de documento</th>
       <th>Número de documento</th>
       <th>Teléfono</th>
+      <th>Dirección</th>
       <th>Acciones</th>
     </tr>
   </thead>
@@ -31,4 +37,8 @@
   <p id="no-clients-message">No se encontraron clientes.</p>
 <% end %>
 
-<%= pagination_nav(@pagy) %>
+<div class="table-footer">
+  <%= pagination_nav(@pagy) %>
+  <%= export_link 'Descargar Excel',
+        clients_path(request.query_parameters.except('page').merge(format: 'csv')) %>
+</div>

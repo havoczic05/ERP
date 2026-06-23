@@ -1,13 +1,21 @@
 class ProductsController < ApplicationController
+  include CsvExport
+
   before_action :set_product, only: %i[show edit update destroy]
 
+  CSV_HEADERS = [ "SKU", "Nombre", "Marca", "Almacén", "Stock", "Precio base USD" ].freeze
+
   def index
+    authorize Product
     scope = Product.kept.order(:name)
     scope = search_products(scope, params[:q]) if params[:q].present?
     scope = scope.where(warehouse_id: params[:warehouse_id]) if params[:warehouse_id].present?
-    @pagy, @products = pagy(:offset, scope)
     @warehouses = Warehouse.order(:name)
-    authorize Product
+
+    respond_to do |format|
+      format.html { @pagy, @products = pagy(:offset, scope) }
+      format.csv { send_csv("productos", CSV_HEADERS, products_csv_rows(scope)) }
+    end
   end
 
   def search
@@ -98,5 +106,18 @@ class ProductsController < ApplicationController
     return scope if term.blank?
 
     scope.where("name ILIKE :q OR sku ILIKE :q", q: "%#{term}%")
+  end
+
+  def products_csv_rows(scope)
+    scope.includes(:warehouse).map do |product|
+      [
+        product.sku,
+        product.name,
+        product.brand,
+        product.warehouse&.name,
+        product.stock,
+        product.base_price_usd
+      ]
+    end
   end
 end

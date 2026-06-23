@@ -46,4 +46,8 @@
   <p id="no-products-message">No se encontraron productos</p>
 <% end %>
 
-<%= pagination_nav(@pagy) %>
+<div class="table-footer">
+  <%= pagination_nav(@pagy) %>
+  <%= export_link 'Descargar Excel',
+        products_path(request.query_parameters.except('page').merge(format: 'csv')) %>
+</div>

@@ -1,4 +1,6 @@
 class SalesController < ApplicationController
+  include CsvExport
+
   before_action :set_sale,        only: %i[show]
   before_action :set_kept_sale,   only: %i[annul convert_to_sale]
 
@@ -13,11 +15,7 @@ class SalesController < ApplicationController
     respond_to do |format|
       # ~15 rows so the pagination/footer fits on screen without much scrolling.
       format.html { @pagy, @sales = pagy(:offset, scope, limit: 15) }
-      format.csv do
-        send_data sales_csv(scope),
-                  filename: "ventas-#{Date.current.iso8601}.csv",
-                  type: "text/csv", disposition: "inline"
-      end
+      format.csv { send_csv("ventas", SALES_CSV_HEADERS, sales_csv_rows(scope)) }
     end
   end
 
@@ -115,19 +113,18 @@ class SalesController < ApplicationController
     scope
   end
 
-  def sales_csv(scope)
-    CSV.generate(headers: true) do |csv|
-      csv << [ "Correlativo", "Fecha", "Tipo", "Cliente", "Total (USD)", "Estado" ]
-      scope.includes(:client).each do |sale|
-        csv << [
-          sale.correlative,
-          helpers.format_date(sale.created_at),
-          helpers.document_type_label(sale.document_type),
-          sale.client.full_name,
-          sale.total_usd,
-          sale.status.humanize
-        ]
-      end
+  SALES_CSV_HEADERS = [ "Correlativo", "Fecha", "Tipo", "Cliente", "Total (USD)", "Estado" ].freeze
+
+  def sales_csv_rows(scope)
+    scope.includes(:client).map do |sale|
+      [
+        sale.correlative,
+        helpers.format_date(sale.created_at),
+        helpers.document_type_label(sale.document_type),
+        sale.client.full_name,
+        sale.total_usd,
+        sale.status.humanize
+      ]
     end
   end
 
