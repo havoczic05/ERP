@@ -120,10 +120,11 @@ RSpec.describe 'Warehouses', type: :system do
         wh = create(:warehouse, name: 'Guarded Depot')
         create(:product, warehouse: wh)
 
-        visit warehouse_path(wh)
-        click_button 'Eliminar'
+        visit warehouses_path
+        within("#warehouse_#{wh.id}") { click_button 'Eliminar' }
 
         expect(page).to have_content('No se puede eliminar este almacén porque tiene productos o ventas asociadas.')
+        expect(page).to have_current_path(warehouses_path)
         expect(Warehouse.find_by(id: wh.id)).not_to be_nil
       end
     end

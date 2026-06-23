@@ -1,21 +1,18 @@
-<h1>Detalle del almacén</h1>
+<%= render layout: "shared/modal", locals: { title: "Detalle del almacén" } do %>
+  <dl class="modal-details">
+    <dt>Nombre</dt>
+    <dd><%= @warehouse.name %></dd>
 
-<dl>
-  <dt>Nombre</dt>
-  <dd><%= @warehouse.name %></dd>
+    <dt>Ubicación</dt>
+    <dd><%= @warehouse.location %></dd>
+  </dl>
 
-  <dt>Ubicación</dt>
-  <dd><%= @warehouse.location %></dd>
-</dl>
-
-<% if flash[:alert].present? %>
-  <div id="alert"><%= flash[:alert] %></div>
+  <div class="form-actions">
+    <% if policy(@warehouse).edit? %>
+      <%= action_link 'Editar', edit_warehouse_path(@warehouse), variant: :primary, size: :md, icon: :pencil,
+                      data: { turbo_frame: 'modal' } %>
+    <% end %>
+    <%= action_link 'Volver a almacenes', warehouses_path, variant: :ghost, size: :md,
+                    icon: 'arrow-left', data: { turbo_frame: '_top' } %>
+  </div>
 <% end %>
-
-<div class="action-bar">
-  <%= action_link 'Editar', edit_warehouse_path(@warehouse), size: :md, icon: :pencil %>
-  <%= action_button 'Eliminar', @warehouse, method: :delete, size: :md, icon: :trash,
-                    confirm: '¿Eliminar este almacén?' %>
-  <span class="spacer"></span>
-  <%= action_link 'Volver a almacenes', warehouses_path, size: :md, icon: "arrow-left" %>
-</div>

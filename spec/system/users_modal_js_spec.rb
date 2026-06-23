@@ -60,4 +60,27 @@ RSpec.describe "Users modal (JS)", type: :system, js: true do
     end
     expect(page).to have_css(".toast", text: "Usuario actualizado correctamente.")
   end
+
+  it "opens a read-only detail modal from Ver and switches to edit" do
+    user = create(:user, :vendedor, email: "verme@example.com")
+    visit users_path
+
+    within("##{ActionView::RecordIdentifier.dom_id(user)}") { click_link "Ver" }
+
+    expect(page).to have_css("dialog.modal[open]", wait: 10)
+    within("dialog.modal") do
+      expect(page).to have_content("Detalle del usuario")
+      expect(page).to have_content("verme@example.com")
+      click_link "Editar"
+    end
+
+    expect(page).to have_field("Correo electrónico", with: "verme@example.com", wait: 10)
+    within("dialog.modal") do
+      fill_in "Correo electrónico", with: "editado@example.com"
+      click_button "Actualizar usuario"
+    end
+
+    within("#users") { expect(page).to have_content("editado@example.com", wait: 10) }
+    expect(page).to have_css(".toast", text: "Usuario actualizado correctamente.")
+  end
 end

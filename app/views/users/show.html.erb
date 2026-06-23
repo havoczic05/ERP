@@ -1,0 +1,21 @@
+<%= render layout: "shared/modal", locals: { title: "Detalle del usuario" } do %>
+  <dl class="modal-details">
+    <dt>Correo electrónico</dt>
+    <dd><%= @user.email %></dd>
+
+    <dt>Rol</dt>
+    <dd><%= @user.role.humanize %></dd>
+
+    <dt>Activo</dt>
+    <dd><%= @user.active? ? 'Sí' : 'No' %></dd>
+  </dl>
+
+  <div class="form-actions">
+    <% if policy(@user).edit? %>
+      <%= action_link 'Editar', edit_user_path(@user), variant: :primary, size: :md, icon: :pencil,
+                      data: { turbo_frame: 'modal' } %>
+    <% end %>
+    <%= action_link 'Volver a usuarios', users_path, variant: :ghost, size: :md,
+                    icon: 'arrow-left', data: { turbo_frame: '_top' } %>
+  </div>
+<% end %>

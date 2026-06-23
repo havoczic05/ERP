@@ -58,4 +58,27 @@ RSpec.describe "Warehouses modal (JS)", type: :system, js: true do
     end
     expect(page).to have_css(".toast", text: "Almacén actualizado correctamente.")
   end
+
+  it "opens a read-only detail modal from Ver and switches to edit" do
+    warehouse = create(:warehouse, name: "Ver Me Depot")
+    visit warehouses_path
+
+    within("##{ActionView::RecordIdentifier.dom_id(warehouse)}") { click_link "Ver" }
+
+    expect(page).to have_css("dialog.modal[open]", wait: 10)
+    within("dialog.modal") do
+      expect(page).to have_content("Detalle del almacén")
+      expect(page).to have_content("Ver Me Depot")
+      click_link "Editar"
+    end
+
+    expect(page).to have_field("Nombre", with: "Ver Me Depot", wait: 10)
+    within("dialog.modal") do
+      fill_in "Nombre", with: "Editado Desde Ver"
+      click_button "Actualizar almacén"
+    end
+
+    within("#warehouses") { expect(page).to have_content("Editado Desde Ver", wait: 10) }
+    expect(page).to have_css(".toast", text: "Almacén actualizado correctamente.")
+  end
 end

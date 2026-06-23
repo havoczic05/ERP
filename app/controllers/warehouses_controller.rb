@@ -54,8 +54,7 @@ class WarehousesController < ApplicationController
       @warehouse.destroy
       redirect_to warehouses_path, notice: "Almacén eliminado correctamente."
     else
-      flash.now[:alert] = "No se puede eliminar este almacén porque tiene productos o ventas asociadas."
-      render :show, status: :unprocessable_entity
+      redirect_to warehouses_path, alert: "No se puede eliminar este almacén porque tiene productos o ventas asociadas."
     end
   end
 
