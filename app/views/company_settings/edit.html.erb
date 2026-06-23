@@ -1,7 +1,3 @@
-<div class="page-head"><h1>Editar configuración</h1></div>
-
-<%= render "shared/settings_nav" %>
-
-<%= render "form", company_settings: @company_settings %>
-
-<%= link_to "Volver a configuración", company_settings_path %>
+<%= render layout: "shared/modal", locals: { title: "Editar configuración" } do %>
+  <%= render "form", company_settings: @company_settings %>
+<% end %>
