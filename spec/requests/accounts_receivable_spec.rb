@@ -138,7 +138,45 @@ RSpec.describe 'AccountsReceivable', type: :request do
 
       it 'shows the outstanding subtotal of the filtered set' do
         get accounts_receivable_path(q: 'Acme')
-        expect(response.body).to include('Saldo total:')
+        expect(response.body).to include('Saldo total')
+      end
+    end
+
+    # -------------------------------------------------------------------------
+    # CSV export (respects the active filters)
+    # -------------------------------------------------------------------------
+    context 'CSV export' do
+      before { login_as(admin_user) }
+
+      let(:acme)      { create(:client, :ruc_client, full_name: 'Acme Corp') }
+      let(:beta)      { create(:client, :ruc_client, full_name: 'Beta SA') }
+      let(:acme_sale) { create(:sale, :venta, client: acme, correlative: 'VTA-AAA01') }
+      let(:beta_sale) { create(:sale, :venta, client: beta, correlative: 'VTA-BBB01') }
+
+      let!(:acme_inst) do
+        create(:installment, sale: acme_sale, status: 'pendiente',
+                             due_date: Date.new(2026, 7, 10), amount_usd: 100, balance_usd: 100)
+      end
+      let!(:beta_inst) do
+        create(:installment, sale: beta_sale, status: 'pendiente',
+                             due_date: 20.days.from_now, amount_usd: 200, balance_usd: 200)
+      end
+
+      it 'exports outstanding installments as CSV with headers and rows' do
+        get accounts_receivable_path(format: :csv)
+
+        expect(response.media_type).to eq('text/csv')
+        expect(response.body).to include('Cliente,Venta,N° de cuota,Monto (USD),Saldo (USD),Vencimiento,Estado')
+        expect(response.body).to include('Acme Corp')
+        expect(response.body).to include('VTA-AAA01')
+        expect(response.body).to include('10/07/2026')
+      end
+
+      it 'respects the active filters' do
+        get accounts_receivable_path(format: :csv, q: 'Acme')
+
+        expect(response.body).to include('Acme Corp')
+        expect(response.body).not_to include('Beta SA')
       end
     end
 

@@ -888,6 +888,10 @@ li {
 .footer-subtotal { margin: 0; font-size: var(--text-md); font-variant-numeric: tabular-nums; }
 .footer-subtotal strong { color: var(--ink); }
 
+/* Accounts Receivable — total row aligned under the Saldo (USD) column */
+.ar-total-label { text-align: right; color: var(--muted); font-weight: 600; }
+.ar-total-value { font-weight: 700; }
+
 /* Accounts Receivable — inline payment form (monto : notas = 1 : 3) */
 .pago-form { display: flex; align-items: center; gap: var(--sp-2); }
 .pago-inputs { display: flex; gap: var(--sp-2); flex: 1; min-width: 0; }

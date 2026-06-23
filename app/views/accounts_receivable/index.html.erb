@@ -65,6 +65,15 @@
       </tr>
     <% end %>
   </tbody>
+  <% unless @installments.empty? %>
+    <tfoot>
+      <tr class="ar-total">
+        <th colspan="4" class="ar-total-label">Saldo total</th>
+        <td class="ar-total-value"><%= money(@subtotal) %></td>
+        <td colspan="3"></td>
+      </tr>
+    </tfoot>
+  <% end %>
 </table>
 
 <% if @installments.empty? %>
@@ -73,7 +82,6 @@
 
 <div class="table-footer">
   <%= pagination_nav(@pagy) %>
-  <p class="footer-subtotal">
-    Saldo total: <strong><%= number_to_currency(@subtotal, unit: 'USD ') %></strong>
-  </p>
+  <%= export_link 'Descargar Excel',
+        accounts_receivable_path(request.query_parameters.except('page').merge(format: 'csv')) %>
 </div>
