@@ -134,4 +134,24 @@ RSpec.describe 'AccountsReceivable index', type: :system do
       expect(page.find_link('Descargar Excel')[:href]).to include('format=csv')
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # Cuotas pagadas / restantes columns (per the sale's installment plan)
+  # ---------------------------------------------------------------------------
+  describe 'installment progress columns' do
+    it 'shows paid and remaining counts per sale' do
+      create(:installment, sale: sale, installment_number: 1, status: 'pagada',
+                           due_date: 5.days.ago, amount_usd: 100, balance_usd: 0)
+      pending2 = create(:installment, sale: sale, installment_number: 2, status: 'pendiente',
+                                      due_date: 5.days.from_now, amount_usd: 100, balance_usd: 100)
+      create(:installment, sale: sale, installment_number: 3, status: 'pendiente',
+                           due_date: 15.days.from_now, amount_usd: 100, balance_usd: 100)
+
+      visit accounts_receivable_path
+
+      cells = find("#installment_#{pending2.id}").all('td')
+      expect(cells[3].text).to eq('1') # Cuotas pagadas
+      expect(cells[4].text).to eq('2') # Cuotas restantes
+    end
+  end
 end
