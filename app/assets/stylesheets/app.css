@@ -625,23 +625,99 @@ a.btn--danger:focus-visible {
 }
 
 /* =============================================================================
-   Flash messages
+   Flash messages — rendered as stacked, auto-dismissing toasts (top-right)
    ========================================================================== */
 
-.flash-notice,
-.flash-alert {
+.toasts {
+    position: fixed;
+    top: var(--sp-4);
+    right: var(--sp-4);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    max-width: min(92vw, 22rem);
+    pointer-events: none;
+}
+.toast {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
     padding: var(--sp-3) var(--sp-4);
     border-radius: var(--r);
-    margin-bottom: var(--sp-5);
     font-size: var(--text-sm);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+    transition: opacity 0.25s ease, transform 0.25s ease;
 }
-.flash-notice {
+.toast--leaving {
+    opacity: 0;
+    transform: translateX(12px);
+}
+.toast--notice {
     background: var(--success-weak);
     color: var(--success-ink);
 }
-.flash-alert {
+.toast--alert {
     background: var(--danger-weak);
     color: var(--danger-ink);
+}
+.toast__msg {
+    flex: 1;
+}
+.toast__close {
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+    color: inherit;
+    opacity: 0.7;
+}
+.toast__close:hover {
+    opacity: 1;
+}
+
+/* =============================================================================
+   Modal — native <dialog>
+   ========================================================================== */
+
+dialog.modal {
+    border: 0;
+    border-radius: var(--r-lg);
+    padding: 0;
+    width: min(92vw, 34rem);
+    background: var(--bg);
+    color: var(--ink);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.22);
+}
+dialog.modal::backdrop {
+    background: rgba(0, 0, 0, 0.45);
+}
+.modal__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--sp-4) var(--sp-5);
+    border-bottom: 1px solid var(--line);
+}
+.modal__title {
+    margin: 0;
+    font-size: var(--text-lg);
+}
+.modal__close {
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font-size: 1.4rem;
+    line-height: 1;
+    color: var(--muted);
+}
+.modal__close:hover {
+    color: var(--ink);
+}
+.modal__body {
+    padding: var(--sp-5);
 }
 
 /* =============================================================================

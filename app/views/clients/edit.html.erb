@@ -1,5 +1,3 @@
-<h1>Editar cliente</h1>
-
-<%= render 'form', client: @client %>
-
-<%= link_to 'Volver a clientes', clients_path %>
+<%= render layout: "shared/modal", locals: { title: "Editar cliente" } do %>
+  <%= render "form", client: @client %>
+<% end %>

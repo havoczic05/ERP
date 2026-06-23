@@ -39,7 +39,10 @@ class ClientsController < ApplicationController
     authorize @client
 
     if @client.save
-      redirect_to @client, notice: "Cliente creado correctamente."
+      respond_to do |format|
+        format.turbo_stream { render turbo_stream: client_saved_streams(@client, "Cliente creado correctamente.", prepend: true) }
+        format.html { redirect_to @client, notice: "Cliente creado correctamente." }
+      end
     else
       render :new, status: :unprocessable_entity
     end
@@ -56,7 +59,10 @@ class ClientsController < ApplicationController
     authorize @client
 
     if @client.update(client_params)
-      redirect_to @client, notice: "Cliente actualizado correctamente."
+      respond_to do |format|
+        format.turbo_stream { render turbo_stream: client_saved_streams(@client, "Cliente actualizado correctamente.", prepend: false) }
+        format.html { redirect_to @client, notice: "Cliente actualizado correctamente." }
+      end
     else
       render :edit, status: :unprocessable_entity
     end
@@ -85,6 +91,22 @@ class ClientsController < ApplicationController
 
   def client_params
     params.require(:client).permit(:full_name, :document_type, :document_number, :phone, :direccion)
+  end
+
+  # Turbo Stream set for a saved client: close the modal, refresh its table row
+  # (prepend for new, replace for existing) and append a confirmation toast.
+  def client_saved_streams(client, message, prepend:)
+    row = if prepend
+            turbo_stream.prepend("clients", partial: "clients/client", locals: { client: client })
+    else
+            turbo_stream.replace(client, partial: "clients/client", locals: { client: client })
+    end
+
+    [
+      turbo_stream.update("modal", ""),
+      row,
+      turbo_stream.append("toasts", partial: "layouts/toast", locals: { kind: :notice, message: message })
+    ]
   end
 
   def clients_csv_rows(scope)

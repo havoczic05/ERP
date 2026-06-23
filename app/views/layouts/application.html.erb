@@ -24,17 +24,19 @@
   </head>
 
   <body>
+    <div id="toasts" class="toasts" aria-live="polite" aria-atomic="false">
+      <%= render "layouts/flash" %>
+    </div>
+
     <% if current_user %>
       <div class="app-shell">
         <%= render "layouts/sidebar" %>
         <main class="app-main">
-          <%= render "layouts/flash" %>
           <%= yield %>
         </main>
       </div>
     <% else %>
       <main class="container">
-        <%= render "layouts/flash" %>
         <%= yield %>
       </main>
     <% end %>

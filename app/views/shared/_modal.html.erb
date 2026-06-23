@@ -1,0 +1,14 @@
+<%# Reusable modal, rendered as a partial layout (render layout: "shared/modal").
+    Server-renders dialog[open] so it works without JS (plain visible panel); the
+    modal Stimulus controller promotes it to a true modal via showModal(). %>
+<%= turbo_frame_tag "modal" do %>
+  <dialog class="modal" open data-controller="modal">
+    <div class="modal__head">
+      <h2 class="modal__title"><%= title %></h2>
+      <button type="button" class="modal__close" data-action="modal#dismiss" aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="modal__body">
+      <%= yield %>
+    </div>
+  </dialog>
+<% end %>

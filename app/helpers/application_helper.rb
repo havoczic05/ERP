@@ -99,6 +99,14 @@ module ApplicationHelper
     end
   end
 
+  # Renders a styled submit button for a form (single source of truth for the
+  # primary CTA inside <%= form_with %> blocks). `f` is the form builder.
+  # Keeps the exact visible Spanish label so system specs that match on
+  # click_button / have_button stay green.
+  def submit_button(f, label, variant: :primary, size: :md, **opts)
+    f.submit label, **opts.merge(class: btn_classes(variant, size, opts[:class]))
+  end
+
   # ---------------------------------------------------------------------------
   # Inline SVG icons — curated Lucide-style set (stroke 1.5). No gem, no Node.
   # Returns an html_safe <svg>, or nil for an unknown name.
