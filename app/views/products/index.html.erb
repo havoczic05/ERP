@@ -22,7 +22,8 @@
     <button type="submit">Buscar</button>
   </form>
 
-  <%= action_link 'Nuevo producto', new_product_path, variant: :primary, size: :md, icon: :plus %>
+  <%= action_link 'Nuevo producto', new_product_path, variant: :primary, size: :md, icon: :plus,
+                  data: { turbo_frame: 'modal' } %>
 </div>
 
 <table>
@@ -37,7 +38,7 @@
       <th>Acciones</th>
     </tr>
   </thead>
-  <tbody>
+  <tbody id="products">
     <%= render @products %>
   </tbody>
 </table>
@@ -51,3 +52,5 @@
   <%= export_link 'Descargar Excel',
         products_path(request.query_parameters.except('page').merge(format: 'csv')) %>
 </div>
+
+<%= render "shared/modal_frame" %>

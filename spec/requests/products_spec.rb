@@ -155,6 +155,20 @@ RSpec.describe 'Products', type: :request do
       end
     end
 
+    context 'as a Turbo Stream request (modal flow)' do
+      it 'closes the modal, prepends the row and appends a toast' do
+        post products_path, params: valid_params,
+                            headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
+
+        expect(response.media_type).to eq('text/vnd.turbo-stream.html')
+        expect(response.body).to include('action="update"', 'target="modal"')
+        expect(response.body).to include('action="prepend"', 'target="products"')
+        expect(response.body).to include('action="append"', 'target="toasts"')
+        expect(response.body).to include('Producto creado correctamente.')
+        expect(response.body).to include('Test Product')
+      end
+    end
+
     context 'with blank name' do
       it 'returns 422' do
         post products_path, params: { product: valid_params[:product].merge(name: '') }
@@ -219,6 +233,21 @@ RSpec.describe 'Products', type: :request do
                                                            base_price_usd: 5.00 } }
         expect(response).to have_http_status(:found)
         expect(product.reload.name).to eq('After')
+      end
+    end
+
+    context 'as a Turbo Stream request (modal flow)' do
+      it 'replaces the row, closes the modal and appends a toast' do
+        patch product_path(product),
+              params: { product: { name: 'After', brand: 'NewBrand', sku: product.sku,
+                                   warehouse_id: warehouse.id, base_price_usd: 5.00 } },
+              headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
+
+        expect(response.media_type).to eq('text/vnd.turbo-stream.html')
+        expect(response.body).to include('action="replace"', %(target="product_#{product.id}"))
+        expect(response.body).to include('action="update"', 'target="modal"')
+        expect(response.body).to include('Producto actualizado correctamente.')
+        expect(response.body).to include('After')
       end
     end
 
