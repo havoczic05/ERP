@@ -42,7 +42,10 @@ class ProductsController < ApplicationController
     authorize @product
 
     if @product.save
-      redirect_to @product, notice: "Producto creado correctamente."
+      respond_to do |format|
+        format.turbo_stream { render turbo_stream: product_saved_streams(@product, "Producto creado correctamente.", prepend: true) }
+        format.html { redirect_to @product, notice: "Producto creado correctamente." }
+      end
     else
       @warehouses = Warehouse.order(:name)
       render :new, status: :unprocessable_entity
@@ -62,7 +65,10 @@ class ProductsController < ApplicationController
     authorize @product
 
     if @product.update(product_update_params)
-      redirect_to @product, notice: "Producto actualizado correctamente."
+      respond_to do |format|
+        format.turbo_stream { render turbo_stream: product_saved_streams(@product, "Producto actualizado correctamente.", prepend: false) }
+        format.html { redirect_to @product, notice: "Producto actualizado correctamente." }
+      end
     else
       @warehouses = Warehouse.order(:name)
       render :edit, status: :unprocessable_entity
@@ -106,6 +112,22 @@ class ProductsController < ApplicationController
     return scope if term.blank?
 
     scope.where("name ILIKE :q OR sku ILIKE :q", q: "%#{term}%")
+  end
+
+  # Turbo Stream set for a saved product: close the modal, refresh its table row
+  # (prepend for new, replace for existing) and append a confirmation toast.
+  def product_saved_streams(product, message, prepend:)
+    row = if prepend
+            turbo_stream.prepend("products", partial: "products/product", locals: { product: product })
+    else
+            turbo_stream.replace(product, partial: "products/product", locals: { product: product })
+    end
+
+    [
+      turbo_stream.update("modal", ""),
+      row,
+      turbo_stream.append("toasts", partial: "layouts/toast", locals: { kind: :notice, message: message })
+    ]
   end
 
   def products_csv_rows(scope)

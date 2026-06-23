@@ -1,5 +1,3 @@
-<h1>Nuevo producto</h1>
-
-<%= render 'form', product: @product %>
-
-<%= link_to 'Volver a productos', products_path %>
+<%= render layout: "shared/modal", locals: { title: "Nuevo producto" } do %>
+  <%= render "form", product: @product %>
+<% end %>

@@ -1,6 +1,3 @@
-<h1>Editar producto</h1>
-
-<%= render 'form', product: @product %>
-
-<%= link_to 'Volver al producto', @product %>
-<%= link_to 'Volver a productos', products_path %>
+<%= render layout: "shared/modal", locals: { title: "Editar producto" } do %>
+  <%= render "form", product: @product %>
+<% end %>
