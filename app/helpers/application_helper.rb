@@ -169,6 +169,17 @@ module ApplicationHelper
     action_link "Limpiar", path, variant: :ghost, size: :md, icon: :x
   end
 
+  # Clickable table header that toggles ascending/descending date order while
+  # preserving the active filters (and resetting the page). Default order is
+  # descending (newest first). Reusable on any date-sortable index.
+  def sortable_date_header(label)
+    current  = params[:dir] == "asc" ? "asc" : "desc"
+    next_dir = current == "asc" ? "desc" : "asc"
+    arrow    = current == "asc" ? "▲" : "▼"
+    query    = request.query_parameters.merge("dir" => next_dir).except("page")
+    link_to safe_join([ label, " ", arrow ]), "#{request.path}?#{query.to_query}", class: "sortable"
+  end
+
   # Reusable export button — opens the export (e.g. a CSV) in a new tab. Same
   # ghost style as the other actions; pass a path with the desired format/filters.
   def export_link(label, path)
