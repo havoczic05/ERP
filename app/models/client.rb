@@ -4,7 +4,10 @@ class Client < ApplicationRecord
     "document_type" => "Tipo de documento",
     "document_number" => "Número de documento",
     "phone" => "Teléfono",
-    "direccion" => "Dirección"
+    "direccion" => "Dirección",
+    "distrito" => "Distrito",
+    "provincia" => "Provincia",
+    "departamento" => "Departamento"
   }.freeze
   include SpanishAttributeNames
 

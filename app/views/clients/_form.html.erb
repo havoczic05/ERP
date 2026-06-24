@@ -50,6 +50,23 @@
       <%= f.text_field :direccion %>
     </div>
 
+    <div class="field-grid">
+      <div class="field">
+        <%= f.label :distrito, 'Distrito' %>
+        <%= f.text_field :distrito %>
+      </div>
+
+      <div class="field">
+        <%= f.label :provincia, 'Provincia' %>
+        <%= f.text_field :provincia %>
+      </div>
+
+      <div class="field">
+        <%= f.label :departamento, 'Departamento' %>
+        <%= f.text_field :departamento %>
+      </div>
+    </div>
+
     <div class="form-actions">
       <%= submit_button f, client.persisted? ? 'Actualizar cliente' : 'Crear cliente' %>
       <%= action_link 'Volver a clientes', clients_path, variant: :ghost, size: :md,

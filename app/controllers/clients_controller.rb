@@ -3,7 +3,8 @@ class ClientsController < ApplicationController
 
   before_action :set_client, only: %i[show edit update destroy]
 
-  CSV_HEADERS = [ "Nombre completo", "Tipo de documento", "Número de documento", "Teléfono", "Dirección" ].freeze
+  CSV_HEADERS = [ "Nombre completo", "Tipo de documento", "Número de documento", "Teléfono",
+                  "Dirección", "Distrito", "Provincia", "Departamento" ].freeze
 
   def index
     authorize Client
@@ -89,7 +90,8 @@ class ClientsController < ApplicationController
   end
 
   def client_params
-    params.require(:client).permit(:full_name, :document_type, :document_number, :phone, :direccion)
+    params.require(:client).permit(:full_name, :document_type, :document_number, :phone,
+                                   :direccion, :distrito, :provincia, :departamento)
   end
 
   # Turbo Stream set for a saved client: close the modal, refresh its table row
@@ -115,7 +117,10 @@ class ClientsController < ApplicationController
         client.document_type.upcase,
         client.document_number,
         client.phone,
-        client.direccion
+        client.direccion,
+        client.distrito,
+        client.provincia,
+        client.departamento
       ]
     end
   end

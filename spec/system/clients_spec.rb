@@ -51,6 +51,18 @@ RSpec.describe 'Clients', type: :system do
       visit clients_path(q: 'Acme')
       expect(page).to have_link('Limpiar', href: clients_path)
     end
+
+    it 'shows distrito, provincia y departamento columns with their values' do
+      create(:client, :ruc_client, full_name: 'Loc Corp',
+                                   distrito: 'Miraflores', provincia: 'Lima', departamento: 'Lima')
+
+      visit clients_path
+
+      expect(page).to have_css('thead th', text: 'Distrito')
+      expect(page).to have_css('thead th', text: 'Provincia')
+      expect(page).to have_css('thead th', text: 'Departamento')
+      expect(page).to have_content('Miraflores')
+    end
   end
 
   # ---------------------------------------------------------------------------
@@ -100,6 +112,24 @@ RSpec.describe 'Clients', type: :system do
 
         expect(page).to have_content('Test Client SA')
         expect(Client.kept.find_by(document_number: '20123456789')).not_to be_nil
+      end
+
+      it 'persists distrito, provincia y departamento' do
+        visit new_client_path
+
+        fill_in 'Nombre completo', with: 'Geo Client'
+        select 'Ruc', from: 'Tipo de documento'
+        fill_in 'Número de documento', with: '20123456789'
+        fill_in 'Teléfono', with: '987654321'
+        fill_in 'Distrito', with: 'Surco'
+        fill_in 'Provincia', with: 'Lima'
+        fill_in 'Departamento', with: 'Lima'
+        click_button 'Crear cliente'
+
+        client = Client.kept.find_by(document_number: '20123456789')
+        expect(client.distrito).to eq('Surco')
+        expect(client.provincia).to eq('Lima')
+        expect(client.departamento).to eq('Lima')
       end
     end
 
