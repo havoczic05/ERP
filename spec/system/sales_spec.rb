@@ -53,6 +53,11 @@ RSpec.describe 'Sales', type: :system do
       expect(page).to have_link('Ver', href: sale_path(sale))
     end
 
+    it 'offers a "Limpiar" link that resets the filters' do
+      visit sales_path(q: 'ACME')
+      expect(page).to have_link('Limpiar', href: sales_path)
+    end
+
     it 'shows the document creation date in dd/mm/aaaa' do
       sale = create(:sale, client: client, warehouse: warehouse, correlative: 'COT-00002')
       visit sales_path

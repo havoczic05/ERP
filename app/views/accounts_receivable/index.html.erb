@@ -25,6 +25,7 @@
       <%= date_field_tag :on, params[:on] %>
     </div>
     <%= f.submit 'Filtrar' %>
+    <%= clear_filters_link accounts_receivable_path %>
   <% end %>
 </div>
 
