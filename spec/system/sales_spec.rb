@@ -67,6 +67,38 @@ RSpec.describe 'Sales', type: :system do
       end
     end
 
+    it 'filters by sale correlative via q' do
+      create(:sale, client: client, warehouse: warehouse, correlative: 'VTA-77777',
+                    document_type: 'venta')
+      create(:sale, client: client, warehouse: warehouse, correlative: 'COT-88888')
+
+      visit sales_path(q: 'VTA-77777')
+
+      expect(page).to have_content('VTA-77777')
+      expect(page).not_to have_content('COT-88888')
+    end
+
+    it 'sorts by creation date, toggling with the Fecha header (default newest first)' do
+      older = create(:sale, client: client, warehouse: warehouse,
+                            correlative: 'COT-OLD01', created_at: 5.days.ago)
+      newer = create(:sale, client: client, warehouse: warehouse,
+                            correlative: 'COT-NEW01', created_at: 1.day.ago)
+
+      visit sales_path
+      ids = page.all('table tbody tr').map { |tr| tr[:id] }
+      expect(ids.index("sale_#{newer.id}")).to be < ids.index("sale_#{older.id}")
+
+      visit sales_path(dir: 'asc')
+      ids = page.all('table tbody tr').map { |tr| tr[:id] }
+      expect(ids.index("sale_#{older.id}")).to be < ids.index("sale_#{newer.id}")
+    end
+
+    it 'renders the Fecha column header as a sort toggle link' do
+      create(:sale, client: client, warehouse: warehouse, correlative: 'COT-SORT1')
+      visit sales_path
+      expect(page).to have_css('th a.sortable', text: 'Fecha')
+    end
+
     it 'shows annulled sales in the index for audit purposes' do
       # Per spec (RF3.1): "Annulled sales (status=anulada) MUST still appear in the
       # index for audit purposes." Annulment soft-deletes (sets discarded_at), so the

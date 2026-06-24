@@ -6,7 +6,7 @@
   <%= form_with url: sales_path, method: :get, class: "filters" do |f| %>
     <div class="field">
       <%= label_tag :q, 'Cliente' %>
-      <%= text_field_tag :q, params[:q], placeholder: 'Nombre del cliente' %>
+      <%= text_field_tag :q, params[:q], placeholder: 'Cliente o correlativo' %>
     </div>
     <div class="field">
       <%= label_tag :date_range, 'Fecha' %>
@@ -40,7 +40,7 @@
     <thead>
       <tr>
         <th>Correlativo</th>
-        <th>Fecha</th>
+        <th><%= sortable_date_header 'Fecha' %></th>
         <th>Tipo</th>
         <th>Cliente</th>
         <th class="num">Total (USD)</th>
