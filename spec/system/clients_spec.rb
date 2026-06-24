@@ -46,6 +46,11 @@ RSpec.describe 'Clients', type: :system do
       visit clients_path
       expect(page).to have_link('Nuevo cliente', href: new_client_path)
     end
+
+    it 'offers a "Limpiar" link that resets the filters' do
+      visit clients_path(q: 'Acme')
+      expect(page).to have_link('Limpiar', href: clients_path)
+    end
   end
 
   # ---------------------------------------------------------------------------

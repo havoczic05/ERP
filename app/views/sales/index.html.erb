@@ -29,6 +29,7 @@
                                params[:status]) %>
     </div>
     <%= f.submit 'Filtrar' %>
+    <%= clear_filters_link sales_path %>
   <% end %>
 
   <%= action_link 'Nuevo documento', new_sale_path, variant: :primary, size: :md, icon: :plus %>

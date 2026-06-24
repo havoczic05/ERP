@@ -20,6 +20,7 @@
     </div>
 
     <button type="submit">Buscar</button>
+    <%= clear_filters_link products_path %>
   </form>
 
   <% if policy(Product).new? %>

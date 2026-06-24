@@ -120,7 +120,8 @@ module ApplicationHelper
     "user-x":   '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" x2="22" y1="8" y2="13"/><line x1="22" x2="17" y1="8" y2="13"/>',
     download:   '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>',
     plus:       '<path d="M5 12h14"/><path d="M12 5v14"/>',
-    "arrow-left": '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>'
+    "arrow-left": '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+    x:          '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>'
   }.freeze
 
   def icon(name)
@@ -159,6 +160,13 @@ module ApplicationHelper
         tag.span(number_with_precision(amount, precision: 2, delimiter: ","), class: "money-val")
       ])
     end
+  end
+
+  # Clears every active filter on an index toolbar. Because the filter forms are
+  # GET forms targeting their own index, "limpiar" is simply a link to the bare
+  # path with no query string. Reused across sales/clients/products/AR.
+  def clear_filters_link(path)
+    action_link "Limpiar", path, variant: :ghost, size: :md, icon: :x
   end
 
   # Reusable export button — opens the export (e.g. a CSV) in a new tab. Same

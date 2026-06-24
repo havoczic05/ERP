@@ -133,6 +133,11 @@ RSpec.describe 'AccountsReceivable index', type: :system do
       expect(page).to have_css('.table-footer', text: 'Descargar Excel')
       expect(page.find_link('Descargar Excel')[:href]).to include('format=csv')
     end
+
+    it 'offers a "Limpiar" link that resets the filters' do
+      visit accounts_receivable_path(q: 'Acme')
+      expect(page).to have_link('Limpiar', href: accounts_receivable_path)
+    end
   end
 
   # ---------------------------------------------------------------------------

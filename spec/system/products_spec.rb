@@ -36,6 +36,11 @@ RSpec.describe 'Products', type: :system do
       expect(page).to have_content('No se encontraron productos')
     end
 
+    it 'offers a "Limpiar" link that resets the filters' do
+      visit products_path(q: 'Widget')
+      expect(page).to have_link('Limpiar', href: products_path)
+    end
+
     it 'shows only kept products' do
       create(:product, name: 'Kept One', warehouse: warehouse)
       create(:product, name: 'Discarded One', warehouse: warehouse, discarded_at: Time.current)
