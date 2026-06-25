@@ -141,22 +141,36 @@ RSpec.describe 'AccountsReceivable index', type: :system do
   end
 
   # ---------------------------------------------------------------------------
-  # Cuotas pagadas / restantes columns (per the sale's installment plan)
+  # Current installment per sale (one row per sale = the cuota to collect)
   # ---------------------------------------------------------------------------
-  describe 'installment progress columns' do
-    it 'shows paid and remaining counts per sale' do
-      create(:installment, sale: sale, installment_number: 1, status: 'pagada',
-                           due_date: 5.days.ago, amount_usd: 100, balance_usd: 0)
-      pending2 = create(:installment, sale: sale, installment_number: 2, status: 'pendiente',
-                                      due_date: 5.days.from_now, amount_usd: 100, balance_usd: 100)
-      create(:installment, sale: sale, installment_number: 3, status: 'pendiente',
-                           due_date: 15.days.from_now, amount_usd: 100, balance_usd: 100)
+  describe 'current installment per sale' do
+    it 'labels the amount column "Monto Cuota (USD)" and drops the progress columns' do
+      create(:installment, sale: sale, status: 'pendiente',
+                           due_date: 5.days.from_now, amount_usd: 250, balance_usd: 250)
 
       visit accounts_receivable_path
 
-      cells = find("#installment_#{pending2.id}").all('td')
-      expect(cells[3].text).to eq('1') # Cuotas pagadas
-      expect(cells[4].text).to eq('2') # Cuotas restantes
+      expect(page).to have_css('thead th', text: 'Monto Cuota (USD)')
+      expect(page).not_to have_css('thead th', text: 'Cuotas pagadas')
+      expect(page).not_to have_css('thead th', text: 'Cuotas restantes')
+    end
+
+    it 'shows only the earliest pending installment per sale, as actual/total' do
+      create(:installment, sale: sale, installment_number: 1, status: 'pagada',
+                           due_date: 5.days.ago, amount_usd: 100, balance_usd: 0)
+      current = create(:installment, sale: sale, installment_number: 2, status: 'pendiente',
+                                     due_date: 5.days.from_now, amount_usd: 100, balance_usd: 100)
+      future  = create(:installment, sale: sale, installment_number: 3, status: 'pendiente',
+                                     due_date: 15.days.from_now, amount_usd: 100, balance_usd: 100)
+
+      visit accounts_receivable_path
+
+      # The sale appears once: only its current (earliest pending) installment.
+      expect(page).to have_css("#installment_#{current.id}")
+      expect(page).not_to have_css("#installment_#{future.id}")
+
+      cells = find("#installment_#{current.id}").all('td')
+      expect(cells[2].text).to eq('2/3') # N° de cuota = actual/total
     end
   end
 end

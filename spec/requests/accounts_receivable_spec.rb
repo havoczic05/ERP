@@ -166,7 +166,7 @@ RSpec.describe 'AccountsReceivable', type: :request do
         get accounts_receivable_path(format: :csv)
 
         expect(response.media_type).to eq('text/csv')
-        expect(response.body).to include('Cliente,Venta,N° de cuota,Cuotas pagadas,Cuotas restantes,Monto (USD),Saldo (USD),Vencimiento,Estado')
+        expect(response.body).to include('Cliente,Venta,N° de cuota,Monto Cuota (USD),Saldo (USD),Vencimiento,Estado')
         expect(response.body).to include('Acme Corp')
         expect(response.body).to include('VTA-AAA01')
         expect(response.body).to include('10/07/2026')
