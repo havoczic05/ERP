@@ -18,6 +18,25 @@ require "bigdecimal/util"
 rng = Random.new(20260620)
 
 # ---------------------------------------------------------------------------
+# 0. Destructive reset (development / test only)
+# ---------------------------------------------------------------------------
+# Wipe and regenerate the whole demo dataset on every run, EXCEPT users (login
+# accounts are preserved). Guarded to Rails.env.local? so production is never
+# touched — there the idempotent `find_or_create_by` + sales guard below keep
+# seeding safe. Deleted in FK-safe order (children before parents).
+if Rails.env.local?
+  Amortization.delete_all
+  CreditNote.delete_all
+  Installment.delete_all
+  SaleItem.delete_all
+  Sale.delete_all
+  Product.delete_all
+  Client.delete_all
+  CompanySettings.delete_all
+  Warehouse.delete_all
+end
+
+# ---------------------------------------------------------------------------
 # 1. Core records
 # ---------------------------------------------------------------------------
 
@@ -54,6 +73,15 @@ ensure_user.call(
   email:    "vendedor@erp.local",
   role:     "vendedor",
   password: ENV.fetch("SEED_VENDEDOR_PASSWORD", "changeme123")
+)
+
+# Company settings — singleton row. Fill every column so PDFs / headers render
+# with real data instead of blanks.
+CompanySettings.instance.update!(
+  razon_social: "Electrodomésticos del Perú S.A.C.",
+  ruc:          "20512345678",
+  direccion:    "Av. Javier Prado Este 1234, San Isidro, Lima",
+  telefono:     "014567890"
 )
 
 # ---------------------------------------------------------------------------
@@ -159,6 +187,34 @@ LAST_NAMES = %w[
 COMPANY_PREFIXES = %w[Comercial Distribuidora Importadora Inversiones Servicios Corporación Grupo Tecno].freeze
 COMPANY_SUFFIXES = %w[SAC EIRL SRL SA].freeze
 
+# [departamento, provincia, distrito] tuples for realistic Peruvian addresses.
+LOCATIONS = [
+  [ "Lima",         "Lima",       "Miraflores" ],
+  [ "Lima",         "Lima",       "San Isidro" ],
+  [ "Lima",         "Lima",       "Surco" ],
+  [ "Lima",         "Lima",       "San Borja" ],
+  [ "La Libertad",  "Trujillo",   "Trujillo" ],
+  [ "Arequipa",     "Arequipa",   "Cercado" ],
+  [ "Piura",        "Piura",      "Piura" ],
+  [ "Cusco",        "Cusco",      "Wanchaq" ],
+  [ "Lambayeque",   "Chiclayo",   "Chiclayo" ],
+  [ "Junín",        "Huancayo",   "El Tambo" ]
+].freeze
+
+STREET_NAMES = [ "Av. Los Próceres", "Jr. San Martín", "Calle Las Begonias", "Av. Grau",
+                 "Jr. Amazonas", "Av. La Marina", "Calle Bolívar", "Av. Brasil" ].freeze
+
+# Returns a hash of location attributes for a client, drawn deterministically.
+pick_location = lambda do
+  departamento, provincia, distrito = LOCATIONS[rng.rand(LOCATIONS.size)]
+  {
+    departamento: departamento,
+    provincia:    provincia,
+    distrito:     distrito,
+    direccion:    "#{STREET_NAMES[rng.rand(STREET_NAMES.size)]} #{rng.rand(100..1999)}"
+  }
+end
+
 clients = []
 
 # 25 individuals (DNI — 8 digits) + 15 businesses (RUC — 11 digits) = 40 clients.
@@ -168,10 +224,15 @@ clients = []
   last2 = LAST_NAMES[rng.rand(LAST_NAMES.size)]
   doc   = format("%08d", 40_000_000 + (rng.rand(0..9_000_000) + i))
 
+  loc = pick_location.call
   clients << Client.find_or_create_by!(document_number: doc) do |c|
     c.full_name     = "#{first} #{last1} #{last2}"
     c.document_type = "dni"
     c.phone         = "9#{format('%08d', rng.rand(0..99_999_999))}"
+    c.departamento  = loc[:departamento]
+    c.provincia     = loc[:provincia]
+    c.distrito      = loc[:distrito]
+    c.direccion     = loc[:direccion]
   end
 end
 
@@ -182,10 +243,15 @@ end
   # Peru RUC: 11 digits, businesses start with "20".
   doc    = "20#{format('%09d', 100_000_000 + (rng.rand(0..800_000_000) + i))}"
 
+  loc = pick_location.call
   clients << Client.find_or_create_by!(document_number: doc) do |c|
     c.full_name     = "#{prefix} #{word} #{suffix}"
     c.document_type = "ruc"
     c.phone         = "01#{format('%07d', rng.rand(0..9_999_999))}"
+    c.departamento  = loc[:departamento]
+    c.provincia     = loc[:provincia]
+    c.distrito      = loc[:distrito]
+    c.direccion     = loc[:direccion]
   end
 end
 
@@ -296,6 +362,22 @@ else
     end
   end
 
+  # --- Anchor each sale's installment schedule to its start date ------------
+  # SaleCreationService anchors due_dates to Date.today (correct for real-time
+  # sales). For backdated demo ventas that would put every cuota in the future.
+  # Re-anchor to the sale's start (its backdated created_at) so the schedule
+  # shifts coherently into the past: earlier cuotas fall due first (some already
+  # overdue), later ones remain pending — ALWAYS in installment_number order.
+  INSTALLMENT_INTERVAL_DAYS = 30
+  ventas.each do |venta|
+    start_date = venta.created_at.to_date
+    venta.installments.order(:installment_number).each do |inst|
+      inst.update_columns(
+        due_date: start_date + (inst.installment_number * INSTALLMENT_INTERVAL_DAYS).days
+      )
+    end
+  end
+
   # --- Pay installments on ~30 ventas (full first cuota, sometimes more) ---
   ventas.sample(30, random: rng).each do |venta|
     venta.installments.where(status: "pendiente").order(:installment_number).first(2).each do |installment|
@@ -306,11 +388,6 @@ else
         paid_at: rng.rand(0..60).days.ago
       )
     end
-  end
-
-  # --- Make a handful of open installments overdue ------------------------
-  Installment.where(status: "pendiente").order(Arel.sql("RANDOM()")).limit(12).each do |installment|
-    installment.update_columns(due_date: rng.rand(5..45).days.ago.to_date)
   end
 
   # --- Annul ~5 ventas (creates credit notes, restores stock) -------------

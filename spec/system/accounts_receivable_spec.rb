@@ -121,10 +121,10 @@ RSpec.describe 'AccountsReceivable index', type: :system do
       expect(page).not_to have_content('Beta SA') # due in 25 days
     end
 
-    it 'shows the outstanding subtotal aligned under the Saldo column' do
+    it 'does not render a subtotal footer row' do
       visit accounts_receivable_path
-      expect(page).to have_css('tfoot .ar-total-label', text: 'Saldo total')
-      expect(page).to have_css('tfoot .ar-total-value')
+      expect(page).not_to have_css('tfoot .ar-total-label')
+      expect(page).not_to have_css('tfoot .ar-total-value')
     end
 
     it 'offers a CSV export link at the bottom-right of the table' do
@@ -143,15 +143,42 @@ RSpec.describe 'AccountsReceivable index', type: :system do
   # Current installment per sale (one row per sale = the cuota to collect)
   # ---------------------------------------------------------------------------
   describe 'current installment per sale' do
-    it 'labels the amount column "Monto Cuota (USD)" and drops the progress columns' do
+    it 'labels the cuota and saldo columns and adds the overdue-count column' do
       create(:installment, sale: sale, status: 'pendiente',
                            due_date: 5.days.from_now, amount_usd: 250, balance_usd: 250)
 
       visit accounts_receivable_path
 
-      expect(page).to have_css('thead th', text: 'Monto Cuota (USD)')
-      expect(page).not_to have_css('thead th', text: 'Cuotas pagadas')
-      expect(page).not_to have_css('thead th', text: 'Cuotas restantes')
+      expect(page).to have_css('thead th', text: 'Cuota actual (USD)')
+      expect(page).to have_css('thead th', text: 'C. Vencidas')
+      expect(page).to have_css('thead th', text: 'Saldo total (USD)')
+      expect(page).not_to have_css('thead th', text: 'Monto Cuota (USD)')
+    end
+
+    it 'links the Venta correlative to the sale detail page' do
+      create(:installment, sale: sale, status: 'pendiente',
+                           due_date: 5.days.from_now, amount_usd: 250, balance_usd: 250)
+
+      visit accounts_receivable_path
+
+      expect(page).to have_link(sale.correlative, href: sale_path(sale))
+    end
+
+    it 'shows C. Vencidas as the count of overdue installments and Saldo total as the sale remaining' do
+      # The displayed row is the earliest pending installment (#1).
+      current = create(:installment, sale: sale, installment_number: 1, status: 'pendiente',
+                                     due_date: 10.days.ago, amount_usd: 100, balance_usd: 100)
+      create(:installment, sale: sale, installment_number: 2, status: 'pendiente',
+                           due_date: 2.days.ago, amount_usd: 100, balance_usd: 100)
+      create(:installment, sale: sale, installment_number: 3, status: 'pendiente',
+                           due_date: 20.days.from_now, amount_usd: 100, balance_usd: 100)
+
+      visit accounts_receivable_path
+
+      cells = find("#installment_#{current.id}").all('td')
+      # Columns: Cliente, Venta, N° de cuota, C. Vencidas, Cuota actual, Saldo total, ...
+      expect(cells[3].text).to eq('2')        # two overdue installments
+      expect(cells[5].text).to include('300') # 100 + 100 + 100 still owed across the sale
     end
 
     it 'shows only the earliest pending installment per sale, as actual/total' do
