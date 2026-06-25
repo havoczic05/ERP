@@ -3,6 +3,5 @@ FactoryBot.define do
     association :installment
     amount_usd { 50.00 }
     paid_at { Time.current }
-    notes { nil }
   end
 end

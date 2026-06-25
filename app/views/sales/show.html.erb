@@ -78,7 +78,6 @@
         <th class="num">Cuota</th>
         <th>Fecha de pago</th>
         <th class="num">Monto</th>
-        <th>Notas</th>
       </tr>
     </thead>
     <tbody>
@@ -87,7 +86,6 @@
           <td class="num"><%= amort.installment.installment_number %></td>
           <td class="col-date"><%= format_date(amort.paid_at) %></td>
           <td><%= money(amort.amount_usd) %></td>
-          <td><%= amort.notes.presence || "—" %></td>
         </tr>
       <% end %>
     </tbody>

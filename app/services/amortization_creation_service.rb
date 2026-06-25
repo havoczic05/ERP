@@ -13,15 +13,14 @@
 #   success → result.record is the persisted Amortization
 #   failure → result.record is the Installment, result.errors has messages
 class AmortizationCreationService
-  def self.call(installment, amount:, paid_at: Time.current, notes: nil)
-    new(installment, amount: amount, paid_at: paid_at, notes: notes).call
+  def self.call(installment, amount:, paid_at: Time.current)
+    new(installment, amount: amount, paid_at: paid_at).call
   end
 
-  def initialize(installment, amount:, paid_at: Time.current, notes: nil)
+  def initialize(installment, amount:, paid_at: Time.current)
     @installment = installment
     @amount      = BigDecimal(amount.to_s)
     @paid_at     = paid_at
-    @notes       = notes
     @errors      = []
   end
 
@@ -49,8 +48,7 @@ class AmortizationCreationService
 
         amortization = @installment.amortizations.create!(
           amount_usd: @amount,
-          paid_at:    @paid_at,
-          notes:      @notes
+          paid_at:    @paid_at
         )
 
         new_balance = balance - @amount

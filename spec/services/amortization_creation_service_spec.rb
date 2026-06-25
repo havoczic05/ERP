@@ -4,8 +4,8 @@ RSpec.describe AmortizationCreationService do
   # ---------------------------------------------------------------------------
   # Helpers
   # ---------------------------------------------------------------------------
-  def call(installment, amount:, paid_at: Time.current, notes: nil)
-    described_class.call(installment, amount: amount, paid_at: paid_at, notes: notes)
+  def call(installment, amount:, paid_at: Time.current)
+    described_class.call(installment, amount: amount, paid_at: paid_at)
   end
 
   # ---------------------------------------------------------------------------

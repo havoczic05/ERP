@@ -7,8 +7,7 @@ class AmortizationsController < ApplicationController
 
     result = AmortizationCreationService.call(
       @installment,
-      amount: amortization_params[:amount_usd],
-      notes:  amortization_params[:notes]
+      amount: amortization_params[:amount_usd]
     )
 
     if result.success?
@@ -26,6 +25,6 @@ class AmortizationsController < ApplicationController
   end
 
   def amortization_params
-    params.require(:amortization).permit(:amount_usd, :notes)
+    params.require(:amortization).permit(:amount_usd)
   end
 end

@@ -12,8 +12,8 @@ RSpec.describe 'Amortizations', type: :request do
     create(:installment, sale: sale, amount_usd: 500.00, balance_usd: 500.00)
   end
 
-  def amortization_params(amount: '200.00', notes: nil)
-    { amortization: { amount_usd: amount, notes: notes } }
+  def amortization_params(amount: '200.00')
+    { amortization: { amount_usd: amount } }
   end
 
   # ---------------------------------------------------------------------------
