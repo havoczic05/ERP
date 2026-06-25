@@ -2,8 +2,7 @@ class Amortization < ApplicationRecord
   HUMAN_ATTRS = {
     "amount_usd" => "Monto (USD)",
     "paid_at" => "Fecha de pago",
-    "installment" => "Cuota",
-    "notes" => "Notas"
+    "installment" => "Cuota"
   }.freeze
   include SpanishAttributeNames
 

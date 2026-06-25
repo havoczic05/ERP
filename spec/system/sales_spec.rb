@@ -363,7 +363,7 @@ RSpec.describe 'Sales', type: :system do
   end
 
   # ---------------------------------------------------------------------------
-  # Payment history on the sale detail page (surfaces amortization notes)
+  # Payment history on the sale detail page
   # ---------------------------------------------------------------------------
   describe 'payment history on show' do
     let(:sale) { create(:sale, :venta, :with_items, client: client, warehouse: warehouse) }
@@ -372,15 +372,15 @@ RSpec.describe 'Sales', type: :system do
                            amount_usd: 300, balance_usd: 100, due_date: 10.days.from_now)
     end
 
-    it 'lists recorded payments with date, amount and notes' do
+    it 'lists recorded payments with date and amount' do
       create(:amortization, installment: installment, amount_usd: 200,
-                            paid_at: Time.zone.local(2026, 6, 10, 12), notes: 'Pago parcial en efectivo')
+                            paid_at: Time.zone.local(2026, 6, 10, 12))
 
       visit sale_path(sale)
 
       expect(page).to have_content('Historial de pagos')
       expect(page).to have_content('10/06/2026')
-      expect(page).to have_content('Pago parcial en efectivo')
+      expect(page).to have_content('200.00')
     end
 
     it 'does not render the payment history section when there are no payments' do

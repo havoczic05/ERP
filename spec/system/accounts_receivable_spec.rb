@@ -88,7 +88,6 @@ RSpec.describe 'AccountsReceivable index', type: :system do
 
     expect(page).to have_button('Registrar pago')
     expect(page).to have_field('amortization[amount_usd]')
-    expect(page).to have_field('amortization[notes]')
   end
 
   describe 'filters' do
