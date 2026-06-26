@@ -136,9 +136,10 @@ RSpec.describe 'AccountsReceivable', type: :request do
         expect(response.body).not_to include('Beta SA') # due in 20 days → out of range
       end
 
-      it 'shows the outstanding subtotal of the filtered set' do
+      it 'labels the sale-remaining column "Saldo total (USD)" and has no subtotal footer' do
         get accounts_receivable_path(q: 'Acme')
-        expect(response.body).to include('Saldo total')
+        expect(response.body).to include('Saldo total (USD)')
+        expect(response.body).not_to include('ar-total-value')
       end
     end
 
@@ -166,7 +167,7 @@ RSpec.describe 'AccountsReceivable', type: :request do
         get accounts_receivable_path(format: :csv)
 
         expect(response.media_type).to eq('text/csv')
-        expect(response.body).to include('Cliente,Venta,N° de cuota,Monto Cuota (USD),Saldo (USD),Vencimiento,Estado')
+        expect(response.body).to include('Cliente,Venta,N° de cuota,C. Vencidas,Cuota actual (USD),Saldo total (USD),Vencimiento,Estado')
         expect(response.body).to include('Acme Corp')
         expect(response.body).to include('VTA-AAA01')
         expect(response.body).to include('10/07/2026')

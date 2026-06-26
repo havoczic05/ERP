@@ -35,8 +35,9 @@
       <th>Cliente</th>
       <th>Venta</th>
       <th>N° de cuota</th>
-      <th>Monto Cuota (USD)</th>
-      <th>Saldo (USD)</th>
+      <th>C. Vencidas</th>
+      <th>Cuota actual (USD)</th>
+      <th>Saldo total (USD)</th>
       <th>Vencimiento</th>
       <th>Estado</th>
       <th>Pago</th>
@@ -46,10 +47,11 @@
     <% @installments.each do |installment| %>
       <tr id="<%= dom_id(installment) %>">
         <td><%= installment.sale.client.full_name %></td>
-        <td><%= installment.sale.correlative %></td>
+        <td><%= link_to installment.sale.correlative, sale_path(installment.sale) %></td>
         <td><%= "#{installment.installment_number}/#{@installment_totals[installment.sale_id]}" %></td>
+        <td><%= @overdue_counts[installment.sale_id] || 0 %></td>
         <td><%= money(installment.amount_usd) %></td>
-        <td><%= money(installment.balance_usd) %></td>
+        <td><%= money(@sale_balances[installment.sale_id]) %></td>
         <td class="col-date"><%= format_date(installment.due_date) %></td>
         <td><%= installment_status_badge(installment) %></td>
         <td>
@@ -64,15 +66,6 @@
       </tr>
     <% end %>
   </tbody>
-  <% unless @installments.empty? %>
-    <tfoot>
-      <tr class="ar-total">
-        <th colspan="4" class="ar-total-label">Saldo total</th>
-        <td class="ar-total-value"><%= money(@subtotal) %></td>
-        <td colspan="3"></td>
-      </tr>
-    </tfoot>
-  <% end %>
 </table>
 
 <% if @installments.empty? %>

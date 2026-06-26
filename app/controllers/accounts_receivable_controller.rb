@@ -1,8 +1,8 @@
 class AccountsReceivableController < ApplicationController
   include CsvExport
 
-  CSV_HEADERS = [ "Cliente", "Venta", "N° de cuota", "Monto Cuota (USD)",
-                  "Saldo (USD)", "Vencimiento", "Estado" ].freeze
+  CSV_HEADERS = [ "Cliente", "Venta", "N° de cuota", "C. Vencidas", "Cuota actual (USD)",
+                  "Saldo total (USD)", "Vencimiento", "Estado" ].freeze
 
   # GET /accounts_receivable
   def index
@@ -16,12 +16,13 @@ class AccountsReceivableController < ApplicationController
     scope = filter_installments(
       Installment.where(id: current_ids).includes(sale: :client).order(:due_date)
     )
-    @subtotal = scope.sum(:balance_usd)
 
     respond_to do |format|
       format.html do
         @pagy, @installments = pagy(:offset, scope)
         @installment_totals = total_installments_for(@installments)
+        @overdue_counts     = overdue_counts_for(@installments)
+        @sale_balances      = sale_balances_for(@installments)
       end
       format.csv { send_csv("cuentas-por-cobrar", CSV_HEADERS, ar_csv_rows(scope)) }
     end
@@ -36,16 +37,36 @@ class AccountsReceivableController < ApplicationController
     Installment.where(sale_id: sale_ids).group(:sale_id).count
   end
 
+  # Overdue (pending + past-due) installment count per sale, in ONE grouped query
+  # (for the "C. Vencidas" column). Returns { sale_id => Integer }.
+  def overdue_counts_for(installments)
+    sale_ids = installments.map(&:sale_id).uniq
+    Installment.where(sale_id: sale_ids, status: "pendiente")
+               .where("due_date < ?", Date.current)
+               .group(:sale_id).count
+  end
+
+  # Remaining balance owed per sale (sum across all its installments; pagada /
+  # anulada rows carry balance 0), in ONE grouped query (for the "Saldo total"
+  # column). Returns { sale_id => BigDecimal }.
+  def sale_balances_for(installments)
+    sale_ids = installments.map(&:sale_id).uniq
+    Installment.where(sale_id: sale_ids).group(:sale_id).sum(:balance_usd)
+  end
+
   def ar_csv_rows(scope)
-    rows = scope.to_a
-    totals = total_installments_for(rows)
+    rows     = scope.to_a
+    totals   = total_installments_for(rows)
+    overdue  = overdue_counts_for(rows)
+    balances = sale_balances_for(rows)
     rows.map do |inst|
       [
         inst.sale.client.full_name,
         inst.sale.correlative,
         "#{inst.installment_number}/#{totals[inst.sale_id]}",
+        overdue[inst.sale_id] || 0,
         inst.amount_usd,
-        inst.balance_usd,
+        balances[inst.sale_id],
         helpers.format_date(inst.due_date),
         inst.overdue? ? "Vencida" : "Pendiente"
       ]
