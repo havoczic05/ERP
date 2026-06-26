@@ -379,13 +379,32 @@ else
   end
 
   # --- Pay installments on ~30 ventas (full first cuota, sometimes more) ---
+  # Payment dates are anchored to each sale's own timeline so the demo data is
+  # chronologically possible: a cuota is paid around its due_date, NEVER before
+  # the sale itself, NEVER in the future, and ALWAYS after the previous cuota's
+  # payment (cuota 1 settles before cuota 2).
+  today = Date.current
   ventas.sample(30, random: rng).each do |venta|
+    start_date = venta.created_at.to_date
+    last_paid  = start_date
+    hour_base  = rng.rand(8..16)
     venta.installments.where(status: "pendiente").order(:installment_number).first(2).each do |installment|
       break if rng.rand(100) < 25 # leave some cuotas open for a realistic mix
+
+      # Pay near the due date (sometimes a few days early), clamped so the date
+      # is never before the previous payment, never before the sale, and never
+      # in the future.
+      target  = installment.due_date - rng.rand(0..5).days
+      paid_on = [ [ target, last_paid ].max, today ].min
+      last_paid = paid_on
+
+      # +installment_number keeps same-day payments ordered by cuota; clamp to
+      # "now" so a payment dated today never lands past the current wall-clock.
+      paid_ts = paid_on.in_time_zone.change(hour: hour_base) + installment.installment_number.hours
       AmortizationCreationService.call(
         installment,
         amount:  installment.balance_usd,
-        paid_at: rng.rand(0..60).days.ago
+        paid_at: [ paid_ts, Time.current ].min
       )
     end
   end
