@@ -74,6 +74,15 @@ RSpec.describe SalePdf do
       expect(text).to match(/Venta/i)
       expect(text).to include("2026-07-01")
     end
+
+    it "omits the installments section when show_installments is false" do
+      text = text_of(described_class.new(venta, settings, show_installments: false).render)
+      expect(text).not_to include("Cuotas")
+      expect(text).not_to include("2026-07-01")
+      # the rest of the document still renders
+      expect(text).to include(venta.correlative)
+      expect(text).to include("Resistor 10k")
+    end
   end
 
   describe "annulled document" do

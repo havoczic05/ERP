@@ -55,9 +55,11 @@ class SalesController < ApplicationController
     respond_to do |format|
       format.html
       format.pdf do
-        pdf = SalePdf.new(@sale, CompanySettings.instance)
+        show_installments = params[:cuotas] != "false"
+        suffix = show_installments ? "" : "-sin-cuotas"
+        pdf = SalePdf.new(@sale, CompanySettings.instance, show_installments: show_installments)
         send_data pdf.render,
-                  filename: "#{@sale.correlative}.pdf",
+                  filename: "#{@sale.correlative}#{suffix}.pdf",
                   type: "application/pdf",
                   disposition: "inline"
       end

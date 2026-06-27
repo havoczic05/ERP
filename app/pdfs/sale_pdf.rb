@@ -3,7 +3,9 @@
 # client block, line-items table, totals, optional installments, and the
 # bank-accounts footer. Injects company logo/razon_social/RUC from CompanySettings.
 class SalePdf < BrandedPdf
-  def initialize(sale, company_settings)
+  # `show_installments:` toggles the cuotas section (a second "without
+  # installments" PDF is offered on the sale page).
+  def initialize(sale, company_settings, show_installments: true)
     super()
     @sale = sale
     @company = company_settings
@@ -14,7 +16,7 @@ class SalePdf < BrandedPdf
     build_client_block
     build_items_table
     build_totals
-    build_installments if @sale.installments.any?
+    build_installments if show_installments && @sale.installments.any?
     build_bank_footer(@company)
   end
 
