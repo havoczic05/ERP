@@ -8,45 +8,55 @@
   <p class="page-sub">Resumen del mes en curso y del día de hoy.</p>
 </div>
 
-<%# KPI strip — the glanceable numbers %>
+<%# KPI strip — glanceable numbers, each one a shortcut into its filtered list %>
 <section aria-label="Métricas operativas">
   <div class="kpi-grid">
-    <div class="kpi">
+    <%= link_to sales_path(document_type: "venta", status: "confirmada", date_range: "month"),
+                class: "kpi", "aria-label": "Ver ventas del mes" do %>
       <span class="kpi-label">Ventas del mes</span>
       <span class="kpi-value"><%= @metrics.monthly_sales_count %></span>
       <span class="kpi-meta"><%= number_to_currency(@metrics.monthly_sales_total, unit: 'USD ') %></span>
-    </div>
+    <% end %>
 
-    <div class="kpi">
+    <%= link_to sales_path(document_type: "venta", status: "confirmada", date_range: "today"),
+                class: "kpi", "aria-label": "Ver ventas de hoy" do %>
       <span class="kpi-label">Ventas de hoy</span>
       <span class="kpi-value"><%= @metrics.daily_sales_count %></span>
       <span class="kpi-meta"><%= number_to_currency(@metrics.daily_sales_total, unit: 'USD ') %></span>
-    </div>
+    <% end %>
 
-    <div class="kpi">
+    <%= link_to accounts_receivable_path,
+                class: "kpi", "aria-label": "Ver cuentas por cobrar" do %>
       <span class="kpi-label">Por cobrar</span>
       <span class="kpi-value"><%= number_to_currency(@metrics.outstanding_ar, unit: 'USD ') %></span>
       <span class="kpi-meta">saldo pendiente</span>
-    </div>
+    <% end %>
 
-    <div class="kpi <%= 'kpi--danger' if @metrics.overdue_count.positive? %>">
+    <%= link_to accounts_receivable_path(status: "vencida"),
+                class: "kpi #{'kpi--danger' if @metrics.overdue_count.positive?}",
+                "aria-label": "Ver facturas vencidas" do %>
       <span class="kpi-label">Vencido</span>
       <span class="kpi-value"><%= number_to_currency(@metrics.overdue_total, unit: 'USD ') %></span>
       <span class="kpi-meta"><%= pluralize(@metrics.overdue_count, 'factura vencida', 'facturas vencidas') %></span>
-    </div>
+    <% end %>
   </div>
 </section>
 
 <%# Rankings & alerts — two columns %>
 <div class="dash-cols">
   <section class="panel">
-    <h2>Top 5 Productos del Mes</h2>
+    <h2>
+      Top 5 Productos del Mes
+      <%= link_to "Ver todos", products_path, class: "panel-link" %>
+    </h2>
     <% if ranking.any? %>
       <ol class="rank-list">
         <% ranking.each do |product, units| %>
           <li>
-            <span class="rank-name"><%= product.name %></span>
-            <span class="rank-val num"><%= units %> u.</span>
+            <%= link_to product_path(product), class: "rank-row", data: { turbo_frame: "modal" } do %>
+              <span class="rank-name"><%= product.name %></span>
+              <span class="rank-val num"><%= units %> u.</span>
+            <% end %>
           </li>
         <% end %>
       </ol>
@@ -59,13 +69,16 @@
     <h2>
       Bajo Stock
       <% if low_stock.any? %><span class="badge badge--warning"><%= low_stock.size %></span><% end %>
+      <%= link_to "Ver todos", products_path, class: "panel-link" %>
     </h2>
     <% if low_stock.any? %>
       <ul class="stock-list">
         <% low_stock.each do |product| %>
           <li>
-            <span><%= product.name %></span>
-            <span class="badge badge--warning"><%= product.stock %> u.</span>
+            <%= link_to product_path(product), class: "stock-row", data: { turbo_frame: "modal" } do %>
+              <span><%= product.name %></span>
+              <span class="badge badge--warning"><%= product.stock %> u.</span>
+            <% end %>
           </li>
         <% end %>
       </ul>
@@ -79,13 +92,15 @@
 <section class="charts" aria-label="Gráficos del mes">
   <div class="chart">
     <h2>Ventas por Día</h2>
-    <%= bar_chart_svg(@metrics.sales_count_by_day, label: "Cantidad de ventas por día del mes") %>
+    <%= bar_chart_svg(@metrics.sales_count_by_day, label: "Cantidad de ventas por día del mes", format: :count) %>
     <p class="chart-caption">Pico del mes: <%= peak_count %> ventas en un día</p>
   </div>
 
   <div class="chart">
     <h2>Monto por Día (USD)</h2>
-    <%= bar_chart_svg(@metrics.sales_total_by_day, label: "Monto de ventas en USD por día del mes") %>
+    <%= bar_chart_svg(@metrics.sales_total_by_day, label: "Monto de ventas en USD por día del mes", format: :money) %>
     <p class="chart-caption">Pico del mes: <%= number_to_currency(peak_total, unit: 'USD ') %></p>
   </div>
 </section>
+
+<%= render "shared/modal_frame" %>
