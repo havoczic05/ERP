@@ -4,6 +4,7 @@ class CompanySettings < ApplicationRecord
     "ruc" => "RUC",
     "direccion" => "Dirección",
     "telefono" => "Teléfono",
+    "subtitulo" => "Subtítulo",
     "logo" => "Logo"
   }.freeze
   include SpanishAttributeNames
@@ -12,6 +13,14 @@ class CompanySettings < ApplicationRecord
   # Attachments
   # ---------------------------------------------------------------------------
   has_one_attached :logo
+
+  # ---------------------------------------------------------------------------
+  # Associations — bank accounts shown in the PDF footers (BCP, etc.). Dynamic
+  # so the user can add/remove accounts from the settings form.
+  # ---------------------------------------------------------------------------
+  has_many :bank_accounts, -> { order(:position, :id) }, dependent: :destroy, inverse_of: :company_settings
+  accepts_nested_attributes_for :bank_accounts, allow_destroy: true,
+                                                reject_if: ->(attributes) { attributes["bank"].blank? }
 
   # ---------------------------------------------------------------------------
   # Validations

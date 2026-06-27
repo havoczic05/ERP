@@ -1,0 +1,34 @@
+<div class="bank-account-row" data-nested-form-target="row">
+  <%= ba.hidden_field :id unless ba.object.new_record? %>
+
+  <div class="field-grid">
+    <div class="field">
+      <%= ba.label :bank, "Banco" %>
+      <%= ba.text_field :bank %>
+    </div>
+
+    <div class="field">
+      <%= ba.label :currency_label, "Moneda" %>
+      <%= ba.text_field :currency_label %>
+    </div>
+  </div>
+
+  <div class="field-grid">
+    <div class="field">
+      <%= ba.label :account_number, "Cuenta corriente" %>
+      <%= ba.text_field :account_number %>
+    </div>
+
+    <div class="field">
+      <%= ba.label :interbank_number, "Cuenta interbancaria" %>
+      <%= ba.text_field :interbank_number %>
+    </div>
+  </div>
+
+  <%= ba.hidden_field :position %>
+  <%= ba.hidden_field :_destroy %>
+
+  <div class="bank-account-row-actions">
+    <button type="button" class="<%= btn_classes(:danger, :sm) %>" data-action="nested-form#remove">Quitar</button>
+  </div>
+</div>

@@ -18,6 +18,11 @@
     <% end %>
   </div>
 
+  <div class="field">
+    <%= f.label :subtitulo, "Subtítulo" %>
+    <%= f.text_field :subtitulo %>
+  </div>
+
   <div class="field-grid">
     <div class="field">
       <%= f.label :ruc, "RUC" %>
@@ -48,6 +53,26 @@
     <%= f.label :logo, "Logo" %>
     <%= f.file_field :logo %>
   </div>
+
+  <fieldset class="bank-accounts" data-controller="nested-form">
+    <legend>Cuentas bancarias</legend>
+
+    <div data-nested-form-target="rows">
+      <%= f.fields_for :bank_accounts do |ba| %>
+        <%= render "bank_account_fields", ba: ba %>
+      <% end %>
+    </div>
+
+    <template data-nested-form-target="template">
+      <%= f.fields_for :bank_accounts, BankAccount.new, child_index: "NEW_RECORD" do |ba| %>
+        <%= render "bank_account_fields", ba: ba %>
+      <% end %>
+    </template>
+
+    <button type="button" class="<%= btn_classes(:ghost, :sm) %>" data-action="nested-form#add">
+      Agregar cuenta
+    </button>
+  </fieldset>
 
   <div class="form-actions">
     <%= submit_button f, "Guardar cambios" %>

@@ -4,6 +4,11 @@
     <dt>Razón social</dt>
     <dd><%= company_settings.razon_social %></dd>
 
+    <% if company_settings.subtitulo.present? %>
+      <dt>Subtítulo</dt>
+      <dd><%= company_settings.subtitulo %></dd>
+    <% end %>
+
     <dt>RUC</dt>
     <dd><%= company_settings.ruc %></dd>
 
@@ -18,6 +23,23 @@
       <dd><%= image_tag company_settings.logo, alt: "Logo de la empresa" %></dd>
     <% end %>
   </dl>
+
+  <% if company_settings.bank_accounts.any? %>
+    <h2>Cuentas bancarias</h2>
+    <ul class="bank-accounts-list">
+      <% company_settings.bank_accounts.each do |account| %>
+        <li>
+          <strong><%= account.bank %><%= " — #{account.currency_label}" if account.currency_label.present? %></strong>
+          <% if account.account_number.present? %>
+            <span>CTA. CTE.: <%= account.account_number %></span>
+          <% end %>
+          <% if account.interbank_number.present? %>
+            <span>CTA. INTERBANCARIO: <%= account.interbank_number %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
 
   <div class="action-bar">
     <%= action_link "Editar configuración", edit_company_settings_path,
