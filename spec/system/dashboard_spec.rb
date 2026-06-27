@@ -35,4 +35,28 @@ RSpec.describe "Dashboard", type: :system do
     expect(page).not_to have_link(href: new_sale_path)
     expect(page).not_to have_selector("a", text: /nuevo|new/i)
   end
+
+  it "deep-links each KPI to its matching filtered list" do
+    visit dashboard_path
+
+    expect(page).to have_link(
+      href: sales_path(document_type: "venta", status: "confirmada", date_range: "month")
+    )
+    expect(page).to have_link(
+      href: sales_path(document_type: "venta", status: "confirmada", date_range: "today")
+    )
+    expect(page).to have_link(href: accounts_receivable_path)
+    expect(page).to have_link(href: accounts_receivable_path(status: "vencida"))
+  end
+
+  it "links ranking and low-stock rows to the product detail" do
+    visit dashboard_path
+    product = Product.find_by!(name: "Top Seller")
+    expect(page).to have_link(href: product_path(product))
+  end
+
+  it "links panel headers to the full products list" do
+    visit dashboard_path
+    expect(page).to have_link("Ver todos", href: products_path)
+  end
 end
