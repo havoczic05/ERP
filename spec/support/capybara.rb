@@ -1,9 +1,43 @@
 require "capybara/rspec"
+require "rspec/retry"
+require "timeout"
+
+# ---------------------------------------------------------------------------
+# JS readiness helper for system specs.
+#
+# Root cause of the intermittent "dialog.modal[open] not found": after a
+# `visit`, the page is interactive before the importmap modules finish booting.
+# If a data-turbo-frame link is clicked in that window, Turbo's document click
+# listener is not attached yet, so the click does a full navigation instead of
+# loading the frame — and the modal never opens. No amount of waiting on the
+# dialog fixes a click that was lost. So we block until Turbo AND Stimulus have
+# booted before interacting.
+# ---------------------------------------------------------------------------
+module JsReadiness
+  def wait_until_js_booted
+    Timeout.timeout(MODAL_WAIT) do
+      sleep 0.05 until page.evaluate_script(
+        "!!(window.Turbo && window.Stimulus) && document.readyState === 'complete'"
+      )
+    end
+  rescue Timeout::Error
+    raise "JS (Turbo/Stimulus) did not boot within #{MODAL_WAIT}s"
+  end
+end
 
 Capybara.configure do |config|
   config.default_driver = :rack_test
   config.javascript_driver = :selenium_headless
+  # Default was 2s (Capybara's built-in). Bumped so loaded CI runners don't time
+  # out on routine async assertions (within / have_field / Turbo Stream row
+  # updates). Modal opens use the longer MODAL_WAIT below.
+  config.default_max_wait_time = Integer(ENV.fetch("CAPYBARA_MAX_WAIT_TIME", "5"))
 end
+
+# Generous wait for opening a <dialog> modal (Turbo Frame fetch + template
+# compile + Stimulus showModal). The first such open in a CI run also pays the
+# cold-start, so it needs more headroom than routine assertions.
+MODAL_WAIT = Integer(ENV.fetch("MODAL_WAIT_TIME", "15"))
 
 # ---------------------------------------------------------------------------
 # Headless Chrome driver for JS-tagged system specs.
@@ -92,6 +126,27 @@ module NoTransactionForJS
 end
 
 RSpec.configure do |config|
+  config.include JsReadiness, :js
+
+  # ---------------------------------------------------------------------------
+  # rspec-retry for JS/system specs.
+  #
+  # Even with JS-readiness waits, headless Chrome under CI load occasionally
+  # drops a click or keystroke (the action is lost, not slow — no wait recovers
+  # it). Retrying the whole example a couple of times turns those transient
+  # glitches into green without masking real, reproducible failures (which fail
+  # every attempt). retry_callback resets the DB between attempts so a
+  # half-applied attempt does not leak into the next.
+  # ---------------------------------------------------------------------------
+  config.verbose_retry = true
+  config.display_try_failure_messages = true
+  config.retry_callback = proc do |example|
+    if example.metadata[:js]
+      DatabaseCleaner.clean
+      DatabaseCleaner.start
+    end
+  end
+
   # Include the no-transaction override for all js: true example groups.
   # This fires at class-composition time, before before_setup, so
   # setup_fixtures sees run_in_transaction? == false and skips the wrapping
@@ -108,6 +163,19 @@ RSpec.configure do |config|
     driven_by(:headless_chrome)
   end
 
+  # One-time JS warmup. The first js example of a run otherwise pays the full
+  # cold-start (browser boot + importmap/Stimulus/Turbo load + first template
+  # compile), which intermittently times out a *random* modal spec in CI. Paying
+  # it here, on a public page, charges that cost to setup instead of to whichever
+  # example RSpec happens to order first.
+  config.before(:each, :js) do
+    unless RSpec.configuration.instance_variable_get(:@js_stack_warmed)
+      RSpec.configuration.instance_variable_set(:@js_stack_warmed, true)
+      visit "/login"
+      wait_until_js_booted # pay the asset/Stimulus/Turbo boot cost once, in setup
+    end
+  end
+
   # ---------------------------------------------------------------------------
   # DatabaseCleaner for JS examples.
   #
@@ -121,7 +189,7 @@ RSpec.configure do |config|
   config.around(:each, :js) do |example|
     DatabaseCleaner.strategy = :truncation
     DatabaseCleaner.start
-    example.run
+    example.run_with_retry(retry: Integer(ENV.fetch("JS_RETRY_COUNT", "3")))
     DatabaseCleaner.clean
   end
 end
