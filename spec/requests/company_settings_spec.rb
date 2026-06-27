@@ -66,6 +66,37 @@ RSpec.describe "CompanySettings", type: :request do
       expect(CompanySettings.first.razon_social).to eq("Mi Empresa S.A.")
     end
 
+    it "§PATCH saves the subtitulo" do
+      patch company_settings_path,
+            params: { company_settings: { razon_social: "Mi Empresa", ruc: "20987654321",
+                                          subtitulo: "Importadora y Distribuidora" } }
+      expect(CompanySettings.first.subtitulo).to eq("Importadora y Distribuidora")
+    end
+
+    it "§PATCH creates bank accounts via nested attributes" do
+      patch company_settings_path,
+            params: { company_settings: { razon_social: "Mi Empresa", ruc: "20987654321",
+                                          bank_accounts_attributes: {
+                                            "0" => { bank: "BCP", currency_label: "Dólares",
+                                                     account_number: "193-9852295-1-39",
+                                                     interbank_number: "002-193-009852295139-15",
+                                                     position: "0" }
+                                          } } }
+      expect(CompanySettings.first.bank_accounts.count).to eq(1)
+      expect(CompanySettings.first.bank_accounts.first.bank).to eq("BCP")
+    end
+
+    it "§PATCH removes a bank account via _destroy" do
+      settings = create(:company_settings)
+      account  = create(:bank_account, company_settings: settings)
+      patch company_settings_path,
+            params: { company_settings: { razon_social: settings.razon_social, ruc: settings.ruc,
+                                          bank_accounts_attributes: {
+                                            "0" => { id: account.id, _destroy: "1" }
+                                          } } }
+      expect(CompanySettings.first.bank_accounts.count).to eq(0)
+    end
+
     it "§Invalid PATCH (RUC 10 digits) does not persist" do
       patch company_settings_path,
             params: { company_settings: { razon_social: "Mi Empresa", ruc: "2012345678" } }

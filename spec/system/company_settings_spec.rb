@@ -62,6 +62,41 @@ RSpec.describe "CompanySettings", type: :system do
   end
 
   # ---------------------------------------------------------------------------
+  # Subtitulo + bank accounts (static parts — the add/remove row UI is JS-only,
+  # so rack_test only exercises the rendered fields and persistence via submit).
+  # ---------------------------------------------------------------------------
+  describe "subtitulo and bank accounts" do
+    it "shows the subtitulo field and saves it" do
+      visit edit_company_settings_path
+      fill_in "Razón social", with: "Empresa SAC"
+      fill_in "RUC", with: "20123456789"
+      fill_in "Subtítulo", with: "Importadora y Distribuidora"
+      find("input[type=submit]").click
+
+      expect(page).to have_content("Importadora y Distribuidora")
+    end
+
+    it "renders existing bank accounts in the edit form" do
+      settings = create(:company_settings)
+      create(:bank_account, company_settings: settings, bank: "BCP", currency_label: "Dólares")
+      visit edit_company_settings_path
+
+      expect(page).to have_content("Cuentas bancarias")
+      expect(page).to have_field("Banco", with: "BCP")
+    end
+
+    it "shows bank accounts on the details page" do
+      settings = create(:company_settings)
+      create(:bank_account, company_settings: settings, bank: "BCP",
+                            account_number: "193-9852295-1-39")
+      visit company_settings_path
+
+      expect(page).to have_content("BCP")
+      expect(page).to have_content("193-9852295-1-39")
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # Logo upload
   # ---------------------------------------------------------------------------
   describe "logo attachment" do

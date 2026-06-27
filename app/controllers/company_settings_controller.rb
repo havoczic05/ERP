@@ -37,6 +37,9 @@ class CompanySettingsController < ApplicationController
   end
 
   def company_settings_params
-    params.require(:company_settings).permit(:razon_social, :ruc, :direccion, :telefono, :logo)
+    params.require(:company_settings).permit(
+      :razon_social, :ruc, :direccion, :telefono, :logo, :subtitulo,
+      bank_accounts_attributes: [ :id, :bank, :currency_label, :account_number, :interbank_number, :position, :_destroy ]
+    )
   end
 end

@@ -121,4 +121,59 @@ RSpec.describe CompanySettings, type: :model do
       expect(CompanySettings.count).to eq 1
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # Subtitulo (optional)
+  # ---------------------------------------------------------------------------
+  describe 'subtitulo' do
+    it 'is valid with a subtitulo' do
+      expect(build(:company_settings, subtitulo: 'Importadora y Distribuidora')).to be_valid
+    end
+
+    it 'is valid without a subtitulo' do
+      expect(build(:company_settings, subtitulo: nil)).to be_valid
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Bank accounts association
+  # ---------------------------------------------------------------------------
+  describe 'bank_accounts association' do
+    it 'has many bank accounts ordered by position' do
+      settings = create(:company_settings)
+      second = create(:bank_account, company_settings: settings, bank: 'BCP', position: 2)
+      first  = create(:bank_account, company_settings: settings, bank: 'BBVA', position: 1)
+      expect(settings.bank_accounts.reload.to_a).to eq([ first, second ])
+    end
+
+    it 'destroys its bank accounts when the settings row is destroyed' do
+      settings = create(:company_settings)
+      create(:bank_account, company_settings: settings)
+      expect { settings.destroy }.to change(BankAccount, :count).by(-1)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Nested attributes for bank accounts
+  # ---------------------------------------------------------------------------
+  describe 'nested attributes for bank_accounts' do
+    it 'creates bank accounts from nested attributes' do
+      settings = create(:company_settings)
+      settings.update(bank_accounts_attributes: [ { bank: 'BCP', currency_label: 'Soles' } ])
+      expect(settings.bank_accounts.count).to eq(1)
+    end
+
+    it 'rejects rows with a blank bank' do
+      settings = create(:company_settings)
+      settings.update(bank_accounts_attributes: [ { bank: '', account_number: '', position: '0' } ])
+      expect(settings.bank_accounts.count).to eq(0)
+    end
+
+    it 'destroys a bank account via _destroy' do
+      settings = create(:company_settings)
+      account  = create(:bank_account, company_settings: settings)
+      settings.update(bank_accounts_attributes: [ { id: account.id, _destroy: '1' } ])
+      expect(settings.bank_accounts.count).to eq(0)
+    end
+  end
 end

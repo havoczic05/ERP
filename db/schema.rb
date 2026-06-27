@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_25_041031) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_27_120100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -51,6 +51,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_25_041031) do
     t.index ["installment_id"], name: "index_amortizations_on_installment_id"
   end
 
+  create_table "bank_accounts", force: :cascade do |t|
+    t.string "account_number"
+    t.string "bank", null: false
+    t.bigint "company_settings_id", null: false
+    t.datetime "created_at", null: false
+    t.string "currency_label"
+    t.string "interbank_number"
+    t.integer "position", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_settings_id", "position"], name: "index_bank_accounts_on_company_settings_id_and_position"
+    t.index ["company_settings_id"], name: "index_bank_accounts_on_company_settings_id"
+  end
+
   create_table "clients", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "departamento"
@@ -71,6 +84,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_25_041031) do
     t.string "direccion"
     t.string "razon_social", null: false
     t.string "ruc", null: false
+    t.string "subtitulo"
     t.string "telefono"
     t.datetime "updated_at", null: false
   end
@@ -169,6 +183,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_25_041031) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "amortizations", "installments"
+  add_foreign_key "bank_accounts", "company_settings", column: "company_settings_id"
   add_foreign_key "credit_notes", "sales"
   add_foreign_key "installments", "sales"
   add_foreign_key "products", "warehouses"
