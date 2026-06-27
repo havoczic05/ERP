@@ -25,6 +25,13 @@ class AccountsReceivableController < ApplicationController
         @sale_balances      = sale_balances_for(@installments)
       end
       format.csv { send_csv("cuentas-por-cobrar", CSV_HEADERS, ar_csv_rows(scope)) }
+      format.pdf do
+        rows = scope.to_a
+        pdf  = PendingInvoicesReportPdf.new(rows, sale_balances_for(rows), CompanySettings.instance)
+        send_data pdf.render,
+                  filename: "facturas-pendientes-#{Date.current.iso8601}.pdf",
+                  type: "application/pdf", disposition: "inline"
+      end
     end
   end
 
