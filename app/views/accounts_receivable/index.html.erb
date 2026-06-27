@@ -76,4 +76,6 @@
   <%= pagination_nav(@pagy) %>
   <%= export_link 'Descargar Excel',
         accounts_receivable_path(request.query_parameters.except('page').merge(format: 'csv')) %>
+  <%= export_link 'Descargar PDF',
+        accounts_receivable_path(request.query_parameters.except('page').merge(format: 'pdf')) %>
 </div>

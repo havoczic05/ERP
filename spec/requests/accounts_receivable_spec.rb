@@ -182,6 +182,29 @@ RSpec.describe 'AccountsReceivable', type: :request do
     end
 
     # -------------------------------------------------------------------------
+    # PDF export (pending/overdue invoices report)
+    # -------------------------------------------------------------------------
+    context 'PDF export' do
+      before { login_as(admin_user) }
+
+      let(:acme)      { create(:client, :ruc_client, full_name: 'Acme Corp') }
+      let(:acme_sale) { create(:sale, :venta, client: acme, correlative: 'VTA-AAA01') }
+      let!(:acme_inst) do
+        create(:installment, sale: acme_sale, status: 'pendiente',
+                             due_date: 5.days.ago, amount_usd: 100, balance_usd: 100)
+      end
+
+      it 'exports a PDF named after the report' do
+        get accounts_receivable_path(format: :pdf)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.media_type).to eq('application/pdf')
+        expect(response.body).to start_with('%PDF')
+        expect(response.headers['Content-Disposition']).to include('facturas-pendientes')
+      end
+    end
+
+    # -------------------------------------------------------------------------
     # AR-01: unauthenticated access is blocked
     # -------------------------------------------------------------------------
     context 'when unauthenticated' do
