@@ -20,9 +20,10 @@ RSpec.describe "Clients modal (JS)", type: :system, js: true do
 
   it "opens the new-client form in a modal without leaving the index" do
     visit clients_path
+    wait_until_js_booted
     click_link "Nuevo cliente"
 
-    expect(page).to have_css("dialog.modal[open]")
+    expect(page).to have_css("dialog.modal[open]", wait: MODAL_WAIT)
     within("dialog.modal") do
       expect(page).to have_content("Nuevo cliente")
       expect(page).to have_field("Nombre completo")
@@ -36,9 +37,10 @@ RSpec.describe "Clients modal (JS)", type: :system, js: true do
 
   it "creates a client from the modal, closing it and showing a toast" do
     visit clients_path
+    wait_until_js_booted
     click_link "Nuevo cliente"
 
-    expect(page).to have_css("dialog.modal[open]", wait: 10) # wait until showModal() promoted it
+    expect(page).to have_css("dialog.modal[open]", wait: MODAL_WAIT) # wait until showModal() promoted it
     within("dialog.modal") do
       fill_in "Nombre completo", with: "Modal Client SA"
       find("#client_document_type option", text: "Ruc").select_option
@@ -47,7 +49,7 @@ RSpec.describe "Clients modal (JS)", type: :system, js: true do
       click_button "Crear cliente"
     end
 
-    within("#clients") { expect(page).to have_content("Modal Client SA", wait: 10) }
+    within("#clients") { expect(page).to have_content("Modal Client SA", wait: MODAL_WAIT) }
     expect(page).to have_css(".toast", text: "Cliente creado correctamente.")
     expect(page).to have_no_css("dialog.modal[open]")
   end
@@ -55,16 +57,18 @@ RSpec.describe "Clients modal (JS)", type: :system, js: true do
   it "edits a client from the modal and updates its row in place" do
     client = create(:client, :ruc_client, full_name: "Before Edit")
     visit clients_path
+    wait_until_js_booted
 
     within("##{ActionView::RecordIdentifier.dom_id(client)}") { click_link "Editar" }
 
+    expect(page).to have_css("dialog.modal[open]", wait: MODAL_WAIT)
     within("dialog.modal") do
       fill_in "Nombre completo", with: "After Edit"
       click_button "Actualizar cliente"
     end
 
     within("#clients") do
-      expect(page).to have_content("After Edit", wait: 10)
+      expect(page).to have_content("After Edit", wait: MODAL_WAIT)
       expect(page).to have_no_content("Before Edit")
     end
     expect(page).to have_css(".toast", text: "Cliente actualizado correctamente.")
@@ -73,10 +77,11 @@ RSpec.describe "Clients modal (JS)", type: :system, js: true do
   it "opens a read-only detail modal from Ver and switches to edit" do
     client = create(:client, :ruc_client, full_name: "Ver Me Co")
     visit clients_path
+    wait_until_js_booted
 
     within("##{ActionView::RecordIdentifier.dom_id(client)}") { click_link "Ver" }
 
-    expect(page).to have_css("dialog.modal[open]", wait: 10)
+    expect(page).to have_css("dialog.modal[open]", wait: MODAL_WAIT)
     within("dialog.modal") do
       expect(page).to have_content("Detalle del cliente")
       expect(page).to have_content("Ver Me Co")
@@ -84,21 +89,22 @@ RSpec.describe "Clients modal (JS)", type: :system, js: true do
     end
 
     # The modal now shows the editable form, pre-filled.
-    expect(page).to have_field("Nombre completo", with: "Ver Me Co", wait: 10)
+    expect(page).to have_field("Nombre completo", with: "Ver Me Co", wait: MODAL_WAIT)
     within("dialog.modal") do
       fill_in "Nombre completo", with: "Edited From Ver"
       click_button "Actualizar cliente"
     end
 
-    within("#clients") { expect(page).to have_content("Edited From Ver", wait: 10) }
+    within("#clients") { expect(page).to have_content("Edited From Ver", wait: MODAL_WAIT) }
     expect(page).to have_css(".toast", text: "Cliente actualizado correctamente.")
   end
 
   it "auto-dismisses the toast after its timeout" do
     visit clients_path
+    wait_until_js_booted
     click_link "Nuevo cliente"
 
-    expect(page).to have_css("dialog.modal[open]")
+    expect(page).to have_css("dialog.modal[open]", wait: MODAL_WAIT)
     within("dialog.modal") do
       fill_in "Nombre completo", with: "Toast Client"
       find("#client_document_type option", text: "Ruc").select_option
@@ -107,7 +113,7 @@ RSpec.describe "Clients modal (JS)", type: :system, js: true do
       click_button "Crear cliente"
     end
 
-    within("#clients") { expect(page).to have_content("Toast Client", wait: 10) }
+    within("#clients") { expect(page).to have_content("Toast Client", wait: MODAL_WAIT) }
     expect(page).to have_css(".toast", text: "Cliente creado correctamente.")
     expect(page).to have_no_css(".toast", wait: 6)
   end

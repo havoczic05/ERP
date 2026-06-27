@@ -79,6 +79,9 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+  # Retry inherently-flaky browser specs (transient Selenium/chromedriver glitches
+  # such as lost clicks/keystrokes under CI load) [https://github.com/NoRedInk/rspec-retry]
+  gem "rspec-retry"
   # Database cleanup strategy for Selenium/JS system specs (truncation instead of
   # transactions, since browser-driven requests run in a separate Puma thread that
   # cannot see the test thread's open transaction).
