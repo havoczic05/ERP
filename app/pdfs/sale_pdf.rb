@@ -1,86 +1,82 @@
-require "prawn"
-require "prawn/table"
-
-# Renders a commercial document (cotizacion or venta) as a PDF.
-#
-# RF5.4: injects the company logo, razon_social and RUC (from CompanySettings)
-# into the header at render time. Pure Ruby (Prawn) — no headless browser, so it
-# runs in CI without Chrome.
-class SalePdf < Prawn::Document
+# Renders a commercial document (cotizacion or venta) as a PDF, following the
+# company's branded layout (see BrandedPdf): branded header + document meta,
+# client block, line-items table, totals, optional installments, and the
+# bank-accounts footer. Injects company logo/razon_social/RUC from CompanySettings.
+class SalePdf < BrandedPdf
   def initialize(sale, company_settings)
-    super(page_size: "A4", margin: 40)
+    super()
     @sale = sale
     @company = company_settings
 
-    build_company_header
-    build_document_title
+    build_doc_meta(label: document_label, reference: @sale.correlative,
+                   date: @sale.created_at.strftime("%d/%m/%Y"))
+    build_branded_header(@company)
     build_client_block
     build_items_table
     build_totals
     build_installments if @sale.installments.any?
-    build_notes if @sale.notes.present?
+    build_bank_footer(@company)
   end
 
   private
 
-  def build_company_header
-    embed_logo
-    text @company.razon_social.to_s, size: 16, style: :bold
-    text "RUC: #{@company.ruc}"
-    text @company.direccion if @company.direccion.present?
-    text "Tel: #{@company.telefono}" if @company.telefono.present?
-    move_down 12
-  end
-
-  def embed_logo
-    return unless @company.logo.attached?
-
-    image StringIO.new(@company.logo.download), width: 90, position: :left
-    move_down 6
-  rescue Prawn::Errors::UnsupportedImageType
-    # Unsupported image format — render the document without the logo rather than failing.
-  end
-
-  def build_document_title
+  def document_label
     label = @sale.document_type.humanize.upcase
     label += " (ANULADA)" if @sale.anulada?
-    text "#{label} — #{@sale.correlative}", size: 14, style: :bold
-    move_down 8
+    label
   end
 
   def build_client_block
     client = @sale.client
-    text "Cliente: #{client.full_name}"
-    text "Documento: #{client.document_type.upcase} #{client.document_number}"
-    move_down 8
+    text "CLIENTE: #{client.full_name}", size: 10
+    text "R.U.C.: #{client.document_number}", size: 10
+    text "DIRECCIÓN: #{client.direccion}", size: 10 if client.direccion.present?
+    text "OBSERVACIÓN: #{@sale.notes}", size: 10 if @sale.notes.present?
+    move_down 10
   end
 
   def build_items_table
-    rows = [ %w[Producto Cant. P.Unit. Total] ]
-    @sale.sale_items.each do |item|
+    rows = [ [ "ITEM", "CANTIDAD", "CÓDIGO", "DESCRIPCIÓN", "PRECIO UNITARIO (INC. IGV)", "TOTAL" ] ]
+    @sale.sale_items.each_with_index do |item, index|
       rows << [
-        item.product.name,
+        (index + 1).to_s,
         item.quantity.to_s,
+        item.product.sku,
+        item.product.name,
         fmt(item.unit_price_usd),
         fmt(item.line_total_usd)
       ]
     end
 
-    table(rows, header: true, width: bounds.width) do
-      row(0).font_style = :bold
+    branded_table(rows, column_widths: { 0 => 42, 1 => 58, 2 => 78, 4 => 118, 5 => 72 }) do |t|
+      t.column(0).align = :center
+      t.column(1).align = :center
+      t.column(4).align = :right
+      t.column(5).align = :right
     end
     move_down 8
   end
 
   def build_totals
-    text "Subtotal: #{fmt(@sale.subtotal_usd)}"
-    text "Impuesto: #{fmt(@sale.tax_usd)}"
-    text "Total: #{fmt(@sale.total_usd)}", style: :bold
+    text "Subtotal: #{fmt(@sale.subtotal_usd)}", size: 10, align: :right
+    text "Impuesto: #{fmt(@sale.tax_usd)}", size: 10, align: :right
+    move_down 4
+
+    table([ [ "TOTAL", fmt(@sale.total_usd) ] ], position: :right, width: 220) do |t|
+      t.cells.background_color = BRAND_WEAK
+      t.cells.borders = []
+      t.cells.padding = [ 6, 8 ]
+      t.cells.font_style = :bold
+      t.column(1).align = :right
+    end
     move_down 8
   end
 
   def build_installments
-    text "Cuotas", style: :bold
+    move_down 8
+    text "Cuotas", style: :bold, size: 11
+    move_down 4
+
     rows = [ %w[# Monto Saldo Vencimiento Estado] ]
     @sale.installments.order(:installment_number).each do |inst|
       rows << [
@@ -92,17 +88,10 @@ class SalePdf < Prawn::Document
       ]
     end
 
-    table(rows, header: true, width: bounds.width) do
-      row(0).font_style = :bold
+    branded_table(rows) do |t|
+      t.column(1).align = :right
+      t.column(2).align = :right
     end
     move_down 8
-  end
-
-  def build_notes
-    text "Notas: #{@sale.notes}"
-  end
-
-  def fmt(value)
-    ActiveSupport::NumberHelper.number_to_currency(value, unit: "USD ")
   end
 end

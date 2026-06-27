@@ -216,6 +216,13 @@ RSpec.describe 'Sales', type: :request do
       get sale_path(sale)
       expect(response).to have_http_status(:ok)
     end
+
+    it 'opens the PDF link in a new window' do
+      sale = create(:sale, :venta, client: client, warehouse: warehouse)
+      get sale_path(sale)
+      expect(response.body).to include(sale_path(sale, format: :pdf))
+      expect(response.body).to include('target="_blank"')
+    end
   end
 
   # ---------------------------------------------------------------------------

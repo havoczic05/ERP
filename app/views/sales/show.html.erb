@@ -114,6 +114,7 @@
   <% end %>
 
   <span class="spacer"></span>
-  <%= action_link 'Descargar PDF', sale_path(@sale, format: :pdf), size: :md, icon: :download %>
+  <%= action_link 'Descargar PDF', sale_path(@sale, format: :pdf), size: :md, icon: :download,
+                  target: "_blank", rel: "noopener" %>
   <%= action_link 'Volver a ventas', sales_path, size: :md, icon: "arrow-left" %>
 </div>

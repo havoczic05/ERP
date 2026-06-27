@@ -111,6 +111,38 @@ RSpec.describe SalePdf do
     end
   end
 
+  describe "branding additions (subtitulo, sku, bank footer)" do
+    let(:sale) do
+      sale = create(:sale, client: client, warehouse: warehouse)
+      create(:sale_item, sale: sale, product: product)
+      sale
+    end
+
+    it "renders the company subtitulo when present" do
+      settings.update!(subtitulo: "Importadora y Distribuidora")
+      text = text_of(described_class.new(sale, settings).render)
+      expect(text).to include("Importadora y Distribuidora")
+    end
+
+    it "renders the product sku as the CÓDIGO column" do
+      text = text_of(described_class.new(sale, settings).render)
+      expect(text).to include(product.sku)
+    end
+
+    it "renders bank accounts in the footer when present" do
+      settings.bank_accounts.create!(bank: "BCP", currency_label: "Dólares",
+                                     account_number: "193-9852295-1-39")
+      text = text_of(described_class.new(sale, settings).render)
+      expect(text).to include("BCP")
+      expect(text).to include("193-9852295-1-39")
+    end
+
+    it "renders without bank accounts" do
+      expect(settings.bank_accounts).to be_empty
+      expect { described_class.new(sale, settings).render }.not_to raise_error
+    end
+  end
+
   describe "optional company fields" do
     let(:sale) do
       sale = create(:sale, client: client, warehouse: warehouse)
