@@ -1,5 +1,18 @@
 <aside class="app-sidebar">
-  <%= link_to "ERP", root_path, class: "sidebar-brand" %>
+  <%= link_to root_path, class: "sidebar-brand" do %>
+    <svg class="sidebar-brand__mark" viewBox="0 0 32 32" aria-hidden="true">
+      <g fill="currentColor">
+        <circle cx="16" cy="7" r="5"/>
+        <circle cx="16" cy="25" r="5"/>
+        <circle cx="7.2" cy="11.5" r="5"/>
+        <circle cx="24.8" cy="11.5" r="5"/>
+        <circle cx="7.2" cy="20.5" r="5"/>
+        <circle cx="24.8" cy="20.5" r="5"/>
+      </g>
+      <circle cx="16" cy="16" r="3.4" fill="#ffffff"/>
+    </svg>
+    <span class="sidebar-brand__name">HGS ERP</span>
+  <% end %>
 
   <nav class="sidebar-nav" aria-label="Primary">
     <div class="nav-group">
