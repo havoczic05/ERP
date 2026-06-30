@@ -30,10 +30,10 @@ class SalePdf < BrandedPdf
 
   def build_client_block
     client = @sale.client
-    text "CLIENTE: #{client.full_name}", size: 10
-    text "R.U.C.: #{client.document_number}", size: 10
-    text "DIRECCIÓN: #{client.direccion}", size: 10 if client.direccion.present?
-    text "OBSERVACIÓN: #{@sale.notes}", size: 10 if @sale.notes.present?
+    text "CLIENTE: #{client.full_name}", size: 10, leading: 4
+    text "R.U.C.: #{client.document_number}", size: 10, leading: 4
+    text "DIRECCIÓN: #{client.direccion}", size: 10, leading: 4 if client.direccion.present?
+    text "OBSERVACIÓN: #{@sale.notes}", size: 10, leading: 4 if @sale.notes.present?
     move_down 10
   end
 
@@ -61,8 +61,7 @@ class SalePdf < BrandedPdf
 
   def build_totals
     text "Subtotal: #{fmt(@sale.subtotal_usd)}", size: 10, align: :right
-    text "Impuesto: #{fmt(@sale.tax_usd)}", size: 10, align: :right
-    move_down 4
+    move_down 10
 
     table([ [ "TOTAL", fmt(@sale.total_usd) ] ], position: :right, width: 220) do |t|
       t.cells.background_color = BRAND_WEAK
@@ -85,7 +84,7 @@ class SalePdf < BrandedPdf
         inst.installment_number.to_s,
         fmt(inst.amount_usd),
         fmt(inst.balance_usd),
-        inst.due_date.iso8601,
+        inst.due_date.strftime("%d/%m/%Y"),
         inst.status.humanize
       ]
     end

@@ -56,6 +56,11 @@ RSpec.describe SalePdf do
       expect(text).to include("3")               # quantity
       expect(text).to include("USD 30.00")       # total
     end
+
+    it "does not render an Impuesto line" do
+      text = text_of(described_class.new(sale, settings).render)
+      expect(text).not_to include("Impuesto")
+    end
   end
 
   describe "venta with installments" do
@@ -72,13 +77,13 @@ RSpec.describe SalePdf do
     it "renders the installments section" do
       text = text_of(described_class.new(venta, settings).render)
       expect(text).to match(/Venta/i)
-      expect(text).to include("2026-07-01")
+      expect(text).to include("01/07/2026")
     end
 
     it "omits the installments section when show_installments is false" do
       text = text_of(described_class.new(venta, settings, show_installments: false).render)
       expect(text).not_to include("Cuotas")
-      expect(text).not_to include("2026-07-01")
+      expect(text).not_to include("01/07/2026")
       # the rest of the document still renders
       expect(text).to include(venta.correlative)
       expect(text).to include("Resistor 10k")

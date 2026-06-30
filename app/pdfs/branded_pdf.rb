@@ -80,8 +80,9 @@ class BrandedPdf < Prawn::Document
     move_down 6
 
     fill_color BRAND
-    text "Cuentas bancarias", size: 9, style: :bold
+    text "Cuentas bancarias", size: 10, style: :bold
     fill_color INK
+    move_down 4
 
     accounts.each do |account|
       heading = [ account.bank, account.currency_label.presence ].compact.join(" — ")
@@ -89,7 +90,8 @@ class BrandedPdf < Prawn::Document
       details << "CTA. CTE.: #{account.account_number}" if account.account_number.present?
       details << "CTA. INTERBANCARIO: #{account.interbank_number}" if account.interbank_number.present?
       line = [ heading, details.join("   ") ].reject(&:blank?).join("   ")
-      text line, size: 8
+      text line, size: 9, leading: 4
+      move_down 4
     end
   end
 
