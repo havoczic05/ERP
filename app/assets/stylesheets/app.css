@@ -1,31 +1,32 @@
 /* =============================================================================
    ERP — Design System
    Register: product (internal tool). Strategy: Restrained.
-   Sober, calm, precise. White surface + botanical-green brand identity +
-   semantic state colors. No flat gray, no raw-spreadsheet borders.
-   All colors OKLCH. Target: WCAG AA.
+   Calm, precise. White content surfaces on a cool-gray canvas + indigo brand
+   identity + semantic state colors. No raw-spreadsheet borders.
+   Brand/neutrals in hex (Sellora indigo); semantic states in OKLCH.
+   Target: WCAG AA.
    ========================================================================== */
 
 :root {
-    /* --- Brand (botanical green — reads as confirmed / financial / trustworthy) */
-    --brand: oklch(0.46 0.11 160);
-    --brand-hover: oklch(0.4 0.11 160);
-    --brand-weak: oklch(0.96 0.03 160);
-    --on-brand: oklch(0.99 0 0);
+    /* --- Brand (indigo — reads as modern / focused / trustworthy) */
+    --brand: #3838ec;
+    --brand-hover: #2d2dd6;
+    --brand-weak: rgba(56, 56, 236, 0.12); /* hover/zebra tints + input focus ring */
+    --on-brand: #ffffff;
 
-    /* --- Surfaces (pure white content; faint green-tinted panels — not gray) */
-    --bg: oklch(1 0 0);
-    --surface: oklch(0.985 0.004 160);
-    --surface-2: oklch(0.967 0.006 160);
+    /* --- Surfaces (white content cards on a cool-gray canvas) */
+    --bg: #ffffff;
+    --surface: #f7f8fa;
+    --surface-2: #eef0f4;
 
-    /* --- Ink (near-black with a whisper of the brand hue) */
-    --ink: oklch(0.24 0.012 160); /* body text — ~13:1 on white */
-    --ink-soft: oklch(0.4 0.012 160); /* strong secondary */
-    --muted: oklch(0.5 0.014 160); /* captions / secondary labels */
+    /* --- Ink (cool near-black neutrals) */
+    --ink: #1b1b2b; /* body text */
+    --ink-soft: #2c3140; /* strong secondary */
+    --muted: #8a8fa0; /* captions / secondary labels */
 
     /* --- Lines (soft dividers, never harsh black) */
-    --line: oklch(0.915 0.005 160);
-    --line-strong: oklch(0.845 0.007 160);
+    --line: #edeef2;
+    --line-strong: #e4e6ec;
 
     /* --- Semantic states (domain: confirmada/anulada, vencida, bajo stock) */
     --success: oklch(0.52 0.12 155);
@@ -44,10 +45,10 @@
     --info-weak: oklch(0.955 0.03 245);
     --info-ink: oklch(0.45 0.11 245);
 
-    /* --- Typography (one sans family; fixed rem scale, ratio ~1.2) */
+    /* --- Typography (Plus Jakarta Sans; fixed rem scale, ratio ~1.2) */
     --font-sans:
-        system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
-        sans-serif;
+        "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
     --font-mono:
         ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
 
@@ -72,12 +73,15 @@
     --sp-6: 2rem;
     --sp-8: 3rem;
 
-    /* --- Radius & elevation (restrained) */
-    --r-sm: 4px;
-    --r: 6px;
-    --r-lg: 10px;
-    --shadow-sm: 0 1px 2px oklch(0.24 0.012 160 / 0.06);
-    --shadow: 0 2px 8px oklch(0.24 0.012 160 / 0.08);
+    /* --- Radius & elevation (rounder, softer — from the Sellora login) */
+    --r-sm: 6px;
+    --r: 10px;
+    --r-lg: 16px;
+    --shadow-sm: 0 1px 2px rgba(24, 24, 64, 0.06);
+    --shadow: 0 12px 30px -18px rgba(24, 24, 64, 0.22);
+
+    /* --- Form controls (uniform single-line height) */
+    --control-h: 2.25rem; /* 36px */
 
     /* --- Semantic z-index scale (dropdown < sticky < modal < toast) */
     --z-dropdown: 50;
@@ -131,7 +135,7 @@ h1,
 h2,
 h3 {
     color: var(--ink);
-    font-weight: var(--weight-semi);
+    font-weight: 700;
     line-height: 1.25;
     margin: 0 0 var(--sp-4);
     text-wrap: balance;
@@ -182,6 +186,7 @@ small {
 .app-main {
     min-width: 0; /* let wide tables scroll instead of stretching the grid track */
     padding: var(--sp-6) var(--sp-6) var(--sp-8);
+    background: var(--surface); /* cool-gray canvas behind white content */
 }
 
 /* Sidebar: the second neutral layer (--surface-2), full-height column. */
@@ -437,6 +442,21 @@ textarea {
     padding: var(--sp-2) var(--sp-3);
     margin-bottom: var(--sp-4);
 }
+/* Single-line controls share one fixed height so text, select and date inputs
+   line up uniformly. box-sizing:border-box (global) makes the height exact;
+   vertical padding is dropped because the fixed height centers the text. */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+input[type="tel"],
+input[type="date"],
+select {
+    height: var(--control-h);
+    padding-top: 0;
+    padding-bottom: 0;
+}
 input:disabled,
 select:disabled,
 textarea:disabled {
@@ -470,7 +490,7 @@ a.btn {
     gap: var(--sp-2);
     font: inherit;
     font-size: var(--text-sm);
-    font-weight: var(--weight-medium);
+    font-weight: var(--weight-semi);
     line-height: 1;
     padding: var(--sp-2) var(--sp-4);
     border-radius: var(--r);

@@ -1,0 +1,231 @@
+/*
+ * Experimental, isolated login styling ("Sellora" reference).
+ * Loaded ONLY on the login page via content_for :head in sessions/new.html.erb.
+ * All rules are scoped under .login-page so nothing leaks into the rest of the
+ * app (app.css is untouched). Colors sampled from the reference PNG.
+ */
+
+.login-page {
+  position: fixed;
+  inset: 0;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #e6e8ec;
+  font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.login-page *,
+.login-page *::before,
+.login-page *::after {
+  box-sizing: border-box;
+}
+
+.login-card {
+  width: min(1000px, 100%);
+  background: #ffffff;
+  border-radius: 26px;
+  box-shadow: 0 30px 60px -25px rgba(24, 24, 64, 0.28);
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-card__main {
+  display: grid;
+  grid-template-columns: 1fr 1.12fr;
+  gap: 26px;
+  min-height: 560px;
+}
+
+/* ---------- Left: form ---------- */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 22px;
+}
+
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.login-brand__mark {
+  width: 26px;
+  height: 26px;
+}
+
+.login-brand__name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1b1b2b;
+  letter-spacing: -0.01em;
+}
+
+.login-form__body {
+  margin: auto 0;
+  width: 100%;
+  max-width: 340px;
+  align-self: center;
+}
+
+.login-title {
+  margin: 0;
+  font-size: 31px;
+  font-weight: 700;
+  color: #1b1b2b;
+  text-align: center;
+  letter-spacing: -0.02em;
+}
+
+.login-subtitle {
+  margin: 10px 0 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #9a9fae;
+  text-align: center;
+}
+
+.login-fields {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.login-page .login-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #2c3140;
+}
+
+.login-page .login-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e4e6ec;
+  border-radius: 10px;
+  background: #ffffff;
+  font: inherit;
+  font-size: 14px;
+  color: #1b1b2b;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.login-page .login-input::placeholder {
+  color: #b9bcc7;
+}
+
+.login-page .login-input:focus {
+  outline: none;
+  border-color: #3838ec;
+  box-shadow: 0 0 0 3px rgba(56, 56, 236, 0.15);
+}
+
+.login-page .login-submit {
+  margin-top: 8px;
+  width: 100%;
+  padding: 13px 16px;
+  border: none;
+  border-radius: 10px;
+  background: #3838ec;
+  color: #ffffff;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.05s ease;
+}
+
+.login-page .login-submit:hover {
+  background: #2d2dd6;
+}
+
+.login-page .login-submit:active {
+  transform: translateY(1px);
+}
+
+.login-card__footer {
+  margin-top: 22px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: #a6aab4;
+}
+
+/* ---------- Right: indigo panel ---------- */
+.login-panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #3838ec;
+  color: #ffffff;
+  padding: 38px 34px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-page .login-panel__title {
+  margin: 0;
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 1.28;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+
+.login-panel__text {
+  margin: 14px 0 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.82);
+  max-width: 85%;
+}
+
+.login-panel__visual {
+  margin-top: 16px;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.login-panel__img {
+  display: block;
+  width: 112%;
+  max-width: none;
+  height: auto;
+  margin: 0 -6% -12px;
+}
+
+/* ---------- Responsive: drop the panel on narrow viewports ---------- */
+@media (max-width: 860px) {
+  .login-card__main {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .login-panel {
+    display: none;
+  }
+
+  .login-form {
+    padding: 16px 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-page .login-input,
+  .login-page .login-submit {
+    transition: none;
+  }
+}
