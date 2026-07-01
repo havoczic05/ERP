@@ -64,26 +64,32 @@ RSpec.describe SalePdf do
   end
 
   describe "venta with installments" do
+    # Anchor the due date far from "today" so it can never collide with the
+    # sale's emission date in the PDF header (which renders today's date) —
+    # otherwise the "omit" assertion breaks whenever the suite runs on that day.
+    let(:due_date) { Date.current + 200 }
+    let(:due_date_str) { due_date.strftime("%d/%m/%Y") }
+
     let(:venta) do
       sale = create(:sale, :venta, client: client, warehouse: warehouse,
                     subtotal_usd: 20.00, total_usd: 20.00)
       create(:sale_item, sale: sale, product: product, quantity: 2,
              unit_price_usd: 10.00, line_total_usd: 20.00)
       create(:installment, sale: sale, installment_number: 1,
-             amount_usd: 20.00, balance_usd: 20.00, due_date: Date.new(2026, 7, 1))
+             amount_usd: 20.00, balance_usd: 20.00, due_date: due_date)
       sale
     end
 
     it "renders the installments section" do
       text = text_of(described_class.new(venta, settings).render)
       expect(text).to match(/Venta/i)
-      expect(text).to include("01/07/2026")
+      expect(text).to include(due_date_str)
     end
 
     it "omits the installments section when show_installments is false" do
       text = text_of(described_class.new(venta, settings, show_installments: false).render)
       expect(text).not_to include("Cuotas")
-      expect(text).not_to include("01/07/2026")
+      expect(text).not_to include(due_date_str)
       # the rest of the document still renders
       expect(text).to include(venta.correlative)
       expect(text).to include("Resistor 10k")

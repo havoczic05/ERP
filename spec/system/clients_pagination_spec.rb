@@ -3,9 +3,8 @@ require 'rails_helper'
 # System spec for Pagy pagination on the Clients index (Phase 8).
 # Uses rack_test driver (no Chrome/Chromium in this WSL environment).
 #
-# Creates 25 clients to exceed the default 20/page limit and asserts
-# that page 1 shows only 20 rows and that the pagination navigation
-# element is rendered.
+# Creates 25 clients to exceed the 10/page limit and asserts that page 1
+# shows only 10 rows and that the pagination navigation element is rendered.
 
 RSpec.describe 'Clients pagination', type: :system do
   before do
@@ -18,7 +17,7 @@ RSpec.describe 'Clients pagination', type: :system do
     allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(user)
   end
 
-  it 'paginates clients (25 total, 20 per page on page 1)' do
+  it 'paginates clients (25 total, 10 per page on page 1)' do
     # Create 25 clients with distinct, sortable full_names (A01..A25)
     25.times do |i|
       num = format('%02d', i + 1)
@@ -29,14 +28,14 @@ RSpec.describe 'Clients pagination', type: :system do
 
     visit clients_path
 
-    # Page 1 should show exactly 20 client rows (table body tr elements with client id)
+    # Page 1 should show exactly 10 client rows (table body tr elements with client id)
     client_rows = all('table tbody tr[id^="client_"]')
-    expect(client_rows.count).to eq(20)
+    expect(client_rows.count).to eq(10)
 
     # The reusable pagination partial renders a <nav class="pagination">.
     expect(page).to have_css('nav.pagination')
     expect(page).to have_link('2', href: clients_path(page: 2))
-    expect(page).to have_content('Mostrando 1–20 de 25')
+    expect(page).to have_content('Mostrando 1–10 de 25')
   end
 
   it 'shows the second page when navigating forward' do
@@ -49,8 +48,8 @@ RSpec.describe 'Clients pagination', type: :system do
 
     visit clients_path(page: 2)
 
-    # Page 2 should show the remaining 5 clients
+    # Page 2 should show the next 10 clients (25 total → 10 + 10 + 5)
     client_rows = all('table tbody tr[id^="client_"]')
-    expect(client_rows.count).to eq(5)
+    expect(client_rows.count).to eq(10)
   end
 end

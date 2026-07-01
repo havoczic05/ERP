@@ -151,13 +151,22 @@ module ApplicationHelper
            suffix: (capture(&suffix) if suffix)
   end
 
-  # Money cell: "USD" pinned left, the amount pinned right (2 decimals, tabular).
-  # Reusable across every money column so currency reads consistently.
+  # Money cell: the amount right-aligned with tabular figures (2 decimals).
+  # The currency lives once in the column header (e.g. "Total (USD)"), so the
+  # cells stay currency-free to avoid repeating "USD" on every row.
   def money(amount)
-    tag.div(class: "money") do
+    tag.div(number_with_precision(amount, precision: 2, delimiter: ","), class: "money")
+  end
+
+  # Uniform search input for index toolbars. Renders the standard `.field`
+  # wrapper with a "Buscar" label and the `q` text field so every table's search
+  # box looks and behaves identically; the placeholder describes what each table
+  # matches on. Keeps id/name "q" so existing GET filter forms keep working.
+  def search_field(placeholder:, label: "Buscar")
+    tag.div(class: "field") do
       safe_join([
-        tag.span("USD", class: "money-cur"),
-        tag.span(number_with_precision(amount, precision: 2, delimiter: ","), class: "money-val")
+        label_tag(:q, label),
+        text_field_tag(:q, params[:q], placeholder: placeholder)
       ])
     end
   end

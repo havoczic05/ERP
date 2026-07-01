@@ -2,10 +2,7 @@
 
 <div class="toolbar">
   <form action="<%= products_path %>" method="get" class="filters">
-    <div class="field">
-      <label for="q">Buscar (nombre o SKU)</label>
-      <input type="text" id="q" name="q" value="<%= params[:q] %>">
-    </div>
+    <%= search_field placeholder: 'Nombre o SKU' %>
 
     <div class="field">
       <label for="warehouse_id">Almacén</label>
@@ -37,7 +34,7 @@
       <th>Marca</th>
       <th>Almacén</th>
       <th>Stock</th>
-      <th>Precio base USD</th>
+      <th class="num">Precio base (USD)</th>
       <th>Acciones</th>
     </tr>
   </thead>

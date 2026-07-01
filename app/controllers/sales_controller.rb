@@ -15,8 +15,8 @@ class SalesController < ApplicationController
     @subtotal = scope.sum(:total_usd) # subtotal of the FILTERED set (not the page)
 
     respond_to do |format|
-      # ~15 rows so the pagination/footer fits on screen without much scrolling.
-      format.html { @pagy, @sales = pagy(:offset, scope, limit: 15) }
+      # 10 rows so the pagination/footer fits on screen without much scrolling.
+      format.html { @pagy, @sales = pagy(:offset, scope, limit: 10) }
       format.csv { send_csv("ventas", SALES_CSV_HEADERS, sales_csv_rows(scope)) }
     end
   end

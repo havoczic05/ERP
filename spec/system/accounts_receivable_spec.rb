@@ -106,7 +106,7 @@ RSpec.describe 'AccountsReceivable index', type: :system do
     it 'filters by client name or correlative via q' do
       visit accounts_receivable_path
       fill_in 'q', with: 'Acme'
-      click_button 'Filtrar'
+      click_button 'Buscar'
 
       expect(page).to have_content('Acme Corp')
       expect(page).not_to have_content('Beta SA')
@@ -115,7 +115,7 @@ RSpec.describe 'AccountsReceivable index', type: :system do
     it 'filters by vencimiento within N days' do
       visit accounts_receivable_path
       select 'Próximos 5 días', from: 'due_within'
-      click_button 'Filtrar'
+      click_button 'Buscar'
 
       expect(page).to have_content('Acme Corp')   # due in 3 days
       expect(page).not_to have_content('Beta SA') # due in 25 days

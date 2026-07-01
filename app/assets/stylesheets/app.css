@@ -1222,14 +1222,8 @@ a.kpi:focus-visible {
 
 /* Money cell: USD pinned left, amount pinned right */
 .money {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: var(--sp-4);
+    text-align: right;
     font-variant-numeric: tabular-nums;
-}
-.money-cur {
-    color: var(--muted);
 }
 
 /* Compact button variant for in-table / inline actions */

@@ -19,7 +19,7 @@ class AccountsReceivableController < ApplicationController
 
     respond_to do |format|
       format.html do
-        @pagy, @installments = pagy(:offset, scope)
+        @pagy, @installments = pagy(:offset, scope, limit: 10)
         @installment_totals = total_installments_for(@installments)
         @overdue_counts     = overdue_counts_for(@installments)
         @sale_balances      = sale_balances_for(@installments)
