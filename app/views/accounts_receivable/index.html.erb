@@ -2,10 +2,7 @@
 
 <div class="toolbar">
   <%= form_with url: accounts_receivable_path, method: :get, class: "filters" do |f| %>
-    <div class="field">
-      <%= label_tag :q, 'Buscar' %>
-      <%= text_field_tag :q, params[:q], placeholder: 'Cliente o correlativo' %>
-    </div>
+    <%= search_field placeholder: 'Cliente o correlativo' %>
     <div class="field">
       <%= label_tag :status, 'Estado' %>
       <%= select_tag :status,
@@ -24,7 +21,7 @@
       <%= label_tag :on, 'Día específico' %>
       <%= date_field_tag :on, params[:on] %>
     </div>
-    <%= f.submit 'Filtrar' %>
+    <%= f.submit 'Buscar' %>
     <%= clear_filters_link accounts_receivable_path %>
   <% end %>
 </div>

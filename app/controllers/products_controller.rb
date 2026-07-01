@@ -13,7 +13,7 @@ class ProductsController < ApplicationController
     @warehouses = Warehouse.order(:name)
 
     respond_to do |format|
-      format.html { @pagy, @products = pagy(:offset, scope) }
+      format.html { @pagy, @products = pagy(:offset, scope, limit: 10) }
       format.csv { send_csv("productos", CSV_HEADERS, products_csv_rows(scope)) }
     end
   end

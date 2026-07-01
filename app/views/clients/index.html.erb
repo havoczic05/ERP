@@ -2,10 +2,7 @@
 
 <div class="toolbar">
   <%= form_with url: clients_path, method: :get, local: true, class: "filters" do |f| %>
-    <div class="field">
-      <%= f.label :q, 'Buscar' %>
-      <%= f.text_field :q, value: params[:q], placeholder: 'Nombre o número de documento' %>
-    </div>
+    <%= search_field placeholder: 'Nombre o número de documento' %>
     <div class="field">
       <%= f.label :document_type, 'Tipo de documento' %>
       <%= select_tag :document_type,

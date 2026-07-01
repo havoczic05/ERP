@@ -13,7 +13,7 @@ class ClientsController < ApplicationController
     scope = scope.where(document_type: params[:document_type]) if Client.document_types.key?(params[:document_type])
 
     respond_to do |format|
-      format.html { @pagy, @clients = pagy(:offset, scope) }
+      format.html { @pagy, @clients = pagy(:offset, scope, limit: 10) }
       format.csv { send_csv("clientes", CSV_HEADERS, clients_csv_rows(scope)) }
     end
   end
