@@ -21,7 +21,7 @@
       <%= label_tag :on, 'Día específico' %>
       <%= date_field_tag :on, params[:on] %>
     </div>
-    <%= f.submit 'Buscar' %>
+    <%= submit_button f, 'Buscar' %>
     <%= clear_filters_link accounts_receivable_path %>
   <% end %>
 </div>

@@ -1,7 +1,7 @@
 <div class="page-head"><h1>Productos</h1></div>
 
 <div class="toolbar">
-  <form action="<%= products_path %>" method="get" class="filters">
+  <%= form_with url: products_path, method: :get, local: true, class: "filters" do |f| %>
     <%= search_field placeholder: 'Nombre o SKU' %>
 
     <div class="field">
@@ -16,9 +16,9 @@
       </select>
     </div>
 
-    <button type="submit">Buscar</button>
+    <%= submit_button f, 'Buscar' %>
     <%= clear_filters_link products_path %>
-  </form>
+  <% end %>
 
   <% if policy(Product).new? %>
     <%= action_link 'Nuevo producto', new_product_path, variant: :primary, size: :md, icon: :plus,

@@ -378,12 +378,21 @@ dd {
    Tables — core UI. Tabular figures, zebra, soft lines (anti-Excel).
    ========================================================================== */
 
+/* Data tables read as a self-contained card: a rounded, bordered white
+   container with a tinted header — mirroring the design-system datatable.
+   border-collapse:separate + overflow:hidden lets the radius clip the corners.
+   The editable .line-items-table opts back out (see its rule). */
 table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     margin: 0 0 var(--sp-5);
     font-size: var(--text-sm);
     font-variant-numeric: tabular-nums;
+    background: var(--bg);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-lg);
+    overflow: hidden;
 }
 
 thead th {
@@ -393,6 +402,7 @@ thead th {
     letter-spacing: 0.03em;
     text-transform: uppercase;
     color: var(--muted);
+    background: var(--surface);
     padding: var(--sp-2) var(--sp-3);
     border-bottom: 1px solid var(--line-strong);
     white-space: nowrap;
@@ -404,8 +414,9 @@ tbody td {
     color: var(--ink);
 }
 
-tbody tr:nth-child(even) {
-    background: var(--surface);
+/* Last row sits flush against the container's rounded edge — no divider. */
+tbody tr:last-child td {
+    border-bottom: none;
 }
 tbody tr:hover {
     background: var(--brand-weak);
@@ -547,6 +558,17 @@ a.btn:focus-visible {
     outline-offset: 2px;
 }
 
+/* CTA buttons (Buscar / Limpiar / Nuevo documento, form submits, action bars)
+   match the input control height so index toolbars line up with the search and
+   select fields. Scoped to .btn/submit — bare icon buttons (.modal__close,
+   .toast__close) keep their own size. Compact .btn--sm opts out below. */
+.btn,
+a.btn,
+button.btn,
+input[type="submit"] {
+    height: var(--control-h);
+}
+
 /* Inline icons inside buttons/links: never shrink, scale with button size */
 .icon {
     flex: none;
@@ -601,13 +623,15 @@ a.btn--danger:focus-visible {
     outline-color: var(--danger);
 }
 
-/* In-table actions read quiet at rest so numbers stay first-class; the button
-   chrome (surface + border) appears only on hover/focus. Destructive actions
-   keep their danger ink at rest so they remain recognizable. Labels are always
-   visible, so this subdues decoration without hiding the control. */
+/* In-table actions use a compact outline at rest (mirroring the design-system
+   datatable): a neutral border for Ver, a danger border for Anular, each with a
+   filled tint on hover/focus. Small radius keeps them chip-like. */
+.row-actions .btn {
+    border-radius: var(--r-sm);
+}
 .row-actions .btn--ghost {
-    background: transparent;
-    border-color: transparent;
+    background: var(--bg);
+    border-color: var(--line-strong);
     color: var(--ink-soft);
 }
 .row-actions .btn--ghost:hover,
@@ -617,8 +641,9 @@ a.btn--danger:focus-visible {
     color: var(--ink);
 }
 .row-actions .btn--danger {
-    background: transparent;
-    border-color: transparent;
+    background: var(--bg);
+    border-color: var(--danger);
+    color: var(--danger-ink);
 }
 .row-actions .btn--danger:hover,
 .row-actions .btn--danger:focus-visible {
@@ -1226,8 +1251,13 @@ a.kpi:focus-visible {
     font-variant-numeric: tabular-nums;
 }
 
-/* Compact button variant for in-table / inline actions */
-.btn--sm {
+/* Compact button variant for in-table / inline actions. The a./button.
+   qualifiers match the base a.btn specificity so height:auto wins over the
+   control-height default. */
+.btn--sm,
+a.btn--sm,
+button.btn--sm {
+    height: auto;
     padding: var(--sp-1) var(--sp-3);
     font-size: var(--text-xs);
 }
@@ -1608,10 +1638,16 @@ a.kpi:focus-visible {
     font-size: var(--text-sm);
 }
 
-/* Line-item editor table: inputs fill their cell, no stacked margins */
+/* Line-item editor table: an editable grid, not a data card — opt out of the
+   global table border/radius/background and keep collapsed borders. */
 .line-items-table {
     table-layout: fixed;
     width: 100%;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+    background: transparent;
+    border-collapse: collapse;
 }
 .line-items-table input {
     max-width: none;
