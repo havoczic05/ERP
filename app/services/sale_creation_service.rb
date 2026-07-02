@@ -284,14 +284,18 @@ class SaleCreationService
   end
 
   # Returns the next sequential correlative for the given document_type.
-  # Uses pluck + Ruby max to avoid FOR UPDATE incompatibility with aggregate funcs.
+  # Computes the max numeric suffix in the DB (single MAX) instead of loading
+  # every matching correlative into Ruby — the old pluck-all approach was O(n)
+  # per call, i.e. O(n²) across a bulk run. CASTing the suffix to INTEGER keeps
+  # ordering correct for any digit count (a lexical MAX would break past 99999).
+  # No FOR UPDATE is held on `sales` here, so a server-side aggregate is safe;
+  # generate_correlative_with_retry still guards the rare concurrent collision.
   def generate_correlative(document_type)
-    prefix = CORRELATIVE_PREFIX.fetch(document_type, "DOC")
-    existing_nums = Sale.where("correlative LIKE ?", "#{prefix}-%")
-                        .pluck(:correlative)
-                        .map { |c| c.delete_prefix("#{prefix}-").to_i }
-    next_num = (existing_nums.max || 0) + 1
-    "#{prefix}-#{format('%05d', next_num)}"
+    prefix       = CORRELATIVE_PREFIX.fetch(document_type, "DOC")
+    suffix_start = prefix.length + 2 # 1-indexed position right after "PREFIX-"
+    max_num = Sale.where("correlative LIKE ?", "#{prefix}-%")
+                  .maximum(Arel.sql("CAST(SUBSTRING(correlative FROM #{suffix_start}) AS INTEGER)"))
+    "#{prefix}-#{format('%05d', max_num.to_i + 1)}"
   end
 
   def apply_venta_installments!(sale)

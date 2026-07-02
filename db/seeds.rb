@@ -32,6 +32,7 @@ if Rails.env.local?
   Sale.delete_all
   Product.delete_all
   Client.delete_all
+  BankAccount.delete_all # child of company_settings — must go before its parent
   CompanySettings.delete_all
   Warehouse.delete_all
 end
@@ -133,18 +134,23 @@ PRODUCT_TYPES = [
 
 MODEL_LINES = %w[Pro Plus Max Lite Smart Eco Elite Prime One Neo].freeze
 
-# Build up to 200 unique products by combining brand × type, with a model suffix
-# guaranteeing SKU uniqueness. Distributed round-robin across warehouses.
+# Target catalog size. model × brand × type gives 10 × 15 × 20 = 3000 possible
+# combos; we take the first PRODUCT_TARGET. Iterating model-outermost keeps every
+# brand and product type represented within the first slice (the alternative,
+# brand-outermost, would only surface the first ~5 brands). The per-index serial
+# guarantees SKU uniqueness regardless of brand/type/model repetition.
+# Stock starts high so the demo can absorb ~1000 ventas without hitting the
+# service's stock gate. Distributed round-robin across warehouses.
+PRODUCT_TARGET = 900
 product_specs = []
 
-BRANDS.to_a.product(PRODUCT_TYPES).each_with_index do |(brand_pair, type), idx|
-  break if product_specs.size >= 200
+MODEL_LINES.product(BRANDS.to_a, PRODUCT_TYPES).each_with_index do |(model, brand_pair, type), idx|
+  break if product_specs.size >= PRODUCT_TARGET
 
   brand_name, brand_code       = brand_pair
   type_name, type_code, lo, hi = type
 
-  model  = MODEL_LINES[idx % MODEL_LINES.size]
-  serial = format("%03d", idx + 1)
+  serial = format("%04d", idx + 1)
   # Round to a "nice" .90 retail-looking price.
   price  = rng.rand(lo..hi).to_d.floor + 0.90.to_d
 
@@ -153,7 +159,7 @@ BRANDS.to_a.product(PRODUCT_TYPES).each_with_index do |(brand_pair, type), idx|
     name:           "#{type_name} #{brand_name} #{model} #{serial}",
     brand:          brand_name,
     base_price_usd: price,
-    stock:          rng.rand(60..280),
+    stock:          rng.rand(500..2000),
     warehouse:      warehouses[idx % warehouses.size]
   }
 end
@@ -217,12 +223,14 @@ end
 
 clients = []
 
-# 25 individuals (DNI — 8 digits) + 15 businesses (RUC — 11 digits) = 40 clients.
-25.times do |i|
+# 130 individuals (DNI — 8 digits) + 70 businesses (RUC — 11 digits) = 200 clients.
+# Document numbers are derived from the loop index so they are guaranteed unique
+# (a rand-based scheme risks collisions at this volume).
+130.times do |i|
   first = FIRST_NAMES[rng.rand(FIRST_NAMES.size)]
   last1 = LAST_NAMES[rng.rand(LAST_NAMES.size)]
   last2 = LAST_NAMES[rng.rand(LAST_NAMES.size)]
-  doc   = format("%08d", 40_000_000 + (rng.rand(0..9_000_000) + i))
+  doc   = format("%08d", 40_000_000 + i)
 
   loc = pick_location.call
   clients << Client.find_or_create_by!(document_number: doc) do |c|
@@ -236,12 +244,12 @@ clients = []
   end
 end
 
-15.times do |i|
+70.times do |i|
   prefix = COMPANY_PREFIXES[rng.rand(COMPANY_PREFIXES.size)]
   word   = LAST_NAMES[rng.rand(LAST_NAMES.size)]
   suffix = COMPANY_SUFFIXES[rng.rand(COMPANY_SUFFIXES.size)]
   # Peru RUC: 11 digits, businesses start with "20".
-  doc    = "20#{format('%09d', 100_000_000 + (rng.rand(0..800_000_000) + i))}"
+  doc    = "20#{format('%09d', 100_000_000 + i)}"
 
   loc = pick_location.call
   clients << Client.find_or_create_by!(document_number: doc) do |c|
@@ -299,12 +307,21 @@ else
     )
   end
 
+  # Demo volume targets and the timeline window (~5 months).
+  VENTAS_TARGET     = 9000
+  COTIZACIONES_COUNT = 120
+  SALES_WINDOW_DAYS = 150
+
   ventas       = []
   cotizaciones = []
   failures     = 0
 
-  # --- 70 ventas ----------------------------------------------------------
-  70.times do
+  # --- 1000 ventas over the last ~5 months --------------------------------
+  # Loop until the target is met (the stock gate can occasionally reject a
+  # draw). The attempt cap is a safety valve against an unexpected stall.
+  attempts = 0
+  while ventas.size < VENTAS_TARGET && attempts < VENTAS_TARGET * 2
+    attempts += 1
     warehouse_id, items = build_items.call(true)
     next if items.empty?
 
@@ -319,15 +336,16 @@ else
     )
 
     if result.success?
-      backdate.call(result.sale, rng.rand(0..180))
+      backdate.call(result.sale, rng.rand(0..SALES_WINDOW_DAYS))
       ventas << result.sale
+      puts "  ... #{ventas.size} ventas" if (ventas.size % 100).zero?
     else
       failures += 1
     end
   end
 
-  # --- 35 cotizaciones ----------------------------------------------------
-  35.times do
+  # --- cotizaciones -------------------------------------------------------
+  COTIZACIONES_COUNT.times do
     warehouse_id, items = build_items.call(false)
     next if items.empty?
 
@@ -340,22 +358,22 @@ else
     )
 
     if result.success?
-      backdate.call(result.sale, rng.rand(0..120))
+      backdate.call(result.sale, rng.rand(0..SALES_WINDOW_DAYS))
       cotizaciones << result.sale
     else
       failures += 1
     end
   end
 
-  # --- Convert ~8 cotizaciones into ventas --------------------------------
-  cotizaciones.sample(8, random: rng).each do |cotizacion|
+  # --- Convert ~15 cotizaciones into ventas -------------------------------
+  cotizaciones.sample(15, random: rng).each do |cotizacion|
     result = SaleCreationService.convert(
       cotizacion,
       num_installments: [ 1, 2, 3 ][rng.rand(3)],
       interval_days:    30
     )
     if result.success?
-      backdate.call(result.sale, rng.rand(0..90))
+      backdate.call(result.sale, rng.rand(0..SALES_WINDOW_DAYS))
       ventas << result.sale
     else
       failures += 1
@@ -378,13 +396,14 @@ else
     end
   end
 
-  # --- Pay installments on ~30 ventas (full first cuota, sometimes more) ---
+  # --- Pay installments on ~40% of ventas (full first cuota, sometimes more) ---
   # Payment dates are anchored to each sale's own timeline so the demo data is
   # chronologically possible: a cuota is paid around its due_date, NEVER before
   # the sale itself, NEVER in the future, and ALWAYS after the previous cuota's
   # payment (cuota 1 settles before cuota 2).
   today = Date.current
-  ventas.sample(30, random: rng).each do |venta|
+  paid_sample_size = (ventas.size * 0.40).round
+  ventas.sample(paid_sample_size, random: rng).each do |venta|
     start_date = venta.created_at.to_date
     last_paid  = start_date
     hour_base  = rng.rand(8..16)
@@ -409,8 +428,9 @@ else
     end
   end
 
-  # --- Annul ~5 ventas (creates credit notes, restores stock) -------------
-  ventas.sample(5, random: rng).each do |venta|
+  # --- Annul ~2% of ventas (creates credit notes, restores stock) ---------
+  annul_sample_size = (ventas.size * 0.02).round
+  ventas.sample(annul_sample_size, random: rng).each do |venta|
     SaleAnnulmentService.call(venta.reload, admin)
   end
 
