@@ -135,14 +135,15 @@ h1,
 h2,
 h3 {
     color: var(--ink);
-    font-weight: 700;
+    font-weight: var(--weight-semi); /* shadcn-style: semibold, not heavy bold */
     line-height: 1.25;
+    letter-spacing: -0.01em; /* tracking-tight */
     margin: 0 0 var(--sp-4);
     text-wrap: balance;
 }
 h1 {
     font-size: var(--text-xl);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
 }
 h2 {
     font-size: var(--text-lg);
@@ -395,21 +396,21 @@ table {
     overflow: hidden;
 }
 
+/* shadcn table header: normal case, muted, medium weight, no fill — the
+   bottom border is the only separator (not the uppercase micro-label look). */
 thead th {
     text-align: left;
-    font-size: var(--text-xs);
-    font-weight: var(--weight-semi);
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
     color: var(--muted);
-    background: var(--surface);
-    padding: var(--sp-2) var(--sp-3);
+    background: transparent;
+    padding: var(--sp-3);
     border-bottom: 1px solid var(--line-strong);
     white-space: nowrap;
 }
 
 tbody td {
-    padding: var(--sp-2) var(--sp-3);
+    padding: var(--sp-3);
     border-bottom: 1px solid var(--line);
     color: var(--ink);
 }
@@ -419,7 +420,7 @@ tbody tr:last-child td {
     border-bottom: none;
 }
 tbody tr:hover {
-    background: var(--brand-weak);
+    background: var(--surface); /* shadcn: neutral row hover, never the accent tint */
 }
 
 /* Right-align numeric / currency columns where wired in views */
@@ -896,9 +897,10 @@ li {
     display: flex;
     flex-direction: column;
     gap: var(--sp-1);
-    background: var(--surface);
+    background: var(--bg); /* white card floats over the cool-gray canvas */
     border: 1px solid var(--line);
     border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
     padding: var(--sp-4);
 }
 .kpi-label {
@@ -954,9 +956,10 @@ a.kpi:focus-visible {
     margin-bottom: var(--sp-6);
 }
 .panel {
-    background: var(--surface);
+    background: var(--bg); /* white card floats over the cool-gray canvas */
     border: 1px solid var(--line);
     border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
     padding: var(--sp-4) var(--sp-5);
 }
 .panel h2 {
@@ -1078,9 +1081,10 @@ a.kpi:focus-visible {
     display: block;
     width: 100%;
     height: auto;
-    background: var(--surface);
+    background: var(--bg); /* match the KPI/panel white surface */
     border: 1px solid var(--line);
-    border-radius: var(--r);
+    border-radius: var(--r-lg); /* unify radius with the cards */
+    box-shadow: var(--shadow-sm);
     padding: var(--sp-3);
 }
 .chart svg .bar,
@@ -1243,6 +1247,22 @@ a.kpi:focus-visible {
 .pago-notas {
     flex: 3;
     min-width: 0;
+}
+
+/* Compact the inline payment controls so the AR row height matches the text
+   rows in the other datatables. Left at the full 36px --control-h, the input +
+   submit made this table's rows visibly taller than every other index table. */
+.pago-form .pago-monto,
+.pago-form input[type="submit"] {
+    height: 1.875rem; /* ~30px — usable, but close to the .btn--sm inline actions */
+}
+.pago-form .pago-monto {
+    padding: 0 var(--sp-2);
+    font-size: var(--text-sm);
+}
+.pago-form input[type="submit"] {
+    padding: 0 var(--sp-3);
+    font-size: var(--text-xs);
 }
 
 /* Money cell: USD pinned left, amount pinned right */

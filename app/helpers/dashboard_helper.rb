@@ -54,7 +54,7 @@ module DashboardHelper
       height = (value.to_f / max * PLOT_HEIGHT).round(2)
       x = MARGIN_LEFT + (index * slot)
       tag.rect(x: x, y: MARGIN_TOP + (PLOT_HEIGHT - height),
-               width: BAR_WIDTH, height: height, class: "bar",
+               width: BAR_WIDTH, height: height, rx: 2, class: "bar",
                data: { day: date.day, value: value }) do
         tag.title("#{date.strftime('%d/%m')} — #{format_tooltip_value(value, format)}")
       end
