@@ -139,11 +139,12 @@ RSpec.describe DashboardHelper, type: :helper do
       expect(result.scan('class="chart-value"').size).to eq(3) # values 3, 1, 5; two zeros skipped
     end
 
-    it 'labels money-chart points with their delimited amount when show_values is on' do
-      money_series = { Date.new(2026, 6, 1) => 1000, Date.new(2026, 6, 2) => 300 }
+    it 'labels money-chart points with a compact amount (e.g. 198k) when show_values is on' do
+      money_series = { Date.new(2026, 6, 1) => 197_628, Date.new(2026, 6, 2) => 300 }
       result = helper.area_chart_svg(money_series, label: 'x', format: :money, show_values: true)
       expect(result.scan('class="chart-value"').size).to eq(2)
-      expect(result).to include('>300<') # a value label (300 is not a y-axis tick here)
+      expect(result).to include('>198k<') # compact, not the full 197,628 on the line
+      expect(result).to include('>300<')  # small amounts stay as-is
     end
 
     it 'omits value digits by default' do

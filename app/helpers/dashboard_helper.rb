@@ -216,9 +216,14 @@ module DashboardHelper
     end
   end
 
-  # Compact per-point label printed on the line. The unit already lives on the
-  # y-axis, so this stays a bare number (integer count, or rounded amount).
+  # Compact per-point label printed on the line. Counts stay as integers; money
+  # amounts are abbreviated (197628 -> "198k", 1.25M -> "1.25M") so up to 31
+  # per-day labels fit without overlapping. The precise scale lives on the y-axis.
   def format_value_label(value, format)
-    format == :money ? number_with_delimiter(value.round) : value.to_i.to_s
+    return value.to_i.to_s unless format == :money
+
+    number_to_human(value, units: { unit: "", thousand: "k", million: "M", billion: "B" },
+                           format: "%n%u", precision: 3, significant: true,
+                           strip_insignificant_zeros: true)
   end
 end
