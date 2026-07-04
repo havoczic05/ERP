@@ -23,22 +23,9 @@
     <%= render "kpi",
         href: accounts_receivable_path,
         aria_label: "Ver cobros del mes", label: "Cobrado del mes",
-        value: number_to_currency(@metrics.monthly_collected, unit: "USD "),
+        value: kpi_currency(@metrics.monthly_collected),
         meta: "pagos recibidos este mes",
         trend: trend_badge(@metrics.monthly_collected_trend) %>
-
-    <%= render "kpi",
-        href: accounts_receivable_path,
-        aria_label: "Ver cuentas por cobrar", label: "Por cobrar",
-        value: number_to_currency(@metrics.outstanding_ar, unit: "USD "),
-        meta: "saldo pendiente" %>
-
-    <%= render "kpi",
-        href: sales_path(document_type: "venta", status: "confirmada", date_range: "month"),
-        aria_label: "Ver ventas del mes", label: "Ticket promedio",
-        value: number_to_currency(@metrics.monthly_average_ticket, unit: "USD "),
-        meta: "por venta este mes",
-        trend: trend_badge(@metrics.monthly_average_ticket_trend) %>
 
     <%= render "kpi",
         href: sales_path(document_type: "venta", status: "confirmada", date_range: "today"),
@@ -49,73 +36,83 @@
     <%= render "kpi",
         href: accounts_receivable_path(status: "vencida"),
         aria_label: "Ver facturas vencidas", label: "Vencido",
-        value: number_to_currency(@metrics.overdue_total, unit: "USD "),
-        meta: pluralize(@metrics.overdue_count, "factura vencida", "facturas vencidas"),
-        danger: @metrics.overdue_count.positive? %>
+        value: kpi_currency(@metrics.overdue_total),
+        meta: pluralize(@metrics.overdue_count, "factura vencida", "facturas vencidas") %>
   </div>
 </section>
 
-<%# Row 2 — temporal area charts %>
-<section class="charts" aria-label="Gráficos del mes">
-  <div class="chart">
-    <h2>Ventas por Día</h2>
-    <%= area_chart_svg(@metrics.sales_count_by_day, label: "Cantidad de ventas por día del mes", format: :count) %>
-    <p class="chart-caption">Pico del mes: <%= peak_count %> ventas en un día</p>
-  </div>
+<%# Row 2 — temporal area charts with a selectable time range. Wrapped in a
+    turbo-frame so the range toggle swaps only the charts (no full-page reload,
+    no scroll jump). turbo_action "advance" pushes ?range= to the URL so a
+    refresh keeps the selected range; the toggle links live inside the frame. %>
+<%= turbo_frame_tag "dashboard-charts", data: { turbo_action: "advance" } do %>
+  <section class="charts" aria-label="Gráficos temporales">
+    <div class="charts-head">
+      <%= chart_range_toggle(@metrics.chart_range) %>
+    </div>
 
-  <div class="chart">
-    <h2>Monto por Día (USD)</h2>
-    <%= area_chart_svg(@metrics.sales_total_by_day, label: "Monto de ventas en USD por día del mes", format: :money) %>
-    <p class="chart-caption">Pico del mes: <%= number_to_currency(peak_total, unit: 'USD ') %></p>
-  </div>
-</section>
+    <div class="chart">
+      <h2>Ventas por Día</h2>
+      <%= area_chart_svg(@metrics.sales_count_by_day, label: "Cantidad de ventas por día", format: :count, show_values: true) %>
+      <p class="chart-caption">Pico del período: <%= peak_count %> ventas en un día</p>
+    </div>
 
-<%# Row 3 — rankings, alerts & upcoming dues %>
+    <div class="chart">
+      <h2>Monto por Día (USD)</h2>
+      <%= area_chart_svg(@metrics.sales_total_by_day, label: "Monto de ventas en USD por día", format: :money, show_values: true) %>
+      <p class="chart-caption">Pico del período: <%= number_to_currency(peak_total, unit: 'USD ') %></p>
+    </div>
+  </section>
+<% end %>
+
+<%# Row 3 — left column stacks Top 5 over Bajo Stock; Vencimientos spans wide. %>
 <div class="dash-cols">
-  <section class="panel">
-    <h2>
-      Top 5 Productos del Mes
-      <%= link_to "Ver todos", products_path, class: "panel-link" %>
-    </h2>
-    <% if ranking.any? %>
-      <ol class="rank-list">
-        <% ranking.each do |product, units| %>
-          <li>
-            <%= link_to product_path(product), class: "rank-row", data: { turbo_frame: "modal" } do %>
-              <span class="rank-name"><%= product.name %></span>
-              <span class="rank-val num"><%= units %> u.</span>
-            <% end %>
-          </li>
-        <% end %>
-      </ol>
-    <% else %>
-      <p class="empty">Sin ventas registradas este mes.</p>
-    <% end %>
-  </section>
+  <div class="dash-stack">
+    <section class="panel">
+      <h2>
+        Top 5 Productos del Mes
+        <%= link_to "Ver todos", products_path, class: "panel-link" %>
+      </h2>
+      <% if ranking.any? %>
+        <ol class="rank-list">
+          <% ranking.each do |product, units| %>
+            <li>
+              <%= link_to product_path(product), class: "rank-row", data: { turbo_frame: "modal" } do %>
+                <span class="rank-name"><%= product.name %></span>
+                <span class="rank-val num"><%= units %> u.</span>
+              <% end %>
+            </li>
+          <% end %>
+        </ol>
+      <% else %>
+        <p class="empty">Sin ventas registradas este mes.</p>
+      <% end %>
+    </section>
 
-  <section class="panel">
-    <h2>
-      Bajo Stock
-      <% if low_stock.any? %><span class="badge badge--warning"><%= low_stock.size %></span><% end %>
-      <%= link_to "Ver todos", products_path, class: "panel-link" %>
-    </h2>
-    <% if low_stock.any? %>
-      <ul class="stock-list">
-        <% low_stock.each do |product| %>
-          <li>
-            <%= link_to product_path(product), class: "stock-row", data: { turbo_frame: "modal" } do %>
-              <span><%= product.name %></span>
-              <span class="badge badge--warning"><%= product.stock %> u.</span>
-            <% end %>
-          </li>
-        <% end %>
-      </ul>
-    <% else %>
-      <p class="empty">Todo el stock está por encima de 10 unidades.</p>
-    <% end %>
-  </section>
+    <section class="panel">
+      <h2>
+        Bajo Stock
+        <% if low_stock.any? %><span class="badge badge--warning"><%= low_stock.size %></span><% end %>
+        <%= link_to "Ver todos", products_path, class: "panel-link" %>
+      </h2>
+      <% if low_stock.any? %>
+        <ul class="stock-list">
+          <% low_stock.each do |product| %>
+            <li>
+              <%= link_to product_path(product), class: "stock-row", data: { turbo_frame: "modal" } do %>
+                <span><%= product.name %></span>
+                <span class="badge badge--warning"><%= product.stock %> u.</span>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="empty">Todo el stock está por encima de 10 unidades.</p>
+      <% end %>
+    </section>
+  </div>
 
-  <section class="panel">
+  <section class="panel panel--wide">
     <h2>
       Vencimientos de la Semana
       <% if upcoming.any? %><span class="badge badge--warning"><%= upcoming.size %></span><% end %>
@@ -125,7 +122,7 @@
       <ul class="stock-list">
         <% upcoming.each do |installment| %>
           <li>
-            <%= link_to sale_path(installment.sale), class: "stock-row", data: { turbo_frame: "modal" } do %>
+            <%= link_to accounts_receivable_path(q: installment.sale.correlative), class: "stock-row" do %>
               <span><%= installment.sale.client.full_name %> · cuota <%= installment.installment_number %></span>
               <span class="num"><%= format_date(installment.due_date) %> · <%= money(installment.balance_usd) %></span>
             <% end %>

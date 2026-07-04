@@ -914,6 +914,12 @@ li {
     line-height: 1.1;
     font-variant-numeric: tabular-nums;
 }
+/* "USD" prefix inside a KPI value: smaller and lighter so the amount leads. */
+.kpi-value .kpi-unit {
+    font-size: var(--text-sm);
+    font-weight: 400;
+    color: var(--muted);
+}
 .kpi-meta {
     color: var(--muted);
     font-size: var(--text-xs);
@@ -985,9 +991,21 @@ a.kpi:focus-visible {
 /* Two-column panels — rankings & alerts */
 .dash-cols {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: 1fr 2fr; /* left: stacked Top5/Bajo stock — right: wide Vencimientos */
     gap: var(--sp-5);
     margin-bottom: var(--sp-6);
+    align-items: start;
+}
+/* Left column: Top 5 stacked above Bajo Stock. */
+.dash-stack {
+    display: grid;
+    gap: var(--sp-5);
+    align-content: start;
+}
+@media (max-width: 56rem) {
+    .dash-cols {
+        grid-template-columns: 1fr; /* stack everything on narrow screens */
+    }
 }
 .panel {
     background: var(--bg); /* white card floats over the cool-gray canvas */
@@ -1096,10 +1114,50 @@ a.kpi:focus-visible {
 }
 
 /* Temporal charts */
+/* Turbo frames are inline custom elements by default; make them block so a
+   frame wrapping a grid/section doesn't collapse the layout. */
+turbo-frame {
+    display: block;
+}
 .charts {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: 1fr; /* one chart per row, full width */
     gap: var(--sp-5);
+}
+/* Full-width header row above the two chart cards, holding the range toggle. */
+.charts-head {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+}
+/* Segmented control: switches the temporal charts' time window. */
+.chart-range {
+    display: inline-flex;
+    gap: 2px;
+    padding: 3px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+}
+.range-opt {
+    padding: 0 var(--sp-3);
+    height: 1.75rem;
+    display: inline-flex;
+    align-items: center;
+    font-size: var(--text-sm);
+    color: var(--muted);
+    border-radius: calc(var(--r-sm) - 2px);
+    text-decoration: none;
+}
+.range-opt:hover {
+    color: var(--ink);
+}
+.range-opt--active,
+.range-opt--active:hover {
+    background: var(--bg);
+    color: var(--brand);
+    box-shadow: var(--shadow-sm);
+    font-weight: 600;
 }
 .chart h2 {
     margin: 0 0 var(--sp-3);
@@ -1128,7 +1186,18 @@ a.kpi:focus-visible {
 }
 .chart-axis {
     fill: var(--muted);
-    font-size: 9px;
+    font-size: 6px;
+    font-variant-numeric: tabular-nums;
+}
+/* Every-day x-axis labels: smaller so up to 31 two-digit numbers don't collide. */
+.chart-axis-x {
+    font-size: 5px;
+}
+/* Per-point value digits printed on the count chart's line. */
+.chart-value {
+    fill: var(--ink);
+    font-size: 5px;
+    font-weight: 600;
     font-variant-numeric: tabular-nums;
 }
 
