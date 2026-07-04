@@ -1,0 +1,19 @@
+<%# Reusable KPI tile — a metric that deep-links into its filtered list.
+    Locals:
+      href       (required) target path for the tile link
+      label      (required) short metric name
+      value      (required) the big number (already formatted)
+      meta       (required) small caption under the value
+      aria_label (required) accessible name for the link
+      trend      (optional) pre-rendered trend badge (from #trend_badge); nil hides it
+      danger     (optional) true renders the alert variant %>
+<% trend  = local_assigns.fetch(:trend, nil) %>
+<% danger = local_assigns.fetch(:danger, false) %>
+<%= link_to href, class: "kpi #{'kpi--danger' if danger}", "aria-label": aria_label do %>
+  <span class="kpi-label"><%= label %></span>
+  <span class="kpi-value-row">
+    <span class="kpi-value"><%= value %></span>
+    <%= trend %>
+  </span>
+  <span class="kpi-meta"><%= meta %></span>
+<% end %>

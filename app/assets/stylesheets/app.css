@@ -948,6 +948,40 @@ a.kpi:focus-visible {
     box-shadow: 0 0 0 3px var(--brand-weak);
 }
 
+/* Value + trend badge share a baseline row so the badge rides next to the number */
+.kpi-value-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    flex-wrap: wrap;
+}
+
+/* KPI trend badge — direction by arrow + colour, value shown as a magnitude */
+.trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semi);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    padding: 3px 6px;
+    border-radius: var(--r-sm);
+    white-space: nowrap;
+}
+.trend--up {
+    background: var(--success-weak);
+    color: var(--success-ink);
+}
+.trend--down {
+    background: var(--danger-weak);
+    color: var(--danger-ink);
+}
+.trend--flat {
+    background: var(--surface-2);
+    color: var(--muted);
+}
+
 /* Two-column panels — rankings & alerts */
 .dash-cols {
     display: grid;
@@ -1087,14 +1121,6 @@ a.kpi:focus-visible {
     box-shadow: var(--shadow-sm);
     padding: var(--sp-3);
 }
-.chart svg .bar,
-.chart rect.bar {
-    fill: var(--brand);
-}
-.chart svg .bar:hover,
-.chart rect.bar:hover {
-    fill: var(--brand-hover);
-}
 .chart-grid {
     stroke: var(--line);
     stroke-width: 1;
@@ -1104,6 +1130,30 @@ a.kpi:focus-visible {
     fill: var(--muted);
     font-size: 9px;
     font-variant-numeric: tabular-nums;
+}
+
+/* Area chart — indigo trend line over a gradient that fades to the baseline */
+.chart-line {
+    stroke: var(--brand);
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+}
+.chart-area {
+    stroke: none;
+}
+.chart-area-stop-top {
+    stop-color: var(--brand);
+    stop-opacity: 0.24;
+}
+.chart-area-stop-bottom {
+    stop-color: var(--brand);
+    stop-opacity: 0;
+}
+/* Invisible hover targets carry the native per-day tooltip */
+.chart-hit {
+    cursor: default;
 }
 
 /* =============================================================================
