@@ -1098,7 +1098,7 @@ a.kpi:focus-visible {
 /* Temporal charts */
 .charts {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: 1fr; /* one chart per row, full width */
     gap: var(--sp-5);
 }
 /* Full-width header row above the two chart cards, holding the range toggle. */

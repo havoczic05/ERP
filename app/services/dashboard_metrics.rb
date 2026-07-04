@@ -6,6 +6,7 @@
 class DashboardMetrics
   LOW_STOCK_THRESHOLD = 10
   UPCOMING_WINDOW_DAYS = 7
+  UPCOMING_DISPLAY_LIMIT = 10
 
   # Time windows the temporal charts can switch between. "month" is the default
   # and the only one the KPIs use; the others only reshape the chart series.
@@ -43,15 +44,11 @@ class DashboardMetrics
 
   # --- Upcoming due installments (next 7 days, inclusive of today) -----------
   # Pending installments coming due — drives the "Vencimientos de la semana"
-  # panel. Overdue and paid installments are excluded.
-  def upcoming_installments
-    pending_installments
-      .where(due_date: today..(today + UPCOMING_WINDOW_DAYS))
-      .includes(sale: :client)
-      .order(:due_date)
-  end
+  # panel. Overdue and paid installments are excluded. The list is capped for
+  # display; the total still reflects the whole window.
+  def upcoming_installments = upcoming_scope.limit(UPCOMING_DISPLAY_LIMIT)
 
-  def upcoming_total = upcoming_installments.sum(:balance_usd)
+  def upcoming_total = upcoming_scope.sum(:balance_usd)
 
   # --- Previous-period trends (percent change vs last month, for badges) -----
   # Each returns a Float percentage (1 decimal), or nil when the previous month
@@ -143,6 +140,16 @@ class DashboardMetrics
 
   def pending_installments
     Installment.where(status: "pendiente")
+  end
+
+  # Base scope for the "Vencimientos de la semana" panel — pending installments
+  # coming due within the window, soonest first. Shared by the capped list and
+  # the window total so they never drift.
+  def upcoming_scope
+    pending_installments
+      .where(due_date: today..(today + UPCOMING_WINDOW_DAYS))
+      .includes(sale: :client)
+      .order(:due_date)
   end
 
   def overdue_installments

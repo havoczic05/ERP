@@ -136,6 +136,20 @@ RSpec.describe DashboardMetrics do
     end
   end
 
+  describe "upcoming list display limit" do
+    it "returns at most the first 10 upcoming installments, soonest first" do
+      12.times do |i|
+        s = venta(total: 10.00, on: today)
+        create(:installment, sale: s, installment_number: 1, status: "pendiente",
+               amount_usd: 5.00, balance_usd: 5.00, due_date: today + (i % 7))
+      end
+
+      result = metrics.upcoming_installments.to_a
+      expect(result.size).to eq(10)
+      expect(result.map(&:due_date)).to eq(result.map(&:due_date).sort)
+    end
+  end
+
   describe "previous-period trends (percent change vs last month)" do
     it "computes the sales-total percent change vs the previous month" do
       venta(total: 100.00, on: today.prev_month)  # baseline: 100

@@ -28,19 +28,6 @@
         trend: trend_badge(@metrics.monthly_collected_trend) %>
 
     <%= render "kpi",
-        href: accounts_receivable_path,
-        aria_label: "Ver cuentas por cobrar", label: "Por cobrar",
-        value: number_to_currency(@metrics.outstanding_ar, unit: "USD "),
-        meta: "saldo pendiente" %>
-
-    <%= render "kpi",
-        href: sales_path(document_type: "venta", status: "confirmada", date_range: "month"),
-        aria_label: "Ver ventas del mes", label: "Ticket promedio",
-        value: number_to_currency(@metrics.monthly_average_ticket, unit: "USD "),
-        meta: "por venta este mes",
-        trend: trend_badge(@metrics.monthly_average_ticket_trend) %>
-
-    <%= render "kpi",
         href: sales_path(document_type: "venta", status: "confirmada", date_range: "today"),
         aria_label: "Ver ventas de hoy", label: "Ventas de hoy",
         value: @metrics.daily_sales_count,
@@ -50,8 +37,7 @@
         href: accounts_receivable_path(status: "vencida"),
         aria_label: "Ver facturas vencidas", label: "Vencido",
         value: number_to_currency(@metrics.overdue_total, unit: "USD "),
-        meta: pluralize(@metrics.overdue_count, "factura vencida", "facturas vencidas"),
-        danger: @metrics.overdue_count.positive? %>
+        meta: pluralize(@metrics.overdue_count, "factura vencida", "facturas vencidas") %>
   </div>
 </section>
 
@@ -129,7 +115,7 @@
       <ul class="stock-list">
         <% upcoming.each do |installment| %>
           <li>
-            <%= link_to sale_path(installment.sale), class: "stock-row", data: { turbo_frame: "modal" } do %>
+            <%= link_to accounts_receivable_path(q: installment.sale.correlative), class: "stock-row" do %>
               <span><%= installment.sale.client.full_name %> · cuota <%= installment.installment_number %></span>
               <span class="num"><%= format_date(installment.due_date) %> · <%= money(installment.balance_usd) %></span>
             <% end %>

@@ -72,10 +72,11 @@ RSpec.describe "Dashboard", type: :system do
     expect(page).to have_link("Ver todos", href: products_path)
   end
 
-  it "shows the month liquidity KPIs (cobrado del mes, ticket promedio)" do
+  it "shows the cobrado del mes KPI and drops the Por cobrar / Ticket promedio tiles" do
     visit dashboard_path
     expect(page).to have_content("Cobrado del mes")
-    expect(page).to have_content("Ticket promedio")
+    expect(page).not_to have_content("Por cobrar")
+    expect(page).not_to have_content("Ticket promedio")
   end
 
   it "renders a trend badge when there is a previous-month baseline" do
@@ -95,5 +96,15 @@ RSpec.describe "Dashboard", type: :system do
     visit dashboard_path
     expect(page).to have_content("Vencimientos de la Semana")
     expect(page).to have_content("Cliente Próximo")
+  end
+
+  it "links each upcoming installment to accounts receivable filtered by its sale correlative" do
+    soon_sale = create(:sale, :venta, client: client, warehouse: warehouse,
+                       subtotal_usd: 100.00, total_usd: 100.00)
+    create(:installment, sale: soon_sale, installment_number: 1, status: "pendiente",
+           amount_usd: 100.00, balance_usd: 100.00, due_date: Date.current + 3)
+
+    visit dashboard_path
+    expect(page).to have_link(href: accounts_receivable_path(q: soon_sale.correlative))
   end
 end
