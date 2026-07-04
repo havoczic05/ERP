@@ -33,3 +33,10 @@
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 
+# Local agent/AI tooling — not shared with the repo.
+/.agents/
+/.mcp.json
+/skills-lock.json
+/.atl/
+/.codegraph/
+
