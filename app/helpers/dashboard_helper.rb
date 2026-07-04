@@ -201,7 +201,7 @@ module DashboardHelper
 
   def format_axis_value(value, format)
     if format == :money
-      number_to_currency(value, unit: "USD ", precision: 0)
+      number_with_delimiter(value.round) # unit lives in the chart title, not each tick
     else
       value.round.to_s
     end

@@ -1169,17 +1169,17 @@ a.kpi:focus-visible {
 }
 .chart-axis {
     fill: var(--muted);
-    font-size: 8px;
+    font-size: 6px;
     font-variant-numeric: tabular-nums;
 }
 /* Every-day x-axis labels: smaller so up to 31 two-digit numbers don't collide. */
 .chart-axis-x {
-    font-size: 7px;
+    font-size: 5px;
 }
 /* Per-point value digits printed on the count chart's line. */
 .chart-value {
     fill: var(--ink);
-    font-size: 7px;
+    font-size: 5px;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
 }

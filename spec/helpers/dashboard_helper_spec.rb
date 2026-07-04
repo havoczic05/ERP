@@ -111,10 +111,11 @@ RSpec.describe DashboardHelper, type: :helper do
       expect(result).to include('<title>03/06 — 1 venta</title>')
     end
 
-    it 'formats money axis labels with USD' do
+    it 'formats money y-axis labels as plain delimited numbers (no USD unit)' do
       money_series = { Date.new(2026, 6, 2) => 1250.5, Date.new(2026, 6, 3) => 0 }
       result = helper.area_chart_svg(money_series, label: 'x', format: :money)
-      expect(result).to include('USD')
+      expect(result).to include('1,251')          # max tick, delimited
+      expect(result).not_to include('USD 1,251')  # unit dropped from the axis
     end
 
     it 'uses a fixed viewBox regardless of day count (constant rendered height)' do
