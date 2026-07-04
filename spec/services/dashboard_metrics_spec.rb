@@ -78,6 +78,111 @@ RSpec.describe DashboardMetrics do
     end
   end
 
+  describe "cobrado del mes (payments received this month)" do
+    let(:sale) { venta(total: 100.00, on: today) }
+    let(:installment) do
+      create(:installment, sale: sale, installment_number: 1, status: "pendiente",
+             amount_usd: 100.00, balance_usd: 100.00, due_date: today + 5)
+    end
+
+    before do
+      create(:amortization, installment: installment, amount_usd: 30.00,
+             paid_at: today.in_time_zone.noon)                     # this month
+      create(:amortization, installment: installment, amount_usd: 20.00,
+             paid_at: today.beginning_of_month.in_time_zone.noon)  # this month
+      create(:amortization, installment: installment, amount_usd: 99.00,
+             paid_at: today.prev_month.in_time_zone.noon)          # previous month — excluded
+    end
+
+    it "sums amortizations paid in the current month" do
+      expect(metrics.monthly_collected).to eq(50.00)
+    end
+  end
+
+  describe "ticket promedio (average sale this month)" do
+    it "divides monthly revenue by the number of confirmed ventas" do
+      venta(total: 100.00, on: today)
+      venta(total: 50.00,  on: today)
+      expect(metrics.monthly_average_ticket).to eq(75.00)
+    end
+
+    it "is zero when there are no ventas this month" do
+      expect(metrics.monthly_average_ticket).to eq(0)
+    end
+  end
+
+  describe "vencimientos próximos (installments due within 7 days)" do
+    let(:sale) { venta(total: 100.00, on: today) }
+
+    before do
+      create(:installment, sale: sale, installment_number: 1, status: "pendiente",
+             amount_usd: 10.00, balance_usd: 10.00, due_date: today)      # due today — included
+      create(:installment, sale: sale, installment_number: 2, status: "pendiente",
+             amount_usd: 20.00, balance_usd: 20.00, due_date: today + 7)  # edge of window — included
+      create(:installment, sale: sale, installment_number: 3, status: "pendiente",
+             amount_usd: 30.00, balance_usd: 30.00, due_date: today + 8)  # just outside — excluded
+      create(:installment, sale: sale, installment_number: 4, status: "pendiente",
+             amount_usd: 40.00, balance_usd: 40.00, due_date: today - 1)  # overdue — excluded
+      create(:installment, sale: sale, installment_number: 5, status: "pagada",
+             amount_usd: 50.00, balance_usd: 0.00, due_date: today + 2)   # paid — excluded
+    end
+
+    it "lists pending installments due from today through 7 days out, ordered by due_date" do
+      expect(metrics.upcoming_installments.map(&:installment_number)).to eq([ 1, 2 ])
+    end
+
+    it "sums the balance of upcoming installments" do
+      expect(metrics.upcoming_total).to eq(30.00)
+    end
+  end
+
+  describe "previous-period trends (percent change vs last month)" do
+    it "computes the sales-total percent change vs the previous month" do
+      venta(total: 100.00, on: today.prev_month)  # baseline: 100
+      venta(total: 100.00, on: today)
+      venta(total: 50.00,  on: today)             # current: 150
+      # (150 - 100) / 100 * 100 = 50.0
+      expect(metrics.monthly_sales_total_trend).to eq(50.0)
+    end
+
+    it "returns a negative percent change when revenue drops" do
+      venta(total: 200.00, on: today.prev_month)  # baseline: 200
+      venta(total: 150.00, on: today)             # current: 150
+      # (150 - 200) / 200 * 100 = -25.0
+      expect(metrics.monthly_sales_total_trend).to eq(-25.0)
+    end
+
+    it "returns nil when there is no previous-month baseline" do
+      venta(total: 150.00, on: today)
+      expect(metrics.monthly_sales_total_trend).to be_nil
+    end
+
+    it "computes the collected percent change vs the previous month" do
+      prev_sale = venta(total: 100.00, on: today.prev_month)
+      prev_inst = create(:installment, sale: prev_sale, installment_number: 1,
+                         status: "pendiente", amount_usd: 100.00, balance_usd: 100.00,
+                         due_date: today)
+      create(:amortization, installment: prev_inst, amount_usd: 40.00,
+             paid_at: today.prev_month.in_time_zone.noon)  # baseline: 40
+
+      sale = venta(total: 100.00, on: today)
+      inst = create(:installment, sale: sale, installment_number: 1, status: "pendiente",
+                    amount_usd: 100.00, balance_usd: 100.00, due_date: today + 5)
+      create(:amortization, installment: inst, amount_usd: 60.00,
+             paid_at: today.in_time_zone.noon)             # current: 60
+      # (60 - 40) / 40 * 100 = 50.0
+      expect(metrics.monthly_collected_trend).to eq(50.0)
+    end
+
+    it "computes the average-ticket percent change vs the previous month" do
+      venta(total: 100.00, on: today.prev_month)  # prev avg ticket: 100
+      venta(total: 100.00, on: today)
+      venta(total: 200.00, on: today)             # current avg ticket: 150
+      # (150 - 100) / 100 * 100 = 50.0
+      expect(metrics.monthly_average_ticket_trend).to eq(50.0)
+    end
+  end
+
   describe "top 5 products" do
     it "ranks products by units sold this month, descending, limited to 5" do
       products = (1..6).map { |i| create(:product, name: "P#{i}", warehouse: warehouse) }

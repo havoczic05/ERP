@@ -5,6 +5,7 @@
 # reference date is injectable so "this month"/"today" are deterministic in specs.
 class DashboardMetrics
   LOW_STOCK_THRESHOLD = 10
+  UPCOMING_WINDOW_DAYS = 7
 
   def initialize(today: Date.current)
     @today = today
@@ -14,6 +15,13 @@ class DashboardMetrics
   def monthly_sales_count = monthly_sales.count
   def monthly_sales_total = monthly_sales.sum(:total_usd)
 
+  # Average sale amount this month (revenue / number of ventas). Zero when
+  # there are no ventas so the KPI card never divides by zero.
+  def monthly_average_ticket = average_ticket(monthly_sales)
+
+  # Payments actually received this month (amortizations, by paid_at).
+  def monthly_collected = monthly_amortizations.sum(:amount_usd)
+
   # --- Daily metrics ---------------------------------------------------------
   def daily_sales_count = daily_sales.count
   def daily_sales_total = daily_sales.sum(:total_usd)
@@ -22,6 +30,33 @@ class DashboardMetrics
   def outstanding_ar = pending_installments.sum(:balance_usd)
   def overdue_count  = overdue_installments.count
   def overdue_total  = overdue_installments.sum(:balance_usd)
+
+  # --- Upcoming due installments (next 7 days, inclusive of today) -----------
+  # Pending installments coming due — drives the "Vencimientos de la semana"
+  # panel. Overdue and paid installments are excluded.
+  def upcoming_installments
+    pending_installments
+      .where(due_date: today..(today + UPCOMING_WINDOW_DAYS))
+      .includes(sale: :client)
+      .order(:due_date)
+  end
+
+  def upcoming_total = upcoming_installments.sum(:balance_usd)
+
+  # --- Previous-period trends (percent change vs last month, for badges) -----
+  # Each returns a Float percentage (1 decimal), or nil when the previous month
+  # has no baseline to compare against.
+  def monthly_sales_total_trend
+    percent_change(monthly_sales_total, prev_monthly_sales.sum(:total_usd))
+  end
+
+  def monthly_collected_trend
+    percent_change(monthly_collected, prev_monthly_amortizations.sum(:amount_usd))
+  end
+
+  def monthly_average_ticket_trend
+    percent_change(monthly_average_ticket, average_ticket(prev_monthly_sales))
+  end
 
   # --- Top 5 products this month (by units sold) -----------------------------
   # Returns an ordered Array of [Product, units_sold].
@@ -59,8 +94,20 @@ class DashboardMetrics
     confirmed_ventas.where(created_at: today.all_month)
   end
 
+  def prev_monthly_sales
+    confirmed_ventas.where(created_at: today.prev_month.all_month)
+  end
+
   def daily_sales
     confirmed_ventas.where(created_at: today.all_day)
+  end
+
+  def monthly_amortizations
+    Amortization.where(paid_at: today.all_month)
+  end
+
+  def prev_monthly_amortizations
+    Amortization.where(paid_at: today.prev_month.all_month)
   end
 
   def pending_installments
@@ -69,6 +116,23 @@ class DashboardMetrics
 
   def overdue_installments
     pending_installments.where(due_date: ...today)
+  end
+
+  # Revenue / number of ventas for a given sales relation. Zero when empty.
+  def average_ticket(sales)
+    count = sales.count
+    return BigDecimal("0") if count.zero?
+
+    sales.sum(:total_usd) / count
+  end
+
+  # Percent change of `current` relative to `previous`. Nil when there is no
+  # baseline (previous is zero), signalling "no comparison" to the view.
+  def percent_change(current, previous)
+    previous = previous.to_f
+    return nil if previous.zero?
+
+    (((current.to_f - previous) / previous) * 100).round(1)
   end
 
   # Fills every day of the current month so charts show a continuous axis.

@@ -59,4 +59,29 @@ RSpec.describe "Dashboard", type: :system do
     visit dashboard_path
     expect(page).to have_link("Ver todos", href: products_path)
   end
+
+  it "shows the month liquidity KPIs (cobrado del mes, ticket promedio)" do
+    visit dashboard_path
+    expect(page).to have_content("Cobrado del mes")
+    expect(page).to have_content("Ticket promedio")
+  end
+
+  it "renders a trend badge when there is a previous-month baseline" do
+    create(:sale, :venta, client: client, warehouse: warehouse,
+           subtotal_usd: 50.00, total_usd: 50.00, created_at: 1.month.ago)
+    visit dashboard_path
+    expect(page).to have_css(".trend")
+  end
+
+  it "lists installments coming due within the next 7 days" do
+    soon_client = create(:client, :ruc_client, full_name: "Cliente Próximo")
+    soon_sale = create(:sale, :venta, client: soon_client, warehouse: warehouse,
+                       subtotal_usd: 100.00, total_usd: 100.00)
+    create(:installment, sale: soon_sale, installment_number: 1, status: "pendiente",
+           amount_usd: 100.00, balance_usd: 100.00, due_date: Date.current + 3)
+
+    visit dashboard_path
+    expect(page).to have_content("Vencimientos de la Semana")
+    expect(page).to have_content("Cliente Próximo")
+  end
 end

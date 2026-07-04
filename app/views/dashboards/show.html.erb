@@ -1,5 +1,6 @@
 <% ranking   = @metrics.top_products %>
 <% low_stock = @metrics.low_stock_products.to_a %>
+<% upcoming  = @metrics.upcoming_installments.to_a %>
 <% peak_count = @metrics.sales_count_by_day.values.max %>
 <% peak_total = @metrics.sales_total_by_day.values.max %>
 
@@ -8,41 +9,68 @@
   <p class="page-sub">Resumen del mes en curso y del día de hoy.</p>
 </div>
 
-<%# KPI strip — glanceable numbers, each one a shortcut into its filtered list %>
+<%# Row 1 — KPI strip. Each tile is a shortcut into its filtered list; the
+    month liquidity tiles carry a trend badge vs. the previous month. %>
 <section aria-label="Métricas operativas">
   <div class="kpi-grid">
-    <%= link_to sales_path(document_type: "venta", status: "confirmada", date_range: "month"),
-                class: "kpi", "aria-label": "Ver ventas del mes" do %>
-      <span class="kpi-label">Ventas del mes</span>
-      <span class="kpi-value"><%= @metrics.monthly_sales_count %></span>
-      <span class="kpi-meta"><%= number_to_currency(@metrics.monthly_sales_total, unit: 'USD ') %></span>
-    <% end %>
+    <%= render "kpi",
+        href: sales_path(document_type: "venta", status: "confirmada", date_range: "month"),
+        aria_label: "Ver ventas del mes", label: "Ventas del mes",
+        value: @metrics.monthly_sales_count,
+        meta: number_to_currency(@metrics.monthly_sales_total, unit: "USD "),
+        trend: trend_badge(@metrics.monthly_sales_total_trend) %>
 
-    <%= link_to sales_path(document_type: "venta", status: "confirmada", date_range: "today"),
-                class: "kpi", "aria-label": "Ver ventas de hoy" do %>
-      <span class="kpi-label">Ventas de hoy</span>
-      <span class="kpi-value"><%= @metrics.daily_sales_count %></span>
-      <span class="kpi-meta"><%= number_to_currency(@metrics.daily_sales_total, unit: 'USD ') %></span>
-    <% end %>
+    <%= render "kpi",
+        href: accounts_receivable_path,
+        aria_label: "Ver cobros del mes", label: "Cobrado del mes",
+        value: number_to_currency(@metrics.monthly_collected, unit: "USD "),
+        meta: "pagos recibidos este mes",
+        trend: trend_badge(@metrics.monthly_collected_trend) %>
 
-    <%= link_to accounts_receivable_path,
-                class: "kpi", "aria-label": "Ver cuentas por cobrar" do %>
-      <span class="kpi-label">Por cobrar</span>
-      <span class="kpi-value"><%= number_to_currency(@metrics.outstanding_ar, unit: 'USD ') %></span>
-      <span class="kpi-meta">saldo pendiente</span>
-    <% end %>
+    <%= render "kpi",
+        href: accounts_receivable_path,
+        aria_label: "Ver cuentas por cobrar", label: "Por cobrar",
+        value: number_to_currency(@metrics.outstanding_ar, unit: "USD "),
+        meta: "saldo pendiente" %>
 
-    <%= link_to accounts_receivable_path(status: "vencida"),
-                class: "kpi #{'kpi--danger' if @metrics.overdue_count.positive?}",
-                "aria-label": "Ver facturas vencidas" do %>
-      <span class="kpi-label">Vencido</span>
-      <span class="kpi-value"><%= number_to_currency(@metrics.overdue_total, unit: 'USD ') %></span>
-      <span class="kpi-meta"><%= pluralize(@metrics.overdue_count, 'factura vencida', 'facturas vencidas') %></span>
-    <% end %>
+    <%= render "kpi",
+        href: sales_path(document_type: "venta", status: "confirmada", date_range: "month"),
+        aria_label: "Ver ventas del mes", label: "Ticket promedio",
+        value: number_to_currency(@metrics.monthly_average_ticket, unit: "USD "),
+        meta: "por venta este mes",
+        trend: trend_badge(@metrics.monthly_average_ticket_trend) %>
+
+    <%= render "kpi",
+        href: sales_path(document_type: "venta", status: "confirmada", date_range: "today"),
+        aria_label: "Ver ventas de hoy", label: "Ventas de hoy",
+        value: @metrics.daily_sales_count,
+        meta: number_to_currency(@metrics.daily_sales_total, unit: "USD ") %>
+
+    <%= render "kpi",
+        href: accounts_receivable_path(status: "vencida"),
+        aria_label: "Ver facturas vencidas", label: "Vencido",
+        value: number_to_currency(@metrics.overdue_total, unit: "USD "),
+        meta: pluralize(@metrics.overdue_count, "factura vencida", "facturas vencidas"),
+        danger: @metrics.overdue_count.positive? %>
   </div>
 </section>
 
-<%# Rankings & alerts — two columns %>
+<%# Row 2 — temporal area charts %>
+<section class="charts" aria-label="Gráficos del mes">
+  <div class="chart">
+    <h2>Ventas por Día</h2>
+    <%= area_chart_svg(@metrics.sales_count_by_day, label: "Cantidad de ventas por día del mes", format: :count) %>
+    <p class="chart-caption">Pico del mes: <%= peak_count %> ventas en un día</p>
+  </div>
+
+  <div class="chart">
+    <h2>Monto por Día (USD)</h2>
+    <%= area_chart_svg(@metrics.sales_total_by_day, label: "Monto de ventas en USD por día del mes", format: :money) %>
+    <p class="chart-caption">Pico del mes: <%= number_to_currency(peak_total, unit: 'USD ') %></p>
+  </div>
+</section>
+
+<%# Row 3 — rankings, alerts & upcoming dues %>
 <div class="dash-cols">
   <section class="panel">
     <h2>
@@ -86,21 +114,28 @@
       <p class="empty">Todo el stock está por encima de 10 unidades.</p>
     <% end %>
   </section>
+
+  <section class="panel">
+    <h2>
+      Vencimientos de la Semana
+      <% if upcoming.any? %><span class="badge badge--warning"><%= upcoming.size %></span><% end %>
+      <%= link_to "Ver todas", accounts_receivable_path, class: "panel-link" %>
+    </h2>
+    <% if upcoming.any? %>
+      <ul class="stock-list">
+        <% upcoming.each do |installment| %>
+          <li>
+            <%= link_to sale_path(installment.sale), class: "stock-row", data: { turbo_frame: "modal" } do %>
+              <span><%= installment.sale.client.full_name %> · cuota <%= installment.installment_number %></span>
+              <span class="num"><%= format_date(installment.due_date) %> · <%= money(installment.balance_usd) %></span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="empty">No hay cuotas por vencer en los próximos 7 días.</p>
+    <% end %>
+  </section>
 </div>
-
-<%# Temporal charts %>
-<section class="charts" aria-label="Gráficos del mes">
-  <div class="chart">
-    <h2>Ventas por Día</h2>
-    <%= bar_chart_svg(@metrics.sales_count_by_day, label: "Cantidad de ventas por día del mes", format: :count) %>
-    <p class="chart-caption">Pico del mes: <%= peak_count %> ventas en un día</p>
-  </div>
-
-  <div class="chart">
-    <h2>Monto por Día (USD)</h2>
-    <%= bar_chart_svg(@metrics.sales_total_by_day, label: "Monto de ventas en USD por día del mes", format: :money) %>
-    <p class="chart-caption">Pico del mes: <%= number_to_currency(peak_total, unit: 'USD ') %></p>
-  </div>
-</section>
 
 <%= render "shared/modal_frame" %>
