@@ -991,9 +991,21 @@ a.kpi:focus-visible {
 /* Two-column panels — rankings & alerts */
 .dash-cols {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: 1fr 2fr; /* left: stacked Top5/Bajo stock — right: wide Vencimientos */
     gap: var(--sp-5);
     margin-bottom: var(--sp-6);
+    align-items: start;
+}
+/* Left column: Top 5 stacked above Bajo Stock. */
+.dash-stack {
+    display: grid;
+    gap: var(--sp-5);
+    align-content: start;
+}
+@media (max-width: 56rem) {
+    .dash-cols {
+        grid-template-columns: 1fr; /* stack everything on narrow screens */
+    }
 }
 .panel {
     background: var(--bg); /* white card floats over the cool-gray canvas */

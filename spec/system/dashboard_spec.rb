@@ -48,6 +48,21 @@ RSpec.describe "Dashboard", type: :system do
     expect(page).to have_css("turbo-frame#dashboard-charts .chart", minimum: 2)
   end
 
+  it "promotes the charts frame to advance so the selected range persists in the URL" do
+    visit dashboard_path
+    expect(page).to have_css("turbo-frame#dashboard-charts[data-turbo-action='advance']")
+  end
+
+  it "stacks Top 5 and Bajo Stock in one column and widens Vencimientos de la Semana" do
+    visit dashboard_path
+    expect(page).to have_css(".dash-stack .panel", count: 2)
+    within(".dash-stack") do
+      expect(page).to have_content("Top 5 Productos del Mes")
+      expect(page).to have_content("Bajo Stock")
+    end
+    expect(page).to have_css(".panel--wide", text: "Vencimientos de la Semana")
+  end
+
   it "does not expose any create/new shortcuts (PRD §3.6 is read-only)" do
     visit dashboard_path
     expect(page).not_to have_link(href: new_sale_path)
