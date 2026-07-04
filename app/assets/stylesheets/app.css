@@ -1368,20 +1368,16 @@ turbo-frame {
     min-width: 0;
 }
 
-/* Compact the inline payment controls so the AR row height matches the text
-   rows in the other datatables. Left at the full 36px --control-h, the input +
-   submit made this table's rows visibly taller than every other index table. */
+/* Match the inline payment controls to the .btn--sm inline actions used by the
+   other datatables (height:auto + sp-1/sp-3 padding + text-xs), so AR rows are
+   the same height instead of taller. The old fixed 30px still overshot the
+   ~24px .btn--sm actions, leaving these rows visibly taller. */
 .pago-form .pago-monto,
 .pago-form input[type="submit"] {
-    height: 1.875rem; /* ~30px — usable, but close to the .btn--sm inline actions */
-}
-.pago-form .pago-monto {
-    padding: 0 var(--sp-2);
-    font-size: var(--text-sm);
-}
-.pago-form input[type="submit"] {
-    padding: 0 var(--sp-3);
+    height: auto;
+    padding: var(--sp-1) var(--sp-3);
     font-size: var(--text-xs);
+    line-height: 1.2;
 }
 
 /* Money cell: USD pinned left, amount pinned right */
