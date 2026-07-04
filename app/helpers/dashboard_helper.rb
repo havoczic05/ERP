@@ -3,6 +3,11 @@ module DashboardHelper
   BAR_WIDTH = 14
   BAR_GAP = 4
 
+  # Human labels for each chart time-range, keyed by the value the service
+  # accepts (DashboardMetrics::VALID_CHART_RANGES is the single source of truth
+  # for which ranges exist and in what order).
+  CHART_RANGE_LABELS = { "month" => "Mes", "30d" => "30 días", "7d" => "7 días" }.freeze
+
   # Margins around the plot area that hold the axis labels.
   MARGIN_LEFT = 36   # y-axis value labels
   MARGIN_RIGHT = 6
@@ -27,6 +32,21 @@ module DashboardHelper
     magnitude = format("%.1f", percent.abs)
     tag.span("#{symbol} #{magnitude}%", class: "trend trend--#{direction}",
              title: "#{word} #{magnitude}% vs. el mes pasado")
+  end
+
+  # Segmented control that switches the temporal charts' time window. Each
+  # option is a GET link back to the dashboard carrying ?range=; the active one
+  # is marked with aria-current for assistive tech and a modifier class for CSS.
+  def chart_range_toggle(active)
+    active = active.to_s
+    options = DashboardMetrics::VALID_CHART_RANGES.map do |value|
+      current = value == active
+      link_to(CHART_RANGE_LABELS[value], dashboard_path(range: value),
+              class: "range-opt#{' range-opt--active' if current}",
+              aria: { current: current ? "true" : nil })
+    end
+    tag.div(safe_join(options), class: "chart-range", role: "group",
+            "aria-label": "Rango de tiempo de los gráficos")
   end
 
   # Renders a {Date => Numeric} series as an inline SVG area chart — an indigo

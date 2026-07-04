@@ -234,4 +234,47 @@ RSpec.describe DashboardMetrics do
       expect(series[today - 1]).to eq(0)
     end
   end
+
+  describe "chart time-range window" do
+    before do
+      venta(total: 10.00, on: today)       # today
+      venta(total: 10.00, on: today - 3)    # within 7d
+      venta(total: 10.00, on: today - 10)   # within 30d, outside 7d
+      venta(total: 10.00, on: today - 40)   # outside 30d
+    end
+
+    it "defaults to the current month" do
+      metrics = described_class.new(today: today)
+      expect(metrics.chart_range).to eq("month")
+      expect(metrics.sales_count_by_day.size).to eq(today.end_of_month.day)
+    end
+
+    it "covers the last 7 days inclusive of today when range is 7d" do
+      series = described_class.new(today: today, chart_range: "7d").sales_count_by_day
+      expect(series.size).to eq(7)
+      expect(series.keys.first).to eq(today - 6)
+      expect(series.keys.last).to eq(today)
+      expect(series[today]).to eq(1)
+      expect(series[today - 3]).to eq(1)
+    end
+
+    it "covers the last 30 days when range is 30d" do
+      series = described_class.new(today: today, chart_range: "30d").sales_count_by_day
+      expect(series.size).to eq(30)
+      expect(series[today - 10]).to eq(1)
+      expect(series).not_to have_key(today - 40)
+    end
+
+    it "sums revenue over the selected window" do
+      series = described_class.new(today: today, chart_range: "7d").sales_total_by_day
+      expect(series[today]).to eq(10.00)
+      expect(series[today - 3]).to eq(10.00)
+    end
+
+    it "falls back to the month for an unknown range" do
+      metrics = described_class.new(today: today, chart_range: "bogus")
+      expect(metrics.chart_range).to eq("month")
+      expect(metrics.sales_count_by_day.size).to eq(today.end_of_month.day)
+    end
+  end
 end

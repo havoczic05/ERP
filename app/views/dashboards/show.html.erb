@@ -55,18 +55,22 @@
   </div>
 </section>
 
-<%# Row 2 — temporal area charts %>
-<section class="charts" aria-label="Gráficos del mes">
+<%# Row 2 — temporal area charts with a selectable time range %>
+<section class="charts" aria-label="Gráficos temporales">
+  <div class="charts-head">
+    <%= chart_range_toggle(@metrics.chart_range) %>
+  </div>
+
   <div class="chart">
     <h2>Ventas por Día</h2>
-    <%= area_chart_svg(@metrics.sales_count_by_day, label: "Cantidad de ventas por día del mes", format: :count) %>
-    <p class="chart-caption">Pico del mes: <%= peak_count %> ventas en un día</p>
+    <%= area_chart_svg(@metrics.sales_count_by_day, label: "Cantidad de ventas por día", format: :count) %>
+    <p class="chart-caption">Pico del período: <%= peak_count %> ventas en un día</p>
   </div>
 
   <div class="chart">
     <h2>Monto por Día (USD)</h2>
-    <%= area_chart_svg(@metrics.sales_total_by_day, label: "Monto de ventas en USD por día del mes", format: :money) %>
-    <p class="chart-caption">Pico del mes: <%= number_to_currency(peak_total, unit: 'USD ') %></p>
+    <%= area_chart_svg(@metrics.sales_total_by_day, label: "Monto de ventas en USD por día", format: :money) %>
+    <p class="chart-caption">Pico del período: <%= number_to_currency(peak_total, unit: 'USD ') %></p>
   </div>
 </section>
 

@@ -33,6 +33,29 @@ RSpec.describe DashboardHelper, type: :helper do
     end
   end
 
+  describe '#chart_range_toggle' do
+    it 'renders a link per range option' do
+      html = helper.chart_range_toggle('month')
+      expect(html).to include('range-opt')
+      expect(html).to include('Mes')
+      expect(html).to include('30 días')
+      expect(html).to include('7 días')
+    end
+
+    it 'marks the active range with a modifier class and aria-current' do
+      html = helper.chart_range_toggle('7d')
+      expect(html).to include('range-opt--active')
+      expect(html).to include('aria-current="true"')
+    end
+
+    it 'links each option back to the dashboard with a range param' do
+      html = helper.chart_range_toggle('month')
+      expect(html).to include('range=7d')
+      expect(html).to include('range=30d')
+      expect(html).to include('range=month')
+    end
+  end
+
   describe '#area_chart_svg' do
     let(:count_series) do
       {

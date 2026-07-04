@@ -30,6 +30,18 @@ RSpec.describe "Dashboard", type: :system do
     expect(page).to have_css("svg", minimum: 1)
   end
 
+  it "offers a time-range toggle for the temporal charts" do
+    visit dashboard_path
+    expect(page).to have_link("Mes", href: dashboard_path(range: "month"))
+    expect(page).to have_link("30 días", href: dashboard_path(range: "30d"))
+    expect(page).to have_link("7 días", href: dashboard_path(range: "7d"))
+  end
+
+  it "marks the selected range as active" do
+    visit dashboard_path(range: "7d")
+    expect(page).to have_css("a.range-opt--active", text: "7 días")
+  end
+
   it "does not expose any create/new shortcuts (PRD §3.6 is read-only)" do
     visit dashboard_path
     expect(page).not_to have_link(href: new_sale_path)
