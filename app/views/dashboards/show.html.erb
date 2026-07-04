@@ -23,7 +23,7 @@
     <%= render "kpi",
         href: accounts_receivable_path,
         aria_label: "Ver cobros del mes", label: "Cobrado del mes",
-        value: number_to_currency(@metrics.monthly_collected, unit: "USD "),
+        value: kpi_currency(@metrics.monthly_collected),
         meta: "pagos recibidos este mes",
         trend: trend_badge(@metrics.monthly_collected_trend) %>
 
@@ -36,7 +36,7 @@
     <%= render "kpi",
         href: accounts_receivable_path(status: "vencida"),
         aria_label: "Ver facturas vencidas", label: "Vencido",
-        value: number_to_currency(@metrics.overdue_total, unit: "USD "),
+        value: kpi_currency(@metrics.overdue_total),
         meta: pluralize(@metrics.overdue_count, "factura vencida", "facturas vencidas") %>
   </div>
 </section>
@@ -49,7 +49,7 @@
 
   <div class="chart">
     <h2>Ventas por Día</h2>
-    <%= area_chart_svg(@metrics.sales_count_by_day, label: "Cantidad de ventas por día", format: :count) %>
+    <%= area_chart_svg(@metrics.sales_count_by_day, label: "Cantidad de ventas por día", format: :count, show_values: true) %>
     <p class="chart-caption">Pico del período: <%= peak_count %> ventas en un día</p>
   </div>
 

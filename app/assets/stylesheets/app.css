@@ -914,6 +914,12 @@ li {
     line-height: 1.1;
     font-variant-numeric: tabular-nums;
 }
+/* "USD" prefix inside a KPI value: smaller and lighter so the amount leads. */
+.kpi-value .kpi-unit {
+    font-size: var(--text-sm);
+    font-weight: 400;
+    color: var(--muted);
+}
 .kpi-meta {
     color: var(--muted);
     font-size: var(--text-xs);
@@ -1164,6 +1170,17 @@ a.kpi:focus-visible {
 .chart-axis {
     fill: var(--muted);
     font-size: 9px;
+    font-variant-numeric: tabular-nums;
+}
+/* Every-day x-axis labels: smaller so up to 31 two-digit numbers don't collide. */
+.chart-axis-x {
+    font-size: 8px;
+}
+/* Per-point value digits printed on the count chart's line. */
+.chart-value {
+    fill: var(--ink);
+    font-size: 8px;
+    font-weight: 600;
     font-variant-numeric: tabular-nums;
 }
 
