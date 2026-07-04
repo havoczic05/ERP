@@ -42,6 +42,12 @@ RSpec.describe "Dashboard", type: :system do
     expect(page).to have_css("a.range-opt--active", text: "7 días")
   end
 
+  it "wraps the temporal charts in a turbo-frame so toggling updates them in place" do
+    visit dashboard_path
+    expect(page).to have_css("turbo-frame#dashboard-charts .chart-range")
+    expect(page).to have_css("turbo-frame#dashboard-charts .chart", minimum: 2)
+  end
+
   it "does not expose any create/new shortcuts (PRD §3.6 is read-only)" do
     visit dashboard_path
     expect(page).not_to have_link(href: new_sale_path)

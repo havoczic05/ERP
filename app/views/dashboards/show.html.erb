@@ -41,24 +41,28 @@
   </div>
 </section>
 
-<%# Row 2 — temporal area charts with a selectable time range %>
-<section class="charts" aria-label="Gráficos temporales">
-  <div class="charts-head">
-    <%= chart_range_toggle(@metrics.chart_range) %>
-  </div>
+<%# Row 2 — temporal area charts with a selectable time range. Wrapped in a
+    turbo-frame so the range toggle swaps only the charts (no full-page reload,
+    no scroll jump); the toggle links live inside the frame and target it. %>
+<%= turbo_frame_tag "dashboard-charts" do %>
+  <section class="charts" aria-label="Gráficos temporales">
+    <div class="charts-head">
+      <%= chart_range_toggle(@metrics.chart_range) %>
+    </div>
 
-  <div class="chart">
-    <h2>Ventas por Día</h2>
-    <%= area_chart_svg(@metrics.sales_count_by_day, label: "Cantidad de ventas por día", format: :count, show_values: true) %>
-    <p class="chart-caption">Pico del período: <%= peak_count %> ventas en un día</p>
-  </div>
+    <div class="chart">
+      <h2>Ventas por Día</h2>
+      <%= area_chart_svg(@metrics.sales_count_by_day, label: "Cantidad de ventas por día", format: :count, show_values: true) %>
+      <p class="chart-caption">Pico del período: <%= peak_count %> ventas en un día</p>
+    </div>
 
-  <div class="chart">
-    <h2>Monto por Día (USD)</h2>
-    <%= area_chart_svg(@metrics.sales_total_by_day, label: "Monto de ventas en USD por día", format: :money) %>
-    <p class="chart-caption">Pico del período: <%= number_to_currency(peak_total, unit: 'USD ') %></p>
-  </div>
-</section>
+    <div class="chart">
+      <h2>Monto por Día (USD)</h2>
+      <%= area_chart_svg(@metrics.sales_total_by_day, label: "Monto de ventas en USD por día", format: :money) %>
+      <p class="chart-caption">Pico del período: <%= number_to_currency(peak_total, unit: 'USD ') %></p>
+    </div>
+  </section>
+<% end %>
 
 <%# Row 3 — rankings, alerts & upcoming dues %>
 <div class="dash-cols">

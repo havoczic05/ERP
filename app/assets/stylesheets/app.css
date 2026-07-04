@@ -1102,6 +1102,11 @@ a.kpi:focus-visible {
 }
 
 /* Temporal charts */
+/* Turbo frames are inline custom elements by default; make them block so a
+   frame wrapping a grid/section doesn't collapse the layout. */
+turbo-frame {
+    display: block;
+}
 .charts {
     display: grid;
     grid-template-columns: 1fr; /* one chart per row, full width */
