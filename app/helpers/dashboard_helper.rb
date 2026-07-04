@@ -1,5 +1,5 @@
 module DashboardHelper
-  PLOT_HEIGHT = 120
+  PLOT_HEIGHT = 84
   # Fixed plot width — the chart always uses the same viewBox aspect ratio, so
   # its rendered height stays constant across ranges (7/30/31 days) under the
   # CSS `width:100%; height:auto`. Days are distributed proportionally within it.
