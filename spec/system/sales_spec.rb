@@ -156,7 +156,7 @@ RSpec.describe 'Sales', type: :system do
   describe 'new sale form' do
     it 'renders the form heading and submit button' do
       visit new_sale_path
-      expect(page).to have_content('Nuevo documento de venta')
+      expect(page).to have_content('Nueva venta')
       expect(page).to have_button('Crear documento')
     end
 
@@ -166,13 +166,14 @@ RSpec.describe 'Sales', type: :system do
                                   with_options: [ 'Cotización', 'Venta' ])
     end
 
-    it 'renders the payment mode with installment fields disabled by default (Contado)' do
+    it 'hides the editable installment plan by default (Contado)' do
       visit new_sale_path
       expect(page).to have_content('Forma de pago')
-      # Contado is the default, so the installment fields render disabled until
-      # the user picks Cuotas.
-      expect(page).to have_field('sale[num_installments]', disabled: true)
-      expect(page).to have_select('sale[interval_days]', disabled: true)
+      # Contado is the default, so the editable installment plan stays hidden
+      # until the user picks Cuotas. Its generator fields render but not visible.
+      expect(page).to have_css('#installments-plan', visible: :hidden)
+      expect(page).to have_field('sale[num_installments]', visible: :hidden)
+      expect(page).to have_select('sale[interval_days]', visible: :hidden)
     end
 
     it 'renders a line-item section with product, quantity, and unit price fields' do

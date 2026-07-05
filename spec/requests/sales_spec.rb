@@ -150,6 +150,50 @@ RSpec.describe 'Sales', type: :request do
   end
 
   # ---------------------------------------------------------------------------
+  # POST /sales — create venta with an explicit editable installment plan
+  # ---------------------------------------------------------------------------
+  describe 'POST /sales (create venta — explicit installment plan)' do
+    before { login_as(admin_user) }
+
+    it 'persists the submitted dates and amounts when the sum matches the total' do
+      # 2 units x 10.00 = 20.00 total, split 12.00 + 8.00 across two dates.
+      params = venta_params.deep_merge(
+        sale: {
+          installments: [
+            { due_date: '2026-08-15', amount_usd: '12.00' },
+            { due_date: '2026-09-15', amount_usd: '8.00' }
+          ]
+        }
+      )
+
+      expect {
+        post sales_path, params: params
+      }.to change(Sale, :count).by(1)
+
+      sale = Sale.last
+      rows = sale.installments.order(:installment_number)
+      expect(rows.pluck(:amount_usd).map(&:to_d)).to eq([ BigDecimal('12.00'), BigDecimal('8.00') ])
+      expect(rows.pluck(:due_date)).to eq([ Date.new(2026, 8, 15), Date.new(2026, 9, 15) ])
+    end
+
+    it 'returns 422 when the installment sum does not match the total' do
+      params = venta_params.deep_merge(
+        sale: {
+          installments: [
+            { due_date: '2026-08-15', amount_usd: '5.00' },
+            { due_date: '2026-09-15', amount_usd: '5.00' } # 10 != 20
+          ]
+        }
+      )
+
+      post sales_path, params: params
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(Sale.count).to eq(0)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # POST /sales — create blocked by insufficient stock
   # ---------------------------------------------------------------------------
   describe 'POST /sales (blocked by stock)' do
