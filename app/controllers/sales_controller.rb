@@ -149,7 +149,8 @@ class SalesController < ApplicationController
     raw = params.require(:sale).permit(
       :client_id, :warehouse_id, :document_type,
       :num_installments, :interval_days, :notes,
-      items: %i[product_id product_query quantity unit_price_usd]
+      items: %i[product_id product_query quantity unit_price_usd],
+      installments: %i[due_date amount_usd]
     )
 
     {
@@ -165,6 +166,15 @@ class SalesController < ApplicationController
           quantity:       item[:quantity].to_i,
           unit_price_usd: item[:unit_price_usd]
         }
+      end,
+      # Editable installment plan (only submitted in Cuotas mode). Fully blank
+      # rows are dropped here so a stray empty row never forces a rejection.
+      installments:     Array(raw[:installments]).filter_map do |installment|
+        due_date = installment[:due_date].to_s.strip
+        amount   = installment[:amount_usd].to_s.strip
+        next if due_date.blank? && amount.blank?
+
+        { due_date: due_date, amount_usd: amount }
       end
     }
   end

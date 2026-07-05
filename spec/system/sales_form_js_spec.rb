@@ -83,8 +83,8 @@ RSpec.describe "Sale form (JS)", type: :system, js: true do
       set_and_fire(quantity, "3", "input")
       set_and_fire(unit_price, "5.00", "input")
 
-      # Row line total cell must show 3 * 5 = 15.
-      expect(page).to have_css("[data-sale-form-target='lineTotal']", text: "USD 15.00")
+      # Row line total cell must show 3 * 5 = 15 (currency lives in the header).
+      expect(page).to have_css("[data-sale-form-target='lineTotal']", text: "15.00")
 
       # Grand total span must reflect the same amount.
       expect(page).to have_css("[data-sale-form-target='grandTotal']", text: "15.00")
@@ -110,13 +110,11 @@ RSpec.describe "Sale form (JS)", type: :system, js: true do
   # 4. Selecting a client fills client_id and reveals its document + edit link
   # ---------------------------------------------------------------------------
   describe "selecting a client from the dropdown" do
-    it "fills client_id, shows the document, and enables the edit link; clearing re-disables it" do
+    it "fills client_id and reveals the strip with name + document + edit link; clearing hides it" do
       visit new_sale_path
 
-      edit = find("[data-sale-form-target='clientEdit']")
-      # Before any selection the edit link is disabled (no href).
-      expect(edit[:class]).to include("is-disabled")
-      expect(edit[:href]).to be_nil
+      # Before any selection the client strip is hidden.
+      expect(page).to have_css("[data-sale-form-target='clientStrip']", visible: :hidden)
 
       set_and_fire(find_field("q"), "ACME", "input")
       fire(find("button.picker-option", text: "ACME Corp"), "click")
@@ -126,19 +124,20 @@ RSpec.describe "Sale form (JS)", type: :system, js: true do
       expect(find_field("q").value).to eq("ACME Corp")
       expect(page).to have_no_css("button.picker-option")
 
-      # The document shows and the edit link is enabled (new tab, edit path).
-      within(".client-meta") do
+      # The strip reveals the client name + document, and the edit link points at
+      # the client's edit page in a new tab.
+      within("[data-sale-form-target='clientStrip']") do
+        expect(page).to have_text("ACME Corp")
         expect(page).to have_text("RUC #{client.document_number}")
       end
-      expect(edit[:class]).not_to include("is-disabled")
+      edit = find("[data-sale-form-target='clientEdit']")
       expect(edit[:href]).to end_with(edit_client_path(client))
       expect(edit[:target]).to eq("_blank")
 
-      # Editing the search text clears the selection → edit link disabled again.
+      # Editing the search text clears the selection → strip hidden again.
       set_and_fire(find_field("q"), "AC", "input")
       expect(find("input[name='sale[client_id]']", visible: :all).value).to eq("")
-      expect(edit[:class]).to include("is-disabled")
-      expect(edit[:href]).to be_nil
+      expect(page).to have_css("[data-sale-form-target='clientStrip']", visible: :hidden)
     end
   end
 
@@ -171,40 +170,90 @@ RSpec.describe "Sale form (JS)", type: :system, js: true do
       expect(find("input[name='sale[items][][unit_price_usd]']").value).to eq("49.90")
 
       # qty defaults to 1, so the line total reflects the autofilled price.
-      expect(page).to have_css("[data-sale-form-target='lineTotal']", text: "USD 49.90")
+      expect(page).to have_css("[data-sale-form-target='lineTotal']", text: "49.90")
     end
   end
 
   # ---------------------------------------------------------------------------
-  # 6. Forma de pago: Contado disables the installment fields, Cuotas enables
+  # 6. Forma de pago: Contado hides the installment plan, Cuotas reveals it
   # ---------------------------------------------------------------------------
-  describe "payment mode (forma de pago)" do
-    def pick_payment(value)
-      radio = find("input[name='payment_method'][value='#{value}']", visible: :all)
-      page.execute_script(
-        "arguments[0].checked = true; " \
-        "arguments[0].dispatchEvent(new Event('change', { bubbles: true }))",
-        radio.native
-      )
-    end
+  def pick_payment(value)
+    radio = find("input[name='payment_method'][value='#{value}']", visible: :all)
+    page.execute_script(
+      "arguments[0].checked = true; " \
+      "arguments[0].dispatchEvent(new Event('change', { bubbles: true }))",
+      radio.native
+    )
+  end
 
-    it "disables num_installments/interval for Contado and enables them for Cuotas" do
+  describe "payment mode (forma de pago)" do
+    it "hides the plan for Contado and reveals editable cuotas for Cuotas" do
       visit new_sale_path
 
-      num      = find("input[name='sale[num_installments]']")
-      interval = find("select[name='sale[interval_days]']")
-
-      # Default is Contado → both disabled.
-      expect(num).to be_disabled
-      expect(interval).to be_disabled
+      # Default is Contado → plan hidden.
+      expect(page).to have_css("#installments-plan", visible: :hidden)
 
       pick_payment("cuotas")
-      expect(num).not_to be_disabled
-      expect(interval).not_to be_disabled
+      expect(page).to have_css("#installments-plan", visible: :visible)
+      expect(page).to have_css("tr.installment-row", count: 2) # default N=2
 
       pick_payment("contado")
-      expect(num).to be_disabled
-      expect(interval).to be_disabled
+      expect(page).to have_css("#installments-plan", visible: :hidden)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # 7. Editable installment plan: seed, validate, edit, regenerate
+  # ---------------------------------------------------------------------------
+  describe "editable installment plan" do
+    # Set one line to 4 units x 10.00 = 40.00 so the plan has a known total.
+    def seed_total_40
+      set_and_fire(find("input[data-sale-form-target='quantity']"), "4", "input")
+      set_and_fire(find("input[data-sale-form-target='unitPrice']"), "10.00", "input")
+    end
+
+    def installment_amounts
+      all("input[name='sale[installments][][amount_usd]']").map { |i| i.value.to_f }
+    end
+
+    it "seeds N equal cuotas splitting the total and marks the sum as matching" do
+      visit new_sale_path
+      seed_total_40
+      pick_payment("cuotas")
+
+      # Default N=2 → two rows of 20.00, sum == total (green).
+      expect(installment_amounts).to eq([ 20.0, 20.0 ])
+      expect(page).to have_css(".installments-validation.is-match")
+      expect(page).to have_text("coincide con el total del documento")
+    end
+
+    it "flags a mismatch when an amount is edited, then re-matches on regenerate" do
+      visit new_sale_path
+      seed_total_40
+      pick_payment("cuotas")
+
+      first_amount = first("input[name='sale[installments][][amount_usd]']")
+      set_and_fire(first_amount, "5.00", "input") # 5 + 20 = 25 != 40
+
+      expect(page).to have_css(".installments-validation.is-mismatch")
+      expect(page).to have_text("no coincide con el total")
+
+      fire(find_button("Regenerar cuotas"), "click")
+      expect(page).to have_css(".installments-validation.is-match")
+      expect(installment_amounts).to eq([ 20.0, 20.0 ])
+    end
+
+    it "regenerates the rows when the number of cuotas changes" do
+      visit new_sale_path
+      set_and_fire(find("input[data-sale-form-target='quantity']"), "3", "input")
+      set_and_fire(find("input[data-sale-form-target='unitPrice']"), "10.00", "input") # total 30
+      pick_payment("cuotas")
+
+      set_and_fire(find("input[name='sale[num_installments]']"), "3", "input")
+
+      expect(page).to have_css("tr.installment-row", count: 3)
+      expect(installment_amounts).to eq([ 10.0, 10.0, 10.0 ])
+      expect(page).to have_css(".installments-validation.is-match")
     end
   end
 end

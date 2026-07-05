@@ -337,4 +337,89 @@ RSpec.describe SaleCreationService, type: :service do
       expect(Sale.count).to eq(0)
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # 15. Explicit installment plan (editable cuotas) — additive path
+  #     When the caller supplies installments[] (date + amount per row) they are
+  #     persisted verbatim, provided SUM == total and count is within 1..MAX.
+  #     When absent/empty, the auto-generation path (tests 8-10) is unchanged.
+  # ---------------------------------------------------------------------------
+  describe 'explicit installment plan' do
+    let(:product) { create(:product, stock: 50, base_price_usd: 100.00, warehouse: warehouse) }
+
+    def explicit_params(installments:, document_type: 'venta', items: nil)
+      items ||= [ item_attrs(product: product, quantity: 1, unit_price: 100.00) ]
+      sale_params(document_type: document_type, items: items, installments: installments)
+    end
+
+    it 'persists the exact dates and amounts when the sum matches the total' do
+      installments = [
+        { due_date: '2026-08-01', amount_usd: '40.00' },
+        { due_date: '2026-09-01', amount_usd: '35.00' },
+        { due_date: '2026-10-01', amount_usd: '25.00' }
+      ]
+
+      result = described_class.call(explicit_params(installments: installments))
+
+      expect(result.success?).to be true
+      rows = result.sale.installments.order(:installment_number)
+      expect(rows.pluck(:amount_usd).map(&:to_d))
+        .to eq([ BigDecimal('40.00'), BigDecimal('35.00'), BigDecimal('25.00') ])
+      expect(rows.pluck(:balance_usd).map(&:to_d))
+        .to eq([ BigDecimal('40.00'), BigDecimal('35.00'), BigDecimal('25.00') ])
+      expect(rows.pluck(:due_date))
+        .to eq([ Date.new(2026, 8, 1), Date.new(2026, 9, 1), Date.new(2026, 10, 1) ])
+      expect(rows.pluck(:status).uniq).to eq([ 'pendiente' ])
+    end
+
+    it 'rejects the sale when the installment sum does not equal the total' do
+      installments = [
+        { due_date: '2026-08-01', amount_usd: '40.00' },
+        { due_date: '2026-09-01', amount_usd: '40.00' } # 80 != 100
+      ]
+
+      result = described_class.call(explicit_params(installments: installments))
+
+      expect(result.success?).to be false
+      expect(result.errors).not_to be_empty
+      expect(Sale.count).to eq(0)
+    end
+
+    it 'rejects more than the maximum allowed installments' do
+      installments = (1..5).map { |m| { due_date: format('2026-0%d-01', m), amount_usd: '20.00' } } # 5 x 20 = 100
+
+      result = described_class.call(explicit_params(installments: installments))
+
+      expect(result.success?).to be false
+      expect(Sale.count).to eq(0)
+    end
+
+    it 'rejects an installment with a blank due date' do
+      installments = [ { due_date: '', amount_usd: '100.00' } ]
+
+      result = described_class.call(explicit_params(installments: installments))
+
+      expect(result.success?).to be false
+      expect(Sale.count).to eq(0)
+    end
+
+    it 'ignores an empty installments array and falls back to auto-generation' do
+      result = described_class.call(explicit_params(installments: []))
+
+      expect(result.success?).to be true
+      expect(result.sale.installments.count).to eq(1)
+      expect(result.sale.installments.first.amount_usd).to eq(BigDecimal('100.00'))
+    end
+
+    it 'does not generate installments for a cotizacion even when supplied' do
+      installments = [ { due_date: '2026-08-01', amount_usd: '100.00' } ]
+
+      result = described_class.call(
+        explicit_params(installments: installments, document_type: 'cotizacion')
+      )
+
+      expect(result.success?).to be true
+      expect(result.sale.installments.count).to eq(0)
+    end
+  end
 end

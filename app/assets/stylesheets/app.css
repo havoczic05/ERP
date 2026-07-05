@@ -1832,6 +1832,221 @@ button.btn--sm {
     font-variant-numeric: tabular-nums;
 }
 
+/* ---------------------------------------------------------------------------
+   Plan de cuotas — editable installment plan (shown only in Cuotas mode).
+   Reuses .line-items-table for the grid; adds a generator row and a footer
+   that turns green/red as the sum matches (or not) the document total.
+   --------------------------------------------------------------------------- */
+.section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+}
+.installments-generator {
+    display: flex;
+    gap: var(--sp-5);
+    align-items: flex-end;
+    margin: var(--sp-3) 0 var(--sp-4);
+}
+.installments-generator .field {
+    max-width: 12rem;
+    margin: 0;
+}
+/* Inputs carry a global 16px bottom margin; zero it here so flex-end aligns the
+   Regenerar button with the input boxes (not with their margin-box bottom). */
+.installments-generator .field input,
+.installments-generator .field select {
+    margin-bottom: 0;
+}
+.installments-table .col-num {
+    width: 12%;
+}
+.installments-table .col-due {
+    width: 34%;
+}
+.installments-table .col-amount {
+    width: 30%;
+}
+.installments-table .col-status {
+    width: 24%;
+}
+.installments-table .col-num {
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+}
+.installments-validation {
+    margin-top: var(--sp-3);
+    padding: var(--sp-2) var(--sp-4);
+    border-radius: var(--r);
+    font-size: var(--text-sm);
+    background: var(--surface-2);
+    color: var(--muted);
+}
+.installments-validation.is-match {
+    background: var(--success-weak);
+    color: var(--success-ink);
+}
+.installments-validation.is-mismatch {
+    background: var(--danger-weak);
+    color: var(--danger-ink);
+}
+
+/* ---------------------------------------------------------------------------
+   Sales form — card-based layout (matches the Pencil /sales/new v2 design).
+   Each section is a white card floating on the cool-gray canvas.
+   --------------------------------------------------------------------------- */
+.form-card {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--sp-5);
+    margin-bottom: var(--sp-5);
+}
+.form-card__title {
+    margin: 0 0 var(--sp-4);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semi);
+    color: var(--ink);
+}
+.form-card__subtitle {
+    margin: var(--sp-1) 0 0;
+    color: var(--muted);
+    font-size: var(--text-sm);
+}
+
+/* Documento: cliente / almacén / tipo on one row */
+.doc-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: var(--sp-4);
+    align-items: start;
+}
+.doc-grid .field {
+    margin: 0;
+}
+@media (max-width: 720px) {
+    .doc-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Selected-client strip — inset pill under the Documento fields */
+.client-strip {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin: var(--sp-4) 0;
+    padding: var(--sp-3) var(--sp-4);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+}
+/* The explicit display:flex above would override the UA [hidden] rule, so the
+   strip must re-hide itself when the hidden attribute is present. */
+.client-strip[hidden] {
+    display: none;
+}
+.client-strip__avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: var(--brand-weak);
+    color: var(--brand);
+    flex: none;
+}
+.client-strip__info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+}
+.client-strip__name {
+    font-weight: var(--weight-semi);
+    color: var(--ink);
+}
+.client-strip__doc {
+    font-size: var(--text-sm);
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+.client-strip .btn {
+    margin-left: auto;
+}
+
+/* Forma de pago — segmented toggle (radios visually hidden, labels are pills) */
+.payment-segments {
+    display: inline-flex;
+    align-self: flex-start; /* stay compact inside the flex-column .field */
+    padding: var(--sp-1);
+    gap: var(--sp-1);
+    background: var(--surface-2);
+    border-radius: var(--r);
+}
+.payment-segment {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+}
+.payment-segment input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.payment-segment span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--sp-2) var(--sp-4);
+    border-radius: var(--r-sm);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    color: var(--ink-soft);
+}
+.payment-segment:has(input:checked) span {
+    background: var(--bg);
+    color: var(--brand);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Line-items footer: add-line on the left, total on the right */
+.line-items-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    margin-top: var(--sp-3);
+}
+.line-items-foot .totals-bar {
+    /* Pull the total in from the card edge so it sits under the Subtotal column
+       (the remove column's ~10% is left as a right gutter). */
+    margin: 0 10% 0 0;
+}
+
+/* Icon-only button (line-item delete) */
+.btn--icon {
+    padding: 0;
+    width: var(--control-h);
+    justify-content: center;
+}
+
+/* Indigo/brand badge (e.g. "Pago en cuotas") */
+.badge--brand {
+    background: var(--brand-weak);
+    color: var(--brand);
+}
+
+/* Tinted table header for the editable grids (matches the design-system tables) */
+.line-items-table thead th,
+.installments-table thead th {
+    background: var(--surface);
+}
+
 /* Credit-note callout on the detail view */
 .note-card {
     background: var(--danger-weak);

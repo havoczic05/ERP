@@ -10,6 +10,10 @@
 class SaleCreationService
   MAX_CORRELATIVE_RETRIES = 3
 
+  # Upper bound on an editable installment plan. Kept at 4 to match the existing
+  # form cap; the explicit-plan path rejects anything above it.
+  MAX_INSTALLMENTS = 4
+
   CORRELATIVE_PREFIX = {
     "cotizacion" => "COT",
     "venta"      => "VTA"
@@ -298,7 +302,19 @@ class SaleCreationService
     "#{prefix}-#{format('%05d', max_num.to_i + 1)}"
   end
 
+  # Dispatches to the explicit editable plan when the caller supplied
+  # installments[] (date + amount per row); otherwise auto-generates equal parts.
   def apply_venta_installments!(sale)
+    explicit = normalized_explicit_installments
+    if explicit
+      create_explicit_installments!(sale, explicit)
+    else
+      create_auto_installments!(sale)
+    end
+  end
+
+  # Auto-generation (unchanged): N equal parts, last one absorbs the remainder.
+  def create_auto_installments!(sale)
     num      = (@num_installments_override || @params[:num_installments].to_i)
     num      = 1 if num < 1
     interval = (@interval_days_override || @params[:interval_days].to_i)
@@ -331,6 +347,59 @@ class SaleCreationService
         status:             "pendiente"
       )
     end
+  end
+
+  # Editable plan: persist the caller's rows verbatim, asserting the plan is
+  # within 1..MAX_INSTALLMENTS and its amounts sum exactly to the sale total.
+  def create_explicit_installments!(sale, installments)
+    if installments.size > MAX_INSTALLMENTS
+      return fail_installments!("A sale cannot have more than #{MAX_INSTALLMENTS} installments")
+    end
+
+    total      = BigDecimal(sale.total_usd.to_s)
+    actual_sum = installments.sum { |i| i[:amount_usd] }
+    unless actual_sum == total
+      return fail_installments!("Installment sum mismatch: #{actual_sum} != #{total}")
+    end
+
+    installments.each_with_index do |installment, index|
+      sale.installments.create!(
+        installment_number: index + 1,
+        amount_usd:         installment[:amount_usd],
+        balance_usd:        installment[:amount_usd],
+        due_date:           installment[:due_date],
+        status:             "pendiente"
+      )
+    end
+  end
+
+  # Parses @params[:installments] into [{ amount_usd: BigDecimal, due_date: Date }].
+  # Returns nil when no explicit plan was supplied (→ auto path). Raises a
+  # rollback failure when a row is malformed (blank date or non-positive amount).
+  def normalized_explicit_installments
+    rows = Array(@params[:installments]).reject(&:blank?)
+    return nil if rows.empty?
+
+    rows.map do |row|
+      amount   = BigDecimal(row[:amount_usd].to_s)
+      raw_date = row[:due_date].to_s.strip
+
+      if raw_date.blank? || amount <= 0
+        return fail_installments!("Each installment needs a due date and a positive amount")
+      end
+
+      { amount_usd: amount, due_date: Date.parse(raw_date) }
+    end
+  rescue ArgumentError
+    # Raised by an unparseable date OR a non-numeric amount (BigDecimal("")).
+    fail_installments!("Each installment needs a valid due date and a positive numeric amount")
+  end
+
+  # Records an installment-plan validation error and rolls the transaction back,
+  # mirroring how the rest of the service surfaces failures via @stock_errors.
+  def fail_installments!(message)
+    @stock_errors = [ message ]
+    raise ActiveRecord::Rollback
   end
 
   def build_failure_result(extra_errors = [])
