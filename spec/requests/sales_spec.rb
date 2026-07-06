@@ -267,6 +267,34 @@ RSpec.describe 'Sales', type: :request do
       expect(response.body).to include(sale_path(sale, format: :pdf))
       expect(response.body).to include('target="_blank"')
     end
+
+    it 'shows the installment plan with running balance and payment date columns' do
+      venta = create(:sale, :venta, client: client, warehouse: warehouse,
+                     subtotal_usd: 400.00, total_usd: 400.00)
+      i1 = create(:installment, sale: venta, installment_number: 1,
+                  amount_usd: 200.00, balance_usd: 0.00, status: 'pagada',
+                  due_date: Date.new(2026, 8, 4))
+      create(:amortization, installment: i1, amount_usd: 200.00,
+             paid_at: Time.zone.local(2026, 8, 4, 10))
+      create(:installment, sale: venta, installment_number: 2,
+             amount_usd: 200.00, balance_usd: 200.00, status: 'pendiente',
+             due_date: Date.new(2026, 9, 3))
+
+      get sale_path(venta)
+
+      expect(response.body).to include('Saldo restante')
+      expect(response.body).to include('Fecha de pago')
+      # Running outstanding: 400 before cuota 1, 200 before cuota 2.
+      expect(response.body).to include('04/08/2026')
+      # The info tooltip trigger is present and labelled for assistive tech.
+      expect(response.body).to include('Cómo se calcula el saldo restante')
+    end
+
+    it 'no longer renders a separate payment history section' do
+      venta = create(:sale, :venta, client: client, warehouse: warehouse)
+      get sale_path(venta)
+      expect(response.body).not_to include('Historial de pagos')
+    end
   end
 
   # ---------------------------------------------------------------------------

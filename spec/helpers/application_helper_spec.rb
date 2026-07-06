@@ -220,4 +220,43 @@ RSpec.describe ApplicationHelper, type: :helper do
       expect(helper.format_date(nil)).to eq('')
     end
   end
+
+  # ---------------------------------------------------------------------------
+  describe '#sale_installment_rows' do
+    let(:warehouse) { create(:warehouse) }
+    let(:client)    { create(:client, :ruc_client) }
+    let(:sale) do
+      create(:sale, :venta, client: client, warehouse: warehouse,
+             subtotal_usd: 400.00, total_usd: 400.00)
+    end
+
+    it 'computes the running outstanding balance before each installment' do
+      (1..4).each do |n|
+        create(:installment, sale: sale, installment_number: n,
+               amount_usd: 100.00, balance_usd: 100.00, status: 'pendiente',
+               due_date: Date.new(2026, 8, 1) + (n - 1).months)
+      end
+
+      rows = helper.sale_installment_rows(sale)
+
+      expect(rows.map { |r| r[:saldo_restante] })
+        .to eq([ 400, 300, 200, 100 ].map { |n| BigDecimal(n) })
+    end
+
+    it 'returns the latest payment date per installment, or nil when unpaid' do
+      paid = create(:installment, sale: sale, installment_number: 1,
+                    amount_usd: 200.00, balance_usd: 0.00, status: 'pagada',
+                    due_date: Date.new(2026, 8, 1))
+      create(:amortization, installment: paid, amount_usd: 200.00,
+             paid_at: Time.zone.local(2026, 8, 4, 10))
+      create(:installment, sale: sale, installment_number: 2,
+             amount_usd: 200.00, balance_usd: 200.00, status: 'pendiente',
+             due_date: Date.new(2026, 9, 1))
+
+      rows = helper.sale_installment_rows(sale)
+
+      expect(rows.first[:paid_on]).to eq(Time.zone.local(2026, 8, 4, 10))
+      expect(rows.second[:paid_on]).to be_nil
+    end
+  end
 end
