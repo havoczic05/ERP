@@ -83,22 +83,19 @@
     <section class="form-card summary-card">
       <h2 class="form-card__title">Resumen</h2>
       <dl class="summary-list">
-        <div class="summary-row"><dt>Cliente</dt><dd><%= @sale.client.full_name %></dd></div>
-        <div class="summary-row">
-          <dt>Documento</dt>
-          <dd class="mono"><%= "#{@sale.client.document_type.upcase} #{@sale.client.document_number}" %></dd>
-        </div>
-        <div class="summary-row"><dt>Almacén</dt><dd><%= @sale.warehouse.name %></dd></div>
-        <div class="summary-row"><dt>Tipo</dt><dd><%= document_type_label(@sale.document_type) %></dd></div>
-        <div class="summary-row"><dt>Emitida</dt><dd class="mono"><%= format_date(@sale.created_at) %></dd></div>
+        <dt>Cliente</dt><dd><%= @sale.client.full_name %></dd>
+        <dt>Documento</dt><dd class="mono"><%= "#{@sale.client.document_type.upcase} #{@sale.client.document_number}" %></dd>
+        <dt>Almacén</dt><dd><%= @sale.warehouse.name %></dd>
+        <dt>Tipo</dt><dd><%= document_type_label(@sale.document_type) %></dd>
+        <dt>Emitida</dt><dd class="mono"><%= format_date(@sale.created_at) %></dd>
       </dl>
 
       <div class="summary-divider"></div>
 
-      <dl class="summary-totals">
-        <div class="summary-row"><dt>Subtotal</dt><dd class="mono"><%= number_to_currency(@sale.subtotal_usd, unit: 'USD ') %></dd></div>
-        <div class="summary-row"><dt>Impuesto</dt><dd class="mono"><%= number_to_currency(@sale.tax_usd, unit: 'USD ') %></dd></div>
-        <div class="summary-row summary-row--total"><dt>Total</dt><dd class="mono"><%= number_to_currency(@sale.total_usd, unit: 'USD ') %></dd></div>
+      <dl class="summary-list">
+        <dt>Subtotal</dt><dd class="mono"><%= number_to_currency(@sale.subtotal_usd, unit: 'USD ') %></dd>
+        <dt>Impuesto</dt><dd class="mono"><%= number_to_currency(@sale.tax_usd, unit: 'USD ') %></dd>
+        <dt class="summary-total-label">Total</dt><dd class="mono summary-total-value"><%= number_to_currency(@sale.total_usd, unit: 'USD ') %></dd>
       </dl>
     </section>
 
@@ -107,8 +104,8 @@
       <section class="form-card summary-card">
         <h2 class="form-card__title">Nota de crédito</h2>
         <dl class="summary-list">
-          <div class="summary-row"><dt>Emitida</dt><dd class="mono"><%= format_date(@sale.credit_note.issued_at) %></dd></div>
-          <div class="summary-row"><dt>Total</dt><dd class="mono"><%= number_to_currency(@sale.credit_note.total_usd, unit: 'USD ') %></dd></div>
+          <dt>Emitida</dt><dd class="mono"><%= format_date(@sale.credit_note.issued_at) %></dd>
+          <dt>Total</dt><dd class="mono"><%= number_to_currency(@sale.credit_note.total_usd, unit: 'USD ') %></dd>
         </dl>
       </section>
     <% end %>
@@ -122,8 +119,8 @@
                           variant: :primary, size: :md, icon: :plus %>
         <% end %>
 
-        <%= action_link 'Descargar PDF', sale_path(@sale, format: :pdf), size: :md, icon: :download,
-                        target: "_blank", rel: "noopener" %>
+        <%= action_link 'Descargar PDF', sale_path(@sale, format: :pdf), variant: :primary, size: :md,
+                        icon: :download, target: "_blank", rel: "noopener" %>
         <% if @sale.installments.any? %>
           <%= action_link 'Descargar PDF sin cuotas', sale_path(@sale, format: :pdf, cuotas: false),
                           size: :md, icon: :download, target: "_blank", rel: "noopener" %>

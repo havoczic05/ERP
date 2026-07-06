@@ -1467,31 +1467,27 @@ button.btn--sm {
     }
 }
 
-/* Summary card — key/value rows + an emphasized total */
-.summary-list,
-.summary-totals {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-3);
+/* Summary card — key/value grid. A fixed label column keeps every value aligned
+   on the same axis across both the info block and the totals block. */
+.summary-list {
+    display: grid;
+    grid-template-columns: 5.5rem 1fr;
+    column-gap: var(--sp-3);
+    row-gap: var(--sp-3);
     margin: 0;
-}
-.summary-row {
-    display: flex;
     align-items: baseline;
-    justify-content: space-between;
-    gap: var(--sp-4);
 }
-.summary-row dt {
+.summary-list dt {
     color: var(--muted);
     font-size: var(--text-sm);
 }
-.summary-row dd {
+.summary-list dd {
     margin: 0;
     color: var(--ink);
     font-weight: var(--weight-semi);
-    text-align: right;
+    min-width: 0;
 }
-.summary-row dd.mono {
+.summary-list dd.mono {
     font-variant-numeric: tabular-nums;
 }
 .summary-divider {
@@ -1499,12 +1495,12 @@ button.btn--sm {
     background: var(--line);
     margin: var(--sp-4) 0;
 }
-.summary-row--total dt {
+.summary-list dt.summary-total-label {
     color: var(--ink);
     font-size: var(--text-base);
     font-weight: var(--weight-semi);
 }
-.summary-row--total dd {
+.summary-list dd.summary-total-value {
     color: var(--brand);
     font-size: var(--text-lg);
     font-weight: 700;
