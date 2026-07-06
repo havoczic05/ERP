@@ -211,8 +211,9 @@ class SaleCreationService
       return Result.failure(cotizacion, [ "This document is already a venta" ])
     end
 
-    # Guard: already converted (a venta referencing this cotizacion exists)
-    if Sale.where(source_cotizacion_id: cotizacion.id).exists?
+    # Guard: already converted (a LIVE venta referencing this cotizacion exists).
+    # Uses kept so an annulled (soft-deleted) venta frees the cotizacion for re-conversion.
+    if Sale.kept.where(source_cotizacion_id: cotizacion.id).exists?
       return Result.failure(cotizacion, [ "This cotizacion has already been converted to a venta" ])
     end
 
