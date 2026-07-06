@@ -300,14 +300,15 @@ RSpec.describe 'Sales', type: :system do
       expect(page).to have_content('Pendiente')
     end
 
-    it 'shows "Convert to Venta" button for cotizacion (admin)' do
+    it 'shows "Convert to Venta" link for cotizacion (admin)' do
       cotizacion = create(:sale, client: client, warehouse: warehouse,
                                   correlative: 'COT-00044', document_type: 'cotizacion',
                                   status: 'confirmada')
 
       visit sale_path(cotizacion)
 
-      expect(page).to have_button('Convertir a venta')
+      # The convert action is now a two-step flow: this links to the editable form.
+      expect(page).to have_link('Convertir a venta', href: convert_sale_path(cotizacion))
     end
 
     it 'shows "Annul Sale" button for confirmed venta (admin)' do
@@ -364,30 +365,30 @@ RSpec.describe 'Sales', type: :system do
   end
 
   # ---------------------------------------------------------------------------
-  # Payment history on the sale detail page
+  # Payment date column on the installments table (folded in from the old
+  # standalone "Historial de pagos" section).
   # ---------------------------------------------------------------------------
-  describe 'payment history on show' do
+  describe 'payment date on the installments table' do
     let(:sale) { create(:sale, :venta, :with_items, client: client, warehouse: warehouse) }
     let(:installment) do
       create(:installment, sale: sale, installment_number: 1,
                            amount_usd: 300, balance_usd: 100, due_date: 10.days.from_now)
     end
 
-    it 'lists recorded payments with date and amount' do
+    it 'shows the payment date on the paid installment row' do
       create(:amortization, installment: installment, amount_usd: 200,
                             paid_at: Time.zone.local(2026, 6, 10, 12))
 
       visit sale_path(sale)
 
-      expect(page).to have_content('Historial de pagos')
+      expect(page).to have_content('Fecha de pago')
       expect(page).to have_content('10/06/2026')
-      expect(page).to have_content('200.00')
     end
 
-    it 'does not render the payment history section when there are no payments' do
+    it 'shows a dash when the installment has no payment' do
       installment # exists but unpaid
       visit sale_path(sale)
-      expect(page).not_to have_content('Historial de pagos')
+      expect(page).to have_content('—')
     end
   end
 end

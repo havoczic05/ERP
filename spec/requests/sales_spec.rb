@@ -267,6 +267,34 @@ RSpec.describe 'Sales', type: :request do
       expect(response.body).to include(sale_path(sale, format: :pdf))
       expect(response.body).to include('target="_blank"')
     end
+
+    it 'shows the installment plan with running balance and payment date columns' do
+      venta = create(:sale, :venta, client: client, warehouse: warehouse,
+                     subtotal_usd: 400.00, total_usd: 400.00)
+      i1 = create(:installment, sale: venta, installment_number: 1,
+                  amount_usd: 200.00, balance_usd: 0.00, status: 'pagada',
+                  due_date: Date.new(2026, 8, 4))
+      create(:amortization, installment: i1, amount_usd: 200.00,
+             paid_at: Time.zone.local(2026, 8, 4, 10))
+      create(:installment, sale: venta, installment_number: 2,
+             amount_usd: 200.00, balance_usd: 200.00, status: 'pendiente',
+             due_date: Date.new(2026, 9, 3))
+
+      get sale_path(venta)
+
+      expect(response.body).to include('Saldo restante')
+      expect(response.body).to include('Fecha de pago')
+      # Running outstanding: 400 before cuota 1, 200 before cuota 2.
+      expect(response.body).to include('04/08/2026')
+      # The info tooltip trigger is present and labelled for assistive tech.
+      expect(response.body).to include('Cómo se calcula el saldo restante')
+    end
+
+    it 'no longer renders a separate payment history section' do
+      venta = create(:sale, :venta, client: client, warehouse: warehouse)
+      get sale_path(venta)
+      expect(response.body).not_to include('Historial de pagos')
+    end
   end
 
   # ---------------------------------------------------------------------------
@@ -313,9 +341,9 @@ RSpec.describe 'Sales', type: :request do
   end
 
   # ---------------------------------------------------------------------------
-  # POST /sales/:id/convert_to_sale — convert cotizacion to venta
+  # Two-step conversion: GET the editable form, then POST the built venta.
   # ---------------------------------------------------------------------------
-  describe 'POST /sales/:id/convert_to_sale' do
+  describe 'cotizacion → venta conversion (two-step editable flow)' do
     let(:cotizacion) do
       sale = create(:sale, client: client, warehouse: warehouse,
                     document_type: 'cotizacion', status: 'confirmada',
@@ -325,19 +353,87 @@ RSpec.describe 'Sales', type: :request do
       sale
     end
 
+    # Full editable-form payload, mirroring what the browser submits.
+    def conversion_payload(items: nil, installments: nil)
+      items ||= [ { product_id: product.id, quantity: 1, unit_price_usd: '10.00' } ]
+      sale = {
+        client_id:     client.id,
+        warehouse_id:  warehouse.id,
+        document_type: 'venta',
+        notes:         cotizacion.notes,
+        items:         items
+      }
+      sale[:installments] = installments if installments
+      { sale: sale }
+    end
+
     before { login_as(vendor_user) }
 
-    it 'creates a new venta and redirects for vendedor' do
-      # Force cotizacion creation before measuring the count delta
-      cot_id = cotizacion.id
-      cotizacion_path = convert_to_sale_sale_path(cotizacion)
+    describe 'GET /sales/:id/convert' do
+      it 'renders the editable convert form preloaded from the cotizacion' do
+        get convert_sale_path(cotizacion)
 
-      expect {
-        post cotizacion_path, params: { num_installments: 1, interval_days: 30 }
-      }.to change(Sale, :count).by(1)
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('Convertir')
+        expect(response.body).to include(cotizacion.correlative)
+      end
 
-      expect(response).to have_http_status(:found)
-      expect(Sale.where(source_cotizacion_id: cot_id).exists?).to be true
+      it 'redirects with an alert when the cotizacion was already converted' do
+        SaleCreationService.call(conversion_payload[:sale].merge(source_cotizacion_id: cotizacion.id))
+
+        get convert_sale_path(cotizacion)
+
+        expect(response).to redirect_to(cotizacion)
+        follow_redirect!
+        expect(response.body).to include('ya')
+      end
+
+      it 'redirects when the document is already a venta' do
+        venta = create(:sale, :venta, client: client, warehouse: warehouse)
+
+        get convert_sale_path(venta)
+
+        expect(response).to redirect_to(venta)
+      end
+    end
+
+    describe 'POST /sales/:id/convert_to_sale' do
+      it 'creates a new venta linked to the cotizacion and redirects' do
+        cot_id = cotizacion.id
+
+        expect {
+          post convert_to_sale_sale_path(cotizacion), params: conversion_payload
+        }.to change(Sale.where(document_type: 'venta'), :count).by(1)
+
+        expect(response).to have_http_status(:found)
+        venta = Sale.find_by(source_cotizacion_id: cot_id)
+        expect(venta).to be_present
+        expect(response).to redirect_to(venta)
+      end
+
+      it 'persists the editable installment plan submitted with the form' do
+        installments = [
+          { due_date: '2026-08-01', amount_usd: '4.00' },
+          { due_date: '2026-09-01', amount_usd: '6.00' }
+        ]
+
+        post convert_to_sale_sale_path(cotizacion), params: conversion_payload(installments: installments)
+
+        venta = Sale.find_by(source_cotizacion_id: cotizacion.id)
+        expect(venta.installments.count).to eq(2)
+        expect(venta.installments.pluck(:amount_usd).map(&:to_d).sum).to eq(BigDecimal('10.00'))
+      end
+
+      it 're-renders the form when the cotizacion was already converted' do
+        SaleCreationService.call(conversion_payload[:sale].merge(source_cotizacion_id: cotizacion.id))
+
+        expect {
+          post convert_to_sale_sale_path(cotizacion), params: conversion_payload
+        }.not_to change(Sale, :count)
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include('ya')
+      end
     end
   end
 

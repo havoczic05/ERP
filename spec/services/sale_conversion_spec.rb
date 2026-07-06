@@ -143,4 +143,31 @@ RSpec.describe 'SaleCreationService.convert (cotizacion to venta)', type: :servi
       expect(Sale.count).to eq(sale_count_before)
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # 4. Re-converting after the prior venta was annulled
+  # ---------------------------------------------------------------------------
+  # The already-converted guard must only count LIVE (kept) ventas. When the
+  # converted venta is annulled it is soft-deleted (discarded_at set), which
+  # frees the cotizacion so it can be converted again.
+  describe 'converting a cotizacion whose prior venta was annulled' do
+    before do
+      cotizacion
+      first = SaleCreationService.convert(cotizacion, conversion_params)
+      SaleAnnulmentService.call(first.sale, nil)
+    end
+
+    it 'allows re-conversion' do
+      result = SaleCreationService.convert(cotizacion, conversion_params)
+
+      expect(result.success?).to be true
+      expect(result.sale.source_cotizacion_id).to eq(cotizacion.id)
+    end
+
+    it 'creates a new venta' do
+      expect {
+        SaleCreationService.convert(cotizacion, conversion_params)
+      }.to change(Sale.kept.where(document_type: 'venta'), :count).by(1)
+    end
+  end
 end

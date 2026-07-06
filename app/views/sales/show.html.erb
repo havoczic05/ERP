@@ -1,124 +1,137 @@
 <div class="detail-head">
-  <h1>Sale <%= @sale.correlative %></h1>
-  <%= sale_status_badge(@sale) %>
-</div>
-<p class="detail-meta">
-  <%= document_type_label(@sale.document_type) %> · <%= @sale.client.full_name %> · <%= @sale.warehouse.name %>
-</p>
-
-<dl>
-  <dt>Subtotal</dt>
-  <dd><%= number_to_currency(@sale.subtotal_usd, unit: 'USD ') %></dd>
-
-  <dt>Impuesto</dt>
-  <dd><%= number_to_currency(@sale.tax_usd, unit: 'USD ') %></dd>
-
-  <dt>Total</dt>
-  <dd><%= number_to_currency(@sale.total_usd, unit: 'USD ') %></dd>
-
-  <% if @sale.notes.present? %>
-    <dt>Notas</dt>
-    <dd><%= @sale.notes %></dd>
-  <% end %>
-</dl>
-
-<h2>Líneas de producto</h2>
-<table>
-  <thead>
-    <tr>
-      <th>Producto</th>
-      <th class="num">Cant.</th>
-      <th class="num">Precio unitario</th>
-      <th class="num">Subtotal</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @sale.sale_items.each do |item| %>
-      <tr>
-        <td><%= item.product.name %></td>
-        <td class="num"><%= item.quantity %></td>
-        <td><%= money(item.unit_price_usd) %></td>
-        <td><%= money(item.line_total_usd) %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
-
-<% if @sale.installments.any? %>
-  <h2>Cuotas</h2>
-  <table>
-    <thead>
-      <tr>
-        <th class="num">#</th>
-        <th class="num">Monto</th>
-        <th class="num">Saldo</th>
-        <th>Fecha de vencimiento</th>
-        <th>Estado</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @sale.installments.order(:installment_number).each do |inst| %>
-        <tr>
-          <td class="num"><%= inst.installment_number %></td>
-          <td><%= money(inst.amount_usd) %></td>
-          <td><%= money(inst.balance_usd) %></td>
-          <td class="col-date"><%= format_date(inst.due_date) %></td>
-          <td><%= installment_status_badge(inst) %></td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-<% end %>
-
-<% if @amortizations.any? %>
-  <h2>Historial de pagos</h2>
-  <table>
-    <thead>
-      <tr>
-        <th class="num">Cuota</th>
-        <th>Fecha de pago</th>
-        <th class="num">Monto</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @amortizations.each do |amort| %>
-        <tr>
-          <td class="num"><%= amort.installment.installment_number %></td>
-          <td class="col-date"><%= format_date(amort.paid_at) %></td>
-          <td><%= money(amort.amount_usd) %></td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-<% end %>
-
-<% if @sale.credit_note %>
-  <h2>Nota de crédito</h2>
-  <p class="note-card">
-    Emitida: <%= format_date(@sale.credit_note.issued_at) %> —
-    Total: <%= number_to_currency(@sale.credit_note.total_usd, unit: 'USD ') %>
-  </p>
-<% end %>
-
-<div class="action-bar">
-  <% if @sale.cotizacion? && @sale.confirmada? && policy(@sale).convert_to_sale? %>
-    <%= action_button 'Convertir a venta', convert_to_sale_sale_path(@sale), method: :post,
-                      variant: :primary, size: :md, icon: :plus,
-                      params: { num_installments: 1, interval_days: 30 } %>
-  <% end %>
-
-  <% if policy(@sale).annul? && @sale.confirmada? && @sale.venta? %>
-    <%= action_button 'Anular venta', annul_sale_path(@sale), method: :post,
-                      variant: :danger, size: :md, icon: :ban,
-                      confirm: '¿Anular esta venta? Esta acción no se puede deshacer.' %>
-  <% end %>
-
-  <span class="spacer"></span>
-  <%= action_link 'Descargar PDF', sale_path(@sale, format: :pdf), size: :md, icon: :download,
-                  target: "_blank", rel: "noopener" %>
-  <% if @sale.installments.any? %>
-    <%= action_link 'Descargar PDF sin cuotas', sale_path(@sale, format: :pdf, cuotas: false),
-                    size: :md, icon: :download, target: "_blank", rel: "noopener" %>
-  <% end %>
+  <div class="detail-title">
+    <h1><%= document_type_label(@sale.document_type) %> <%= @sale.correlative %></h1>
+    <%= sale_status_badge(@sale) %>
+  </div>
   <%= action_link 'Volver a ventas', sales_path, size: :md, icon: "arrow-left" %>
+</div>
+
+<div class="detail-grid">
+  <div class="detail-main">
+    <%# ---- Card: Líneas de producto ---------------------------------------- %>
+    <section class="form-card">
+      <h2 class="form-card__title">Líneas de producto</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th class="num">Cant.</th>
+            <th class="num">Precio unitario (USD)</th>
+            <th class="num">Subtotal (USD)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @sale.sale_items.each do |item| %>
+            <tr>
+              <td><%= item.product.name %></td>
+              <td class="num"><%= item.quantity %></td>
+              <td><%= money(item.unit_price_usd) %></td>
+              <td><%= money(item.line_total_usd) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </section>
+
+    <%# ---- Card: Cuotas ----------------------------------------------------- %>
+    <% if @sale.installments.any? %>
+      <section class="form-card">
+        <h2 class="form-card__title">Cuotas</h2>
+        <table>
+          <thead>
+            <tr>
+              <th class="num">#</th>
+              <th class="num">Monto (USD)</th>
+              <th class="num">
+                <span class="th-info">
+                  <span>Saldo restante (USD)</span>
+                  <button type="button" class="info-tip"
+                          aria-label="Cómo se calcula el saldo restante">
+                    <%= icon(:info) %>
+                    <span class="info-tip__bubble" role="tooltip">
+                      Saldo que aún se debía al llegar a esta cuota: el total del documento
+                      menos el monto de las cuotas anteriores.
+                    </span>
+                  </button>
+                </span>
+              </th>
+              <th>Vencimiento</th>
+              <th>Fecha de pago</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% sale_installment_rows(@sale).each do |row| %>
+              <% inst = row[:installment] %>
+              <tr>
+                <td class="num"><%= inst.installment_number %></td>
+                <td><%= money(inst.amount_usd) %></td>
+                <td><%= money(row[:saldo_restante]) %></td>
+                <td class="col-date"><%= format_date(inst.due_date) %></td>
+                <td class="col-date"><%= row[:paid_on] ? format_date(row[:paid_on]) : "—" %></td>
+                <td><%= installment_status_badge(inst) %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </section>
+    <% end %>
+  </div>
+
+  <aside class="detail-side">
+    <%# ---- Card: Resumen --------------------------------------------------- %>
+    <section class="form-card summary-card">
+      <h2 class="form-card__title">Resumen</h2>
+      <dl class="summary-list">
+        <dt>Cliente</dt><dd><%= @sale.client.full_name %></dd>
+        <dt>Documento</dt><dd class="mono"><%= "#{@sale.client.document_type.upcase} #{@sale.client.document_number}" %></dd>
+        <dt>Almacén</dt><dd><%= @sale.warehouse.name %></dd>
+        <dt>Tipo</dt><dd><%= document_type_label(@sale.document_type) %></dd>
+        <dt>Emitida</dt><dd class="mono"><%= format_date(@sale.created_at) %></dd>
+      </dl>
+
+      <div class="summary-divider"></div>
+
+      <dl class="summary-list">
+        <dt>Subtotal</dt><dd class="mono"><%= usd_amount(@sale.subtotal_usd) %></dd>
+        <dt>Impuesto</dt><dd class="mono"><%= usd_amount(@sale.tax_usd) %></dd>
+        <dt class="summary-total-label">Total</dt><dd class="mono summary-total-value"><%= usd_amount(@sale.total_usd) %></dd>
+      </dl>
+    </section>
+
+    <%# ---- Card: Nota de crédito (ventas anuladas) ------------------------- %>
+    <% if @sale.credit_note %>
+      <section class="form-card summary-card">
+        <h2 class="form-card__title">Nota de crédito</h2>
+        <dl class="summary-list">
+          <dt>Emitida</dt><dd class="mono"><%= format_date(@sale.credit_note.issued_at) %></dd>
+          <dt>Total</dt><dd class="mono"><%= usd_amount(@sale.credit_note.total_usd) %></dd>
+        </dl>
+      </section>
+    <% end %>
+
+    <%# ---- Card: Acciones -------------------------------------------------- %>
+    <section class="form-card">
+      <h2 class="form-card__title">Acciones</h2>
+      <div class="detail-actions">
+        <% if @sale.cotizacion? && @sale.confirmada? && policy(@sale).convert_to_sale? %>
+          <%= action_link 'Convertir a venta', convert_sale_path(@sale),
+                          variant: :primary, size: :md, icon: :plus %>
+        <% end %>
+
+        <%= action_link 'Descargar PDF', sale_path(@sale, format: :pdf), variant: :primary, size: :md,
+                        icon: :download, target: "_blank", rel: "noopener" %>
+        <% if @sale.installments.any? %>
+          <%= action_link 'Descargar PDF sin cuotas', sale_path(@sale, format: :pdf, cuotas: false),
+                          size: :md, icon: :download, target: "_blank", rel: "noopener" %>
+        <% end %>
+
+        <% if policy(@sale).annul? && @sale.confirmada? && @sale.venta? %>
+          <%= action_button 'Anular venta', annul_sale_path(@sale), method: :post,
+                            variant: :danger, size: :md, icon: :ban,
+                            confirm: '¿Anular esta venta? Esta acción no se puede deshacer.' %>
+        <% end %>
+      </div>
+    </section>
+  </aside>
 </div>

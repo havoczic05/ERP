@@ -30,6 +30,15 @@ class SaleCreationService
   def call
     @stock_errors = []
 
+    # Guard: when linking to a source cotizacion, reject if a LIVE (kept) venta
+    # already references it — mirrors convert_from, so re-conversion is only
+    # possible once the prior venta is annulled (soft-deleted).
+    source_cotizacion_id = @params[:source_cotizacion_id].presence
+    if source_cotizacion_id &&
+       Sale.kept.where(source_cotizacion_id: source_cotizacion_id).exists?
+      return Result.failure(nil, [ "This cotizacion has already been converted to a venta" ])
+    end
+
     ActiveRecord::Base.transaction do
       items_data = Array(@params[:items])
 
@@ -108,14 +117,15 @@ class SaleCreationService
       end
 
       sale = Sale.new(
-        client_id:     @params[:client_id],
-        warehouse_id:  @params[:warehouse_id],
-        document_type: document_type,
-        status:        "confirmada",
-        notes:         @params[:notes],
-        tax_usd:       0.00,
-        subtotal_usd:  subtotal,
-        total_usd:     subtotal   # tax = 0 in v1
+        client_id:            @params[:client_id],
+        warehouse_id:         @params[:warehouse_id],
+        document_type:        document_type,
+        status:               "confirmada",
+        notes:                @params[:notes],
+        tax_usd:              0.00,
+        subtotal_usd:         subtotal,
+        total_usd:            subtotal,  # tax = 0 in v1
+        source_cotizacion_id: source_cotizacion_id
       )
 
       # Step 5: generate unique correlative (MAX+1 per type, rescue RecordNotUnique + retry)
@@ -211,8 +221,9 @@ class SaleCreationService
       return Result.failure(cotizacion, [ "This document is already a venta" ])
     end
 
-    # Guard: already converted (a venta referencing this cotizacion exists)
-    if Sale.where(source_cotizacion_id: cotizacion.id).exists?
+    # Guard: already converted (a LIVE venta referencing this cotizacion exists).
+    # Uses kept so an annulled (soft-deleted) venta frees the cotizacion for re-conversion.
+    if Sale.kept.where(source_cotizacion_id: cotizacion.id).exists?
       return Result.failure(cotizacion, [ "This cotizacion has already been converted to a venta" ])
     end
 

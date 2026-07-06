@@ -45,6 +45,25 @@ module ApplicationHelper
     content_tag(:span, sale.status.humanize, class: "badge badge--#{variant}")
   end
 
+  # Decorates a sale's installments (ordered) with the two values the detail view
+  # shows but the model does not store:
+  #   :saldo_restante — running outstanding balance BEFORE this installment, i.e.
+  #     the sale total minus the amounts of all prior installments (a schedule
+  #     view: "how much was still owed on arriving at this cuota").
+  #   :paid_on        — the latest amortization paid_at for this installment, or nil.
+  def sale_installment_rows(sale)
+    total   = sale.total_usd
+    running = BigDecimal("0")
+
+    sale.installments.includes(:amortizations).order(:installment_number).map do |installment|
+      saldo    = total - running
+      running += installment.amount_usd
+      { installment: installment,
+        saldo_restante: saldo,
+        paid_on: installment.amortizations.map(&:paid_at).max }
+    end
+  end
+
   # Returns an html_safe <span> with the appropriate badge class for an installment's status.
   # Labels are rendered in Spanish; badge variant is driven by the DB enum value.
   def installment_status_badge(installment)
@@ -123,7 +142,8 @@ module ApplicationHelper
     "arrow-left": '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
     x:          '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
     refresh:    '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
-    user:       '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/>'
+    user:       '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/>',
+    info:       '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>'
   }.freeze
 
   def icon(name)
@@ -151,6 +171,16 @@ module ApplicationHelper
            placeholder: placeholder, select_action: select_action,
            wrapper_class: wrapper_class,
            suffix: (capture(&suffix) if suffix)
+  end
+
+  # Renders a USD amount with a small, muted "USD" prefix so the number stays the
+  # focal point (e.g. summary totals): <span class="amount-cur">USD</span> 1,173.68
+  def usd_amount(value)
+    safe_join([
+      content_tag(:span, "USD", class: "amount-cur"),
+      " ",
+      number_with_precision(value, precision: 2, delimiter: ",")
+    ])
   end
 
   # Money cell: the amount right-aligned with tabular figures (2 decimals).
