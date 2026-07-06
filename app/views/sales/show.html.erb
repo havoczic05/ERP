@@ -93,9 +93,9 @@
       <div class="summary-divider"></div>
 
       <dl class="summary-list">
-        <dt>Subtotal</dt><dd class="mono"><%= number_to_currency(@sale.subtotal_usd, unit: 'USD ') %></dd>
-        <dt>Impuesto</dt><dd class="mono"><%= number_to_currency(@sale.tax_usd, unit: 'USD ') %></dd>
-        <dt class="summary-total-label">Total</dt><dd class="mono summary-total-value"><%= number_to_currency(@sale.total_usd, unit: 'USD ') %></dd>
+        <dt>Subtotal</dt><dd class="mono"><%= usd_amount(@sale.subtotal_usd) %></dd>
+        <dt>Impuesto</dt><dd class="mono"><%= usd_amount(@sale.tax_usd) %></dd>
+        <dt class="summary-total-label">Total</dt><dd class="mono summary-total-value"><%= usd_amount(@sale.total_usd) %></dd>
       </dl>
     </section>
 
@@ -105,7 +105,7 @@
         <h2 class="form-card__title">Nota de crédito</h2>
         <dl class="summary-list">
           <dt>Emitida</dt><dd class="mono"><%= format_date(@sale.credit_note.issued_at) %></dd>
-          <dt>Total</dt><dd class="mono"><%= number_to_currency(@sale.credit_note.total_usd, unit: 'USD ') %></dd>
+          <dt>Total</dt><dd class="mono"><%= usd_amount(@sale.credit_note.total_usd) %></dd>
         </dl>
       </section>
     <% end %>

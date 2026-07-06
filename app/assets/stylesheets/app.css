@@ -1485,10 +1485,18 @@ button.btn--sm {
     margin: 0;
     color: var(--ink);
     font-weight: var(--weight-semi);
+    text-align: right;
     min-width: 0;
 }
 .summary-list dd.mono {
     font-variant-numeric: tabular-nums;
+}
+/* De-emphasized currency prefix — smaller + muted so the number leads. */
+.amount-cur {
+    font-size: 0.78em;
+    font-weight: var(--weight-normal);
+    color: var(--muted);
+    margin-right: 2px;
 }
 .summary-divider {
     height: 1px;

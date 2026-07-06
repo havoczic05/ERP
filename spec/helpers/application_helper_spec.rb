@@ -222,6 +222,20 @@ RSpec.describe ApplicationHelper, type: :helper do
   end
 
   # ---------------------------------------------------------------------------
+  describe '#usd_amount' do
+    it 'renders the number prominently with a de-emphasized USD prefix' do
+      html = helper.usd_amount(1173.68)
+
+      expect(html).to have_css('span.amount-cur', text: 'USD')
+      expect(html).to include('1,173.68')
+    end
+
+    it 'always shows two decimals' do
+      expect(helper.usd_amount(0)).to include('0.00')
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   describe '#sale_installment_rows' do
     let(:warehouse) { create(:warehouse) }
     let(:client)    { create(:client, :ruc_client) }

@@ -173,6 +173,16 @@ module ApplicationHelper
            suffix: (capture(&suffix) if suffix)
   end
 
+  # Renders a USD amount with a small, muted "USD" prefix so the number stays the
+  # focal point (e.g. summary totals): <span class="amount-cur">USD</span> 1,173.68
+  def usd_amount(value)
+    safe_join([
+      content_tag(:span, "USD", class: "amount-cur"),
+      " ",
+      number_with_precision(value, precision: 2, delimiter: ",")
+    ])
+  end
+
   # Money cell: the amount right-aligned with tabular figures (2 decimals).
   # The currency lives once in the column header (e.g. "Total (USD)"), so the
   # cells stay currency-free to avoid repeating "USD" on every row.
