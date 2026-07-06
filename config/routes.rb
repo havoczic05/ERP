@@ -36,6 +36,7 @@ Rails.application.routes.draw do
   resources :sales do
     member do
       post :annul
+      get  :convert
       post :convert_to_sale
     end
   end

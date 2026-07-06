@@ -2,7 +2,7 @@ class SalesController < ApplicationController
   include CsvExport
 
   before_action :set_sale,        only: %i[show]
-  before_action :set_kept_sale,   only: %i[annul convert_to_sale]
+  before_action :set_kept_sale,   only: %i[annul convert convert_to_sale]
 
   # GET /sales(.csv)
   def index
@@ -66,24 +66,43 @@ class SalesController < ApplicationController
     end
   end
 
+  # GET /sales/:id/convert
+  # Renders the editable convert form preloaded from the cotizacion. The user
+  # edits items and picks the payment plan before submitting to convert_to_sale.
+  def convert
+    authorize @sale, :convert_to_sale?
+
+    reason = conversion_block_reason(@sale)
+    return redirect_to(@sale, alert: reason) if reason
+
+    load_convert_form
+    render :convert
+  end
+
   # POST /sales/:id/convert_to_sale
+  # Builds a brand-new venta from the submitted (editable) form data, linked to
+  # the source cotizacion. The already-converted guard lives in the service; the
+  # controller pre-checks it to surface a Spanish message on the form.
   def convert_to_sale
-    authorize @sale
+    authorize @sale, :convert_to_sale?
 
-    conversion_params = {
-      num_installments: params[:num_installments].to_i,
-      interval_days:    params[:interval_days].to_i
-    }
-    conversion_params[:num_installments] = 1 if conversion_params[:num_installments] < 1
-    conversion_params[:interval_days]    = 30 if conversion_params[:interval_days] <= 0
+    reason = conversion_block_reason(@sale)
+    if reason
+      @errors = [ reason ]
+      return render_convert_form
+    end
 
-    result = SaleCreationService.convert(@sale, conversion_params)
+    params_for_venta = sale_creation_params.merge(
+      document_type:        "venta",
+      source_cotizacion_id: @sale.id
+    )
+    result = SaleCreationService.call(params_for_venta)
 
     if result.success?
       redirect_to result.sale, notice: "Cotización convertida a venta correctamente."
     else
-      flash[:alert] = result.errors.join("; ")
-      redirect_to @sale
+      @errors = result.errors
+      render_convert_form
     end
   end
 
@@ -140,9 +159,33 @@ class SalesController < ApplicationController
     @sale = Sale.find(params[:id])
   end
 
-  # Annul and convert_to_sale operate only on kept (non-discarded) sales.
+  # Annul and convert operate only on kept (non-discarded) sales.
   def set_kept_sale
     @sale = Sale.kept.find(params[:id])
+  end
+
+  # Shared setup for the convert form (GET and POST-failure re-render).
+  def load_convert_form
+    @products   = product_options
+    @warehouses = Warehouse.order(:name)
+  end
+
+  def render_convert_form
+    load_convert_form
+    render :convert, status: :unprocessable_entity
+  end
+
+  # Reason a cotizacion cannot be converted, or nil when it can. Keeps the GET
+  # form from opening on a document that is already a venta or already has a
+  # live (kept) venta. The service enforces the same guard on submit.
+  def conversion_block_reason(sale)
+    return "Este documento ya es una venta." if sale.venta?
+
+    if Sale.kept.where(source_cotizacion_id: sale.id).exists?
+      return "Esta cotización ya fue convertida a una venta."
+    end
+
+    nil
   end
 
   def sale_creation_params

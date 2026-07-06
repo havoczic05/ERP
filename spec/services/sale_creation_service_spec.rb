@@ -422,4 +422,53 @@ RSpec.describe SaleCreationService, type: :service do
       expect(result.sale.installments.count).to eq(0)
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # source_cotizacion_id — creating a venta linked to its originating cotizacion
+  # (used by the two-step convert flow, which builds the venta from an editable
+  # form rather than copying the cotizacion verbatim).
+  # ---------------------------------------------------------------------------
+  describe 'venta linked to a source cotizacion' do
+    let(:product) { create(:product, stock: 50, base_price_usd: 10.00, warehouse: warehouse) }
+    let(:cotizacion) do
+      create(:sale, client: client, warehouse: warehouse,
+             document_type: 'cotizacion', status: 'confirmada',
+             subtotal_usd: 10.00, total_usd: 10.00)
+    end
+
+    def linked_params(**extra)
+      sale_params(
+        document_type: 'venta',
+        items: [ item_attrs(product: product, quantity: 1, unit_price: 10.00) ],
+        source_cotizacion_id: cotizacion.id,
+        **extra
+      )
+    end
+
+    it 'records the source cotizacion linkage on the new venta' do
+      result = described_class.call(linked_params)
+
+      expect(result.success?).to be true
+      expect(result.sale.source_cotizacion_id).to eq(cotizacion.id)
+    end
+
+    it 'rejects when a live venta already references the cotizacion' do
+      described_class.call(linked_params)
+
+      result = described_class.call(linked_params)
+
+      expect(result.success?).to be false
+      expect(result.errors.first).to include('already been converted')
+    end
+
+    it 'allows creation again after the prior linked venta was annulled' do
+      first = described_class.call(linked_params)
+      SaleAnnulmentService.call(first.sale, nil)
+
+      result = described_class.call(linked_params)
+
+      expect(result.success?).to be true
+      expect(result.sale.source_cotizacion_id).to eq(cotizacion.id)
+    end
+  end
 end

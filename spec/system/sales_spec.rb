@@ -300,14 +300,15 @@ RSpec.describe 'Sales', type: :system do
       expect(page).to have_content('Pendiente')
     end
 
-    it 'shows "Convert to Venta" button for cotizacion (admin)' do
+    it 'shows "Convert to Venta" link for cotizacion (admin)' do
       cotizacion = create(:sale, client: client, warehouse: warehouse,
                                   correlative: 'COT-00044', document_type: 'cotizacion',
                                   status: 'confirmada')
 
       visit sale_path(cotizacion)
 
-      expect(page).to have_button('Convertir a venta')
+      # The convert action is now a two-step flow: this links to the editable form.
+      expect(page).to have_link('Convertir a venta', href: convert_sale_path(cotizacion))
     end
 
     it 'shows "Annul Sale" button for confirmed venta (admin)' do

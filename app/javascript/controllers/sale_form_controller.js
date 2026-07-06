@@ -41,6 +41,17 @@ export default class extends Controller {
   connect() {
     this.togglePaymentMode()
     this.syncWarehouseGating()
+    this.recomputeAll()
+  }
+
+  // Recompute every line-item row (and the grand total). Used on connect so a
+  // preloaded form (e.g. the cotizacion→venta convert form) shows correct
+  // line/grand totals immediately, before the user touches any input.
+  recomputeAll() {
+    if (!this.hasLineItemsBodyTarget) return
+    this.lineItemsBodyTarget
+      .querySelectorAll("tr.line-item")
+      .forEach((row) => this.recomputeRow(row))
   }
 
   // -------------------------------------------------------------------------

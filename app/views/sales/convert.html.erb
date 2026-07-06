@@ -1,0 +1,27 @@
+<% cotizacion = @sale %>
+<div class="page-head">
+  <h1>Convertir a venta</h1>
+  <p class="page-sub">
+    Convertí la cotización <strong><%= cotizacion.correlative %></strong> en una venta.
+    Revisá los productos y elegí la forma de pago.
+  </p>
+</div>
+
+<%= render "form_fields",
+      form_url: convert_to_sale_sale_path(cotizacion),
+      submit_label: "Convertir a venta",
+      sale: cotizacion,
+      warehouses: @warehouses,
+      show_document_type: false,
+      line_items: cotizacion.sale_items.includes(:product).map { |item|
+        {
+          product_id:    item.product_id,
+          product_query: ("#{item.product.name} (#{item.product.sku})" if item.product),
+          quantity:      item.quantity,
+          unit_price:    format("%.2f", item.unit_price_usd)
+        }
+      },
+      selected_client: cotizacion.client,
+      back_label: "Volver a la cotización",
+      back_path: cotizacion,
+      errors: @errors %>

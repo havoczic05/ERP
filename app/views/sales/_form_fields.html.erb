@@ -1,0 +1,227 @@
+<%# Shared editable sale form, used by both /sales/new and the cotizacion→venta
+    convert flow. Locals:
+      form_url             — where the form posts
+      submit_label         — submit button text
+      sale                 — Sale carrying client_id/warehouse_id/document_type defaults
+      warehouses           — collection for the almacén select
+      show_document_type   — render the Cotización/Venta selector (new) vs. force venta (convert)
+      line_items           — array of { product_query:, product_id:, quantity:, unit_price: };
+                             at least one row (a single blank row for new)
+      selected_client      — preloaded Client to reveal in the strip, or nil
+      back_label, back_path — the "volver" link text and target
+      errors               — array of error strings, or nil %>
+
+<% if errors.present? %>
+  <div id="sale-errors" class="flash-alert">
+    <ul>
+      <% errors.each do |error| %>
+        <li><%= error %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<%# Stimulus sale-form controller scope — must enclose the client picker, the
+    line items, and the installment plan (the controller acts on all three). %>
+<div data-controller="sale-form"
+     data-sale-form-search-url-value="<%= search_clients_path %>"
+     data-sale-form-product-search-url-value="<%= search_products_path %>">
+<%= form_with url: form_url, method: :post do |f| %>
+
+  <%# ---- Card: Documento ---------------------------------------------------- %>
+  <section class="form-card">
+    <h2 class="form-card__title">Documento</h2>
+
+    <div class="doc-grid">
+      <%# Client picker — reusable combobox. On select, sale-form#clientSelected
+          reveals the selected-client strip below the field row. %>
+      <%= combobox label: 'Cliente', query_name: :q,
+            hidden_name: 'sale[client_id]', hidden_value: sale.client_id,
+            query_value: (selected_client&.full_name),
+            search_path: search_clients_path,
+            placeholder: 'Buscar cliente por nombre o documento…',
+            wrapper_class: 'client-search',
+            select_action: 'combobox:select->sale-form#clientSelected combobox:clear->sale-form#clientCleared' %>
+
+      <div class="field">
+        <%= label_tag 'sale[warehouse_id]', 'Almacén' %>
+        <%= select_tag 'sale[warehouse_id]',
+            options_for_select(warehouses.map { |w| [w.name, w.id] }, sale.warehouse_id),
+            include_blank: 'Seleccione un almacén',
+            data: { 'sale-form-target': 'warehouse', action: 'change->sale-form#warehouseChanged' } %>
+      </div>
+
+      <% if show_document_type %>
+        <div class="field">
+          <%= label_tag 'sale[document_type]', 'Tipo de documento' %>
+          <%= select_tag 'sale[document_type]',
+              options_for_select([['Cotización', 'cotizacion'], ['Venta', 'venta']],
+                                 sale.document_type) %>
+        </div>
+      <% else %>
+        <%= hidden_field_tag 'sale[document_type]', 'venta' %>
+      <% end %>
+    </div>
+
+    <%# Selected-client strip — hidden until a client is picked. Shows the client
+        name + document and a link to edit it in a new tab (admins only). %>
+    <div class="client-strip" data-sale-form-target="clientStrip" <%= 'hidden' unless selected_client %>>
+      <span class="client-strip__avatar"><%= icon(:user) %></span>
+      <div class="client-strip__info">
+        <span class="client-strip__name" data-sale-form-target="clientName"><%= selected_client&.full_name %></span>
+        <span class="client-strip__doc" data-sale-form-target="clientDoc">
+          <%= "#{selected_client.document_type.upcase} #{selected_client.document_number}" if selected_client %>
+        </span>
+      </div>
+      <% if policy(Client).edit? %>
+        <%= content_tag :a, safe_join([ icon(:pencil), content_tag(:span, 'Editar cliente') ]),
+              target: "_blank", rel: "noopener",
+              href: (selected_client ? edit_client_path(selected_client) : nil),
+              class: "btn btn--ghost btn--sm", title: "Editar cliente",
+              data: { "sale-form-target": "clientEdit" } %>
+      <% end %>
+    </div>
+
+    <%# Forma de pago (UI-only): a segmented toggle. Contado hides the plan;
+        Cuotas reveals the editable installments below. %>
+    <fieldset class="field payment-mode">
+      <legend>Forma de pago</legend>
+      <div class="payment-segments">
+        <label class="payment-segment">
+          <%= radio_button_tag 'payment_method', 'contado', true,
+                data: { action: 'change->sale-form#togglePaymentMode' } %>
+          <span>Contado</span>
+        </label>
+        <label class="payment-segment">
+          <%= radio_button_tag 'payment_method', 'cuotas', false,
+                data: { action: 'change->sale-form#togglePaymentMode' } %>
+          <span>Cuotas</span>
+        </label>
+      </div>
+    </fieldset>
+  </section>
+
+  <%# ---- Card: Líneas de producto ------------------------------------------- %>
+  <section class="form-card" id="line-items">
+    <h2 class="form-card__title">Líneas de producto</h2>
+
+    <table id="line-items-table" class="line-items-table">
+      <%# Producto column is ~4× the width of Cantidad / Precio unitario. %>
+      <colgroup>
+        <col class="col-product">
+        <col class="col-qty">
+        <col class="col-price">
+        <col class="col-subtotal">
+        <col class="col-remove">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th class="num">Cantidad</th>
+          <th class="num">Precio (USD)</th>
+          <th class="num">Subtotal (USD)</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody data-sale-form-target="lineItemsBody">
+        <% line_items.each do |line| %>
+          <tr class="line-item">
+            <td><%= combobox query_name: 'sale[items][][product_query]',
+                      hidden_name: 'sale[items][][product_id]',
+                      hidden_value: line[:product_id], query_value: line[:product_query],
+                      search_path: search_products_path,
+                      placeholder: 'Escriba el nombre del producto',
+                      wrapper_class: 'product-search',
+                      select_action: 'combobox:select->sale-form#productSelected' %></td>
+            <td><%= number_field_tag 'sale[items][][quantity]', (line[:quantity] || 1), min: 1,
+                    data: { 'sale-form-target': 'quantity',
+                            action: 'input->sale-form#recompute' } %></td>
+            <td><%= number_field_tag 'sale[items][][unit_price_usd]', (line[:unit_price] || '0.00'), step: '0.01',
+                    data: { 'sale-form-target': 'unitPrice',
+                            action: 'input->sale-form#recompute' } %></td>
+            <td class="col-total" data-sale-form-target="lineTotal">0.00</td>
+            <td><button type="button" class="btn btn--ghost btn--sm btn--icon"
+                    aria-label="Eliminar" data-action="sale-form#removeLine"><%= icon(:trash) %></button></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <div class="line-items-foot">
+      <button type="button" class="btn btn--ghost btn--sm" data-action="sale-form#addLine">
+        <%= safe_join([ icon(:plus), content_tag(:span, 'Agregar línea') ]) %>
+      </button>
+      <div class="totals-bar">
+        <span class="totals-label">Total</span>
+        <span class="totals-value" data-sale-form-target="grandTotal">USD 0.00</span>
+      </div>
+    </div>
+  </section>
+
+  <%# ---- Card: Plan de cuotas ------------------------------------------------
+      Shown only in Cuotas mode. The generator seeds equal installments from
+      N + interval + the grand total; each row's fecha and monto are then
+      editable, and the footer validates SUM == total before submit. Contado
+      disables these inputs so nothing installments-related is submitted. %>
+  <section class="form-card installments-plan" id="installments-plan"
+           data-sale-form-target="installmentsSection" hidden>
+    <div class="section-head">
+      <div class="section-head__titles">
+        <h2 class="form-card__title">Plan de cuotas</h2>
+        <p class="form-card__subtitle">Ajustá el vencimiento y el monto de cada cuota. La suma debe coincidir con el total.</p>
+      </div>
+      <span class="badge badge--brand">Pago en cuotas</span>
+    </div>
+
+    <div class="installments-generator">
+      <div class="field">
+        <%= label_tag 'sale[num_installments]', 'N° de cuotas' %>
+        <%= number_field_tag 'sale[num_installments]', 2, min: 1, max: 4,
+            data: { 'sale-form-target': 'numInstallments',
+                    action: 'input->sale-form#regenerateInstallments' } %>
+      </div>
+
+      <div class="field">
+        <%= label_tag 'sale[interval_days]', 'Cada' %>
+        <%= select_tag 'sale[interval_days]',
+            options_for_select([7, 10, 15, 30, 45].map { |d| ["#{d} días", d] }, 30),
+            data: { 'sale-form-target': 'intervalDays',
+                    action: 'change->sale-form#regenerateInstallments' } %>
+      </div>
+
+      <button type="button" class="btn btn--ghost"
+              data-action="sale-form#regenerateInstallments">
+        <%= safe_join([ icon(:refresh), content_tag(:span, 'Regenerar cuotas') ]) %>
+      </button>
+    </div>
+
+    <table id="installments-table" class="line-items-table installments-table">
+      <colgroup>
+        <col class="col-num">
+        <col class="col-due">
+        <col class="col-amount">
+        <col class="col-status">
+      </colgroup>
+      <thead>
+        <tr>
+          <th class="num">Cuota</th>
+          <th>Vencimiento</th>
+          <th class="num">Monto (USD)</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <%# Rows are rendered client-side by sale-form#generateInstallments. %>
+      <tbody data-sale-form-target="installmentsBody"></tbody>
+    </table>
+
+    <div class="installments-validation" data-sale-form-target="installmentsValidation">
+      <span class="installments-validation-msg" data-sale-form-target="installmentsSum"></span>
+    </div>
+  </section>
+
+  <div class="action-bar">
+    <%= f.submit submit_label %>
+    <%= link_to back_label, back_path %>
+  </div>
+<% end %>
+</div>
