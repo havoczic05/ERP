@@ -86,6 +86,19 @@ CompanySettings.instance.update!(
 )
 
 # ---------------------------------------------------------------------------
+# Production guard
+# ---------------------------------------------------------------------------
+# Everything below (demo catalog + demo transactions) is development/test
+# fixture data. In production we stop here so `db:seed` only creates the core
+# records needed to start using the app: login users, warehouses and company
+# settings — never the ~900 demo products / 200 clients / thousands of ventas.
+# Set SEED_DEMO=true to force the full demo dataset in any environment.
+unless Rails.env.local? || ENV["SEED_DEMO"] == "true"
+  puts "Producción: core seeds listos (usuarios, almacenes, configuración). Data demo omitida."
+  return
+end
+
+# ---------------------------------------------------------------------------
 # 2. Demo catalog — products
 # ---------------------------------------------------------------------------
 
