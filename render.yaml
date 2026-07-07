@@ -1,0 +1,34 @@
+databases:
+  - name: erp-db
+    databaseName: erp_production
+    plan: free
+    postgresMajorVersion: "16"
+
+services:
+  - type: web
+    name: erp
+    runtime: ruby
+    plan: free
+    region: oregon
+    buildCommand: "./bin/render-build.sh"
+    startCommand: "bundle exec rails server"
+    healthCheckPath: /up
+    envVars:
+      - key: RAILS_MASTER_KEY
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: erp-db
+          property: connectionString
+      - key: RAILS_ENV
+        value: production
+      - key: RAILS_SERVE_STATIC_FILES
+        value: "true"
+      - key: RAILS_LOG_TO_STDOUT
+        value: "true"
+      - key: WEB_CONCURRENCY
+        value: "1"
+      - key: RAILS_MAX_THREADS
+        value: "3"
+      - key: SOLID_QUEUE_IN_PUMA
+        value: "true"
