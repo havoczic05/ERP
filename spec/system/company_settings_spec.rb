@@ -31,6 +31,13 @@ RSpec.describe "CompanySettings", type: :system do
       visit company_settings_path
       expect(page).to have_link("Editar configuración", href: edit_company_settings_path)
     end
+
+    it "reserves empty slots for the upcoming default-warehouse and import features" do
+      visit company_settings_path
+
+      expect(find("#hub_default_warehouse", visible: :all).text).to eq("")
+      expect(find("#hub_import", visible: :all).text).to eq("")
+    end
   end
 
   # ---------------------------------------------------------------------------
@@ -109,6 +116,16 @@ RSpec.describe "CompanySettings", type: :system do
 
       expect(page).to have_current_path(company_settings_path)
       expect(CompanySettings.first.logo.attached?).to be true
+    end
+
+    it "constrains the logo preview to a fixed-size tile" do
+      visit edit_company_settings_path
+      fill_in "Razón social", with: "Logo Corp"
+      fill_in "RUC", with: "20123456789"
+      attach_file "Logo", Rails.root.join("spec/fixtures/files/logo.png")
+      find("input[type=submit]").click
+
+      expect(page).to have_css("img.company-logo")
     end
   end
 end

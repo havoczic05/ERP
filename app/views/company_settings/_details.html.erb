@@ -1,48 +1,63 @@
 <div id="company_settings">
-  <h2>Datos de la empresa</h2>
-  <dl>
-    <dt>Razón social</dt>
-    <dd><%= company_settings.razon_social %></dd>
+  <div class="hub-body">
+    <div class="hub-main">
+      <section class="form-card">
+        <h2 class="form-card__title">Datos de la empresa</h2>
+        <dl>
+          <dt>Razón social</dt>
+          <dd><%= company_settings.razon_social %></dd>
 
-    <% if company_settings.subtitulo.present? %>
-      <dt>Subtítulo</dt>
-      <dd><%= company_settings.subtitulo %></dd>
-    <% end %>
-
-    <dt>RUC</dt>
-    <dd><%= company_settings.ruc %></dd>
-
-    <dt>Dirección</dt>
-    <dd><%= company_settings.direccion %></dd>
-
-    <dt>Teléfono</dt>
-    <dd><%= company_settings.telefono %></dd>
-
-    <% if company_settings.logo.attached? %>
-      <dt>Logo</dt>
-      <dd><%= image_tag company_settings.logo, alt: "Logo de la empresa" %></dd>
-    <% end %>
-  </dl>
-
-  <% if company_settings.bank_accounts.any? %>
-    <h2>Cuentas bancarias</h2>
-    <ul class="bank-accounts-list">
-      <% company_settings.bank_accounts.each do |account| %>
-        <li>
-          <strong><%= account.bank %><%= " — #{account.currency_label}" if account.currency_label.present? %></strong>
-          <% if account.account_number.present? %>
-            <span>CTA. CTE.: <%= account.account_number %></span>
+          <% if company_settings.subtitulo.present? %>
+            <dt>Subtítulo</dt>
+            <dd><%= company_settings.subtitulo %></dd>
           <% end %>
-          <% if account.interbank_number.present? %>
-            <span>CTA. INTERBANCARIO: <%= account.interbank_number %></span>
+
+          <dt>RUC</dt>
+          <dd><%= company_settings.ruc %></dd>
+
+          <dt>Dirección</dt>
+          <dd><%= company_settings.direccion %></dd>
+
+          <dt>Teléfono</dt>
+          <dd><%= company_settings.telefono %></dd>
+
+          <% if company_settings.logo.attached? %>
+            <dt>Logo</dt>
+            <dd><%= image_tag company_settings.logo, alt: "Logo de la empresa", class: "company-logo" %></dd>
           <% end %>
-        </li>
+        </dl>
+      </section>
+
+      <% if company_settings.bank_accounts.any? %>
+        <section class="form-card">
+          <h2 class="form-card__title">Cuentas bancarias</h2>
+          <ul class="bank-accounts-list">
+            <% company_settings.bank_accounts.each do |account| %>
+              <li>
+                <div class="bank-accounts-list__head">
+                  <strong><%= account.bank %></strong>
+                  <% if account.currency_label.present? %>
+                    <span class="badge badge--info"><%= account.currency_label %></span>
+                  <% end %>
+                </div>
+                <% if account.account_number.present? %>
+                  <span>CTA. CTE.: <%= account.account_number %></span>
+                <% end %>
+                <% if account.interbank_number.present? %>
+                  <span>CTA. INTERBANCARIA: <%= account.interbank_number %></span>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        </section>
       <% end %>
-    </ul>
-  <% end %>
+    </div>
 
-  <div class="action-bar">
-    <%= action_link "Editar configuración", edit_company_settings_path,
-                    variant: :primary, size: :md, icon: :pencil, data: { turbo_frame: "modal" } %>
+    <aside class="hub-sidebar">
+      <%# Reserved for PR2 — default warehouse selector (rendered empty in PR1) %>
+      <div id="hub_default_warehouse"></div>
+      <%# Reserved for PR3 — import entry point (rendered empty in PR1) %>
+      <div id="hub_import"></div>
+    </aside>
   </div>
 </div>

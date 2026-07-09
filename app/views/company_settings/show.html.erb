@@ -1,4 +1,11 @@
-<div class="page-head"><h1>Configuración</h1></div>
+<div class="page-head page-head--with-action">
+  <div>
+    <h1>Configuración</h1>
+    <p class="page-sub">Ajustes del negocio y de la cuenta</p>
+  </div>
+  <%= action_link "Editar configuración", edit_company_settings_path,
+                  variant: :primary, size: :md, icon: :pencil, data: { turbo_frame: "modal" } %>
+</div>
 
 <%= render "shared/settings_nav" %>
 
