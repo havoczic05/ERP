@@ -53,8 +53,13 @@ class WarehousesController < ApplicationController
     if @warehouse.destroyable?
       @warehouse.destroy
       redirect_to warehouses_path, notice: "Almacén eliminado correctamente."
-    else
+    elsif @warehouse.products.exists? || @warehouse.sales.exists?
+      # The harder blocker takes precedence when a warehouse is BOTH the
+      # default AND has products/sales — changing the default alone would not
+      # be enough to unblock deletion, so this message must show first.
       redirect_to warehouses_path, alert: "No se puede eliminar este almacén porque tiene productos o ventas asociadas."
+    else
+      redirect_to warehouses_path, alert: "No se puede eliminar el almacén predeterminado. Cambie el predeterminado primero."
     end
   end
 

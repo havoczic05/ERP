@@ -254,6 +254,39 @@ RSpec.describe 'Sales', type: :system do
   end
 
   # ---------------------------------------------------------------------------
+  # Default-warehouse preselection (RF-DW-3)
+  # ---------------------------------------------------------------------------
+  describe 'default warehouse preselection on new sale form' do
+    it 'preselects the configured default warehouse' do
+      create(:company_settings, default_warehouse: warehouse)
+      visit new_sale_path
+      expect(page).to have_select('sale[warehouse_id]', selected: warehouse.name)
+    end
+
+    it 'has no preselection when no default warehouse is configured' do
+      warehouse
+      visit new_sale_path
+      expect(find_field('sale[warehouse_id]').value).to be_blank
+    end
+
+    it 'does NOT re-force the default on a failed create re-render — keeps the submitted warehouse' do
+      other_warehouse = create(:warehouse, name: 'Almacén Norte')
+      create(:company_settings, default_warehouse: warehouse)
+      visit new_sale_path
+
+      select 'Cotización', from: 'sale[document_type]'
+      select other_warehouse.name, from: 'sale[warehouse_id]'
+      # Intentionally omit client_id so the submission fails validation.
+      fill_in 'sale[items][][product_query]', with: "#{product.name} (#{product.sku})"
+      fill_in 'sale[items][][quantity]', with: '1'
+      fill_in 'sale[items][][unit_price_usd]', with: '10.00'
+      click_button 'Crear documento'
+
+      expect(page).to have_select('sale[warehouse_id]', selected: other_warehouse.name)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # Show page
   # ---------------------------------------------------------------------------
   describe 'show page' do

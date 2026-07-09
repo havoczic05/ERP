@@ -200,6 +200,31 @@ RSpec.describe 'Warehouses', type: :request do
       end
     end
 
+    context 'when warehouse is the configured default (RF-DW-5)' do
+      it 'redirects with a distinct default-warehouse alert and warehouse persists' do
+        wh = create(:warehouse)
+        create(:company_settings, default_warehouse: wh)
+        expect {
+          delete warehouse_path(wh)
+        }.not_to change(Warehouse, :count)
+        expect(response).to redirect_to(warehouses_path)
+        expect(flash[:alert]).to eq('No se puede eliminar el almacén predeterminado. Cambie el predeterminado primero.')
+      end
+    end
+
+    context 'when warehouse is BOTH the configured default AND has products/sales' do
+      it 'shows the products/sales alert (the harder blocker takes precedence), not the default-only message' do
+        wh = create(:warehouse)
+        create(:company_settings, default_warehouse: wh)
+        create(:product, warehouse: wh)
+        expect {
+          delete warehouse_path(wh)
+        }.not_to change(Warehouse, :count)
+        expect(response).to redirect_to(warehouses_path)
+        expect(flash[:alert]).to eq('No se puede eliminar este almacén porque tiene productos o ventas asociadas.')
+      end
+    end
+
     it 'returns 403 for vendedor' do
       allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(vendedor)
       wh = create(:warehouse)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_27_120100) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_09_061422) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -81,6 +81,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_27_120100) do
 
   create_table "company_settings", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.bigint "default_warehouse_id"
     t.string "direccion"
     t.string "razon_social", null: false
     t.string "ruc", null: false
@@ -184,6 +185,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_27_120100) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "amortizations", "installments"
   add_foreign_key "bank_accounts", "company_settings", column: "company_settings_id"
+  add_foreign_key "company_settings", "warehouses", column: "default_warehouse_id", on_delete: :nullify
   add_foreign_key "credit_notes", "sales"
   add_foreign_key "installments", "sales"
   add_foreign_key "products", "warehouses"

@@ -44,4 +44,42 @@ RSpec.describe Warehouse, type: :model do
       expect(warehouse.sales).to include(sale)
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # Default-warehouse destroy guard (RF-DW-5)
+  # ---------------------------------------------------------------------------
+  describe '#default_for_company?' do
+    it 'returns true when it is the configured default warehouse' do
+      warehouse = create(:warehouse)
+      create(:company_settings, default_warehouse: warehouse)
+      expect(warehouse.default_for_company?).to be true
+    end
+
+    it 'returns false when it is not the configured default warehouse' do
+      warehouse = create(:warehouse)
+      other = create(:warehouse)
+      create(:company_settings, default_warehouse: other)
+      expect(warehouse.default_for_company?).to be false
+    end
+
+    it 'returns false when no default warehouse is configured' do
+      warehouse = create(:warehouse)
+      expect(warehouse.default_for_company?).to be false
+    end
+  end
+
+  describe '#destroyable? with the default-warehouse guard' do
+    it 'returns false when the warehouse is the configured default, even with no products/sales' do
+      warehouse = create(:warehouse)
+      create(:company_settings, default_warehouse: warehouse)
+      expect(warehouse.destroyable?).to be false
+    end
+
+    it 'returns true when the warehouse is not the default and has no products/sales' do
+      warehouse = create(:warehouse)
+      other = create(:warehouse)
+      create(:company_settings, default_warehouse: other)
+      expect(warehouse.destroyable?).to be true
+    end
+  end
 end

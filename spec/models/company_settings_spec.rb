@@ -136,6 +136,52 @@ RSpec.describe CompanySettings, type: :model do
   end
 
   # ---------------------------------------------------------------------------
+  # Default warehouse (RF-DW-1)
+  # ---------------------------------------------------------------------------
+  describe 'default_warehouse association' do
+    it 'is optional (valid without a default warehouse)' do
+      expect(build(:company_settings, default_warehouse: nil)).to be_valid
+    end
+
+    it 'persists the chosen default warehouse id' do
+      warehouse = create(:warehouse, name: 'Almacén Central')
+      settings = create(:company_settings, default_warehouse: warehouse)
+      expect(settings.reload.default_warehouse_id).to eq(warehouse.id)
+      expect(settings.default_warehouse).to eq(warehouse)
+    end
+
+    it 'allows clearing the default warehouse back to nil' do
+      warehouse = create(:warehouse)
+      settings = create(:company_settings, default_warehouse: warehouse)
+      settings.update(default_warehouse_id: nil)
+      expect(settings.reload.default_warehouse_id).to be_nil
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Default warehouse must reference an existing warehouse (reliability fix —
+  # a warehouse deleted between page load and submit, or a crafted request,
+  # must fail gracefully instead of raising ActiveRecord::InvalidForeignKey).
+  # ---------------------------------------------------------------------------
+  describe 'default_warehouse_id must reference an existing warehouse' do
+    it 'is invalid when default_warehouse_id does not reference an existing warehouse' do
+      record = build(:company_settings, default_warehouse_id: 999_999)
+      expect(record).not_to be_valid
+      expect(record.errors[:default_warehouse_id]).to be_present
+    end
+
+    it 'does not raise and does not persist when saved with a non-existent default_warehouse_id' do
+      record = build(:company_settings, default_warehouse_id: 999_999)
+      expect { expect(record.save).to be false }.not_to raise_error
+      expect(record).not_to be_persisted
+    end
+
+    it 'stays valid when default_warehouse_id is blank (clearing the default)' do
+      expect(build(:company_settings, default_warehouse_id: nil)).to be_valid
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # Bank accounts association
   # ---------------------------------------------------------------------------
   describe 'bank_accounts association' do
