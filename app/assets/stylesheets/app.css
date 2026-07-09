@@ -859,6 +859,51 @@ dialog.modal::backdrop {
     color: var(--muted);
 }
 
+/* Settings hub (Configuración): main content + a ~360px sidebar reserved for
+   the default-warehouse control (PR2) and the import entry point (PR3).
+   Flexbox (not grid) so an empty sidebar collapses and .hub-main reclaims
+   its width automatically — no layout change needed once PR2/PR3 fill it. */
+.hub-body {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sp-6);
+}
+.hub-main {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+}
+.hub-sidebar {
+    flex: 0 0 360px;
+    width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+}
+/* Collapse the sidebar while both reserved slots are empty (PR1). Shows
+   itself automatically the moment either slot gets real content (PR2/PR3). */
+.hub-sidebar:not(:has(> :not(:empty))) {
+    display: none;
+}
+/* The hub columns own their vertical rhythm via flex `gap`; neutralize
+   .form-card's default margin-bottom so spacing doesn't compound and no
+   stray margin trails after the last card. */
+.hub-main > .form-card,
+.hub-sidebar > .form-card {
+    margin-bottom: 0;
+}
+@media (max-width: 900px) {
+    .hub-body {
+        flex-direction: column;
+    }
+    .hub-sidebar {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+}
+
 /* =============================================================================
    Dashboard
    ========================================================================== */
@@ -879,6 +924,15 @@ li {
 }
 .page-head h1 {
     margin-bottom: var(--sp-1);
+}
+/* Modifier: title/subtitle on the left, a single primary action on the right
+   (e.g. Configuración hub). Other .page-head usages stay block-stacked. */
+.page-head--with-action {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    flex-wrap: wrap;
 }
 .page-sub {
     margin: 0;
@@ -1752,6 +1806,24 @@ button.btn--sm {
 .bank-accounts-list li span {
     color: var(--ink-soft);
     font-variant-numeric: tabular-nums;
+}
+/* Bank name + currency badge on one line, above the account numbers */
+.bank-accounts-list__head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+}
+
+/* Company logo preview (Configuración hub): a fixed-size tile so a large
+   uploaded image never blows out the layout — it scales down, never up. */
+.company-logo {
+    width: 96px;
+    height: 96px;
+    object-fit: contain;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: var(--sp-2);
 }
 
 /* ---------------------------------------------------------------------------
