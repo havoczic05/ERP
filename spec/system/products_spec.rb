@@ -128,6 +128,37 @@ RSpec.describe 'Products', type: :system do
   end
 
   # ---------------------------------------------------------------------------
+  # Default-warehouse preselection (RF-DW-4)
+  # ---------------------------------------------------------------------------
+  describe 'default warehouse preselection on new product form' do
+    it 'preselects the configured default warehouse' do
+      create(:company_settings, default_warehouse: warehouse)
+      visit new_product_path
+      expect(page).to have_select('Almacén', selected: warehouse.name)
+    end
+
+    it 'has no preselection when no default warehouse is configured' do
+      visit new_product_path
+      expect(find_field('Almacén').value).to be_blank
+    end
+
+    it 'does NOT re-force the default on a failed create re-render — keeps the submitted warehouse' do
+      other_warehouse = create(:warehouse, name: 'Almacén Norte')
+      create(:company_settings, default_warehouse: warehouse)
+      visit new_product_path
+
+      fill_in 'Nombre', with: ''
+      fill_in 'SKU', with: 'ERR-002'
+      fill_in 'Marca', with: 'X'
+      select other_warehouse.name, from: 'Almacén'
+      fill_in 'Precio base USD', with: '1.00'
+      click_button 'Crear producto'
+
+      expect(page).to have_select('Almacén', selected: other_warehouse.name)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # Edit (RF-PM-3 — stock read-only on edit form)
   # ---------------------------------------------------------------------------
   describe 'editing a product' do
@@ -136,6 +167,13 @@ RSpec.describe 'Products', type: :system do
     it 'pre-fills the form with existing data' do
       visit edit_product_path(product)
       expect(page).to have_field('Nombre', with: 'Old Name')
+    end
+
+    it 'keeps the product\'s own warehouse selected, NOT a different configured default (RF-DW-4)' do
+      other_default = create(:warehouse, name: 'Almacén Central')
+      create(:company_settings, default_warehouse: other_default)
+      visit edit_product_path(product)
+      expect(page).to have_select('Almacén', selected: warehouse.name)
     end
 
     it 'renders stock as plain text, NOT a writable input (RF-PM-3)' do

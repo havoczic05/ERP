@@ -1,5 +1,6 @@
 class CompanySettingsController < ApplicationController
   before_action :set_company_settings
+  before_action :set_warehouses, only: %i[show update]
 
   def show
     authorize @company_settings
@@ -18,7 +19,7 @@ class CompanySettingsController < ApplicationController
           render turbo_stream: [
             turbo_stream.update("modal", ""),
             turbo_stream.replace("company_settings", partial: "company_settings/details",
-                                                      locals: { company_settings: @company_settings }),
+                                                      locals: { company_settings: @company_settings, warehouses: @warehouses }),
             turbo_stream.append("toasts", partial: "layouts/toast",
                                           locals: { kind: :notice, message: "Configuración actualizada." })
           ]
@@ -36,9 +37,14 @@ class CompanySettingsController < ApplicationController
     @company_settings = CompanySettings.instance
   end
 
+  # Used by the hub's "Almacén predeterminado" select (RF-DW-2).
+  def set_warehouses
+    @warehouses = Warehouse.order(:name)
+  end
+
   def company_settings_params
     params.require(:company_settings).permit(
-      :razon_social, :ruc, :direccion, :telefono, :logo, :subtitulo,
+      :razon_social, :ruc, :direccion, :telefono, :logo, :subtitulo, :default_warehouse_id,
       bank_accounts_attributes: [ :id, :bank, :currency_label, :account_number, :interbank_number, :position, :_destroy ]
     )
   end

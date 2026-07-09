@@ -113,6 +113,17 @@ RSpec.describe "CompanySettings", type: :request do
       expect(CompanySettings.first.logo.attached?).to be true
     end
 
+    it "§PATCH with a non-existent default_warehouse_id fails gracefully (no 500)" do
+      settings = create(:company_settings)
+      expect {
+        patch company_settings_path,
+              params: { company_settings: { razon_social: settings.razon_social, ruc: settings.ruc,
+                                            default_warehouse_id: 999_999 } }
+      }.not_to raise_error
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(settings.reload.default_warehouse_id).to be_nil
+    end
+
     it "§Vendedor PATCH is forbidden" do
       allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(vendedor)
       patch company_settings_path, params: valid_params

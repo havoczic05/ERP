@@ -54,8 +54,21 @@
     </div>
 
     <aside class="hub-sidebar">
-      <%# Reserved for PR2 — default warehouse selector (rendered empty in PR1) %>
-      <div id="hub_default_warehouse"></div>
+      <div id="hub_default_warehouse">
+        <section class="form-card">
+          <h2 class="form-card__title">Almacén predeterminado</h2>
+          <%= form_with model: company_settings, url: company_settings_path, method: :patch do |f| %>
+            <div class="field">
+              <%= f.label :default_warehouse_id, "Almacén predeterminado" %>
+              <%= f.select :default_warehouse_id,
+                           options_for_select(warehouses.map { |w| [ w.name, w.id ] }, company_settings.default_warehouse_id),
+                           include_blank: "Ninguno" %>
+              <p class="field-hint">Se preselecciona al crear ventas y productos.</p>
+            </div>
+            <%= submit_button f, "Guardar", size: :sm %>
+          <% end %>
+        </section>
+      </div>
       <%# Reserved for PR3 — import entry point (rendered empty in PR1) %>
       <div id="hub_import"></div>
     </aside>

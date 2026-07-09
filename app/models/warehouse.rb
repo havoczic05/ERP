@@ -19,9 +19,15 @@ class Warehouse < ApplicationRecord
   # ---------------------------------------------------------------------------
   # Destroy guard
   # ---------------------------------------------------------------------------
-  # Returns false when the warehouse has associated products or sales,
-  # preventing hard delete. Uses EXISTS queries (no N+1 risk).
+  # Returns false when the warehouse has associated products or sales, or is
+  # the configured default warehouse, preventing hard delete. Uses EXISTS
+  # queries (no N+1 risk).
   def destroyable?
-    !products.exists? && !sales.exists?
+    !products.exists? && !sales.exists? && !default_for_company?
+  end
+
+  # True when this warehouse is the currently configured default (RF-DW-5).
+  def default_for_company?
+    CompanySettings.instance.default_warehouse_id == id
   end
 end

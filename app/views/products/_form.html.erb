@@ -40,7 +40,7 @@
       <div class="field">
         <%= f.label :warehouse_id, 'Almacén' %>
         <%= f.collection_select :warehouse_id, @warehouses, :id, :name,
-                                { include_blank: 'Seleccionar almacén' } %>
+                                { include_blank: 'Seleccionar almacén', selected: preselected_warehouse_id(product) } %>
         <% if product.errors[:warehouse_id].any? %>
           <span class="error"><%= product.errors[:warehouse_id].join(', ') %></span>
         <% end %>

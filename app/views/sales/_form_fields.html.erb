@@ -46,7 +46,7 @@
       <div class="field">
         <%= label_tag 'sale[warehouse_id]', 'Almacén' %>
         <%= select_tag 'sale[warehouse_id]',
-            options_for_select(warehouses.map { |w| [w.name, w.id] }, sale.warehouse_id),
+            options_for_select(warehouses.map { |w| [w.name, w.id] }, preselected_warehouse_id(sale)),
             include_blank: 'Seleccione un almacén',
             data: { 'sale-form-target': 'warehouse', action: 'change->sale-form#warehouseChanged' } %>
       </div>

@@ -32,11 +32,52 @@ RSpec.describe "CompanySettings", type: :system do
       expect(page).to have_link("Editar configuración", href: edit_company_settings_path)
     end
 
-    it "reserves empty slots for the upcoming default-warehouse and import features" do
+    it "reserves an empty slot for the upcoming import feature" do
       visit company_settings_path
 
-      expect(find("#hub_default_warehouse", visible: :all).text).to eq("")
       expect(find("#hub_import", visible: :all).text).to eq("")
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Default-warehouse selector (RF-DW-1, RF-DW-2)
+  # ---------------------------------------------------------------------------
+  describe "default warehouse selector" do
+    let!(:settings) { create(:company_settings) }
+    let!(:central)  { create(:warehouse, name: "Almacén Central") }
+    let!(:norte)    { create(:warehouse, name: "Almacén Norte") }
+
+    it "offers a select with all warehouses plus a blank option" do
+      visit company_settings_path
+
+      within("#hub_default_warehouse") do
+        expect(page).to have_select("Almacén predeterminado",
+                                     options: [ "Ninguno", "Almacén Central", "Almacén Norte" ])
+        expect(page).to have_content("Se preselecciona al crear ventas y productos.")
+      end
+    end
+
+    it "sets the default warehouse when the admin submits a choice" do
+      visit company_settings_path
+
+      within("#hub_default_warehouse") do
+        select "Almacén Central", from: "Almacén predeterminado"
+        click_button "Guardar"
+      end
+
+      expect(CompanySettings.instance.default_warehouse_id).to eq(central.id)
+    end
+
+    it "clears the default warehouse when the admin submits the blank option" do
+      settings.update!(default_warehouse: central)
+      visit company_settings_path
+
+      within("#hub_default_warehouse") do
+        select "Ninguno", from: "Almacén predeterminado"
+        click_button "Guardar"
+      end
+
+      expect(CompanySettings.instance.default_warehouse_id).to be_nil
     end
   end
 

@@ -23,12 +23,19 @@ class CompanySettings < ApplicationRecord
                                                 reject_if: ->(attributes) { attributes["bank"].blank? }
 
   # ---------------------------------------------------------------------------
+  # Default warehouse (RF-DW-1) — preselected on new sales/products, nullified
+  # by the DB FK if the warehouse is ever removed some other way.
+  # ---------------------------------------------------------------------------
+  belongs_to :default_warehouse, class_name: "Warehouse", optional: true
+
+  # ---------------------------------------------------------------------------
   # Validations
   # ---------------------------------------------------------------------------
   validates :razon_social, presence: { message: "no puede estar en blanco" }
   validates :ruc,
             presence: { message: "no puede estar en blanco" },
             format: { with: /\A\d{11}\z/, message: "debe tener exactamente 11 dígitos numéricos" }
+  validate :default_warehouse_must_exist
 
   # ---------------------------------------------------------------------------
   # Singleton accessor
@@ -36,4 +43,15 @@ class CompanySettings < ApplicationRecord
   # first_or_create! which would fail the presence validations).
   # ---------------------------------------------------------------------------
   def self.instance = first_or_initialize
+
+  private
+
+  # Guards against ActiveRecord::InvalidForeignKey (a DB-level 500) when the
+  # default_warehouse_id points at a warehouse deleted between page load and
+  # submit, or a crafted request. nil (clearing the default) stays valid.
+  def default_warehouse_must_exist
+    return if default_warehouse_id.blank?
+
+    errors.add(:default_warehouse_id, "no es un almacén válido") unless Warehouse.exists?(default_warehouse_id)
+  end
 end
