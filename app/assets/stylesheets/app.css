@@ -823,7 +823,6 @@ dialog.modal::backdrop {
 .settings-nav__item.is-active {
     color: var(--brand);
     border-bottom-color: var(--brand);
-    font-weight: 600;
 }
 
 .settings-cards {
