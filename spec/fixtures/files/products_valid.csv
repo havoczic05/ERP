@@ -1,0 +1,4 @@
+SKU,Nombre,Marca,Almacén,Stock,Precio base USD
+ABC001,Producto Uno,Marca A,Almacén Central,10,25.50
+ABC002,Producto Dos,Marca B,Almacén Norte,5,10.00
+ABC003,  Producto Tres  ,Marca C,  Almacén Sur  ,20,100.00
