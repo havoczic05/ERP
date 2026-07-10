@@ -69,8 +69,33 @@
           <% end %>
         </section>
       </div>
-      <%# Reserved for PR3 — import entry point (rendered empty in PR1) %>
-      <div id="hub_import"></div>
+      <div id="hub_import">
+        <section class="form-card">
+          <h2 class="form-card__title">Importar datos</h2>
+
+          <div class="import-entry">
+            <h3 class="import-entry__label">Productos</h3>
+            <div class="import-entry__actions">
+              <%= action_link "Importar archivo", import_new_products_path,
+                              variant: :secondary, size: :sm, icon: :plus %>
+              <%= action_link "Plantilla", import_product_template_path,
+                              variant: :ghost, size: :sm, icon: :download %>
+            </div>
+          </div>
+
+          <div class="import-entry">
+            <h3 class="import-entry__label">Clientes</h3>
+            <div class="import-entry__actions">
+              <%= action_link "Importar archivo", import_new_clients_path,
+                              variant: :secondary, size: :sm, icon: :plus %>
+              <%= action_link "Plantilla", import_client_template_path,
+                              variant: :ghost, size: :sm, icon: :download %>
+            </div>
+          </div>
+
+          <p class="field-hint">Formatos: CSV, XLSX &middot; máx 500 filas</p>
+        </section>
+      </div>
     </aside>
   </div>
 </div>

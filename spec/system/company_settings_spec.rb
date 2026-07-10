@@ -32,10 +32,12 @@ RSpec.describe "CompanySettings", type: :system do
       expect(page).to have_link("Editar configuración", href: edit_company_settings_path)
     end
 
-    it "reserves an empty slot for the upcoming import feature" do
+    it "shows the import card in the hub sidebar" do
       visit company_settings_path
 
-      expect(find("#hub_import", visible: :all).text).to eq("")
+      within("#hub_import") do
+        expect(page).to have_content("Importar datos")
+      end
     end
   end
 

@@ -1,0 +1,44 @@
+<%# Per-row import report.
+    Locals:
+      report — ImportReport instance
+%>
+<% if report.rows.any? %>
+  <section class="form-card import-report">
+    <h3 class="form-card__title">Resultado de la importación</h3>
+
+    <p class="import-report__summary">
+      <strong><%= report.created_count %></strong> creados
+      <% if report.error_count > 0 %>
+        &middot; <strong><%= report.error_count %></strong> con error
+      <% end %>
+    </p>
+
+    <% if report.rows.any? { |r| r[:status] != :created } %>
+      <table class="import-report__table">
+        <thead>
+          <tr>
+            <th>Fila</th>
+            <th>Estado</th>
+            <th>Detalle</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% report.rows.each do |row| %>
+            <% next if row[:status] == :created %>
+            <tr class="import-report__row import-report__row--<%= row[:status] %>">
+              <td><%= row[:fila] %></td>
+              <td>
+                <% if row[:status] == :duplicate %>
+                  Duplicado
+                <% else %>
+                  Error
+                <% end %>
+              </td>
+              <td><%= Array(row[:errores]).join(", ") %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+  </section>
+<% end %>
