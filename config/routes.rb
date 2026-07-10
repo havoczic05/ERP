@@ -50,4 +50,14 @@ Rails.application.routes.draw do
   get "dashboard", to: "dashboards#show", as: :dashboard
 
   resource :company_settings, only: %i[show edit update]
+
+  # Import UI routes — admin-only, scoped under /config/importar
+  scope "/config/importar", controller: :imports, as: :import do
+    get  "productos",          action: :new_products,    as: :new_products
+    post "productos",          action: :create_products, as: :create_products
+    get  "productos/plantilla", action: :product_template, as: :product_template
+    get  "clientes",           action: :new_clients,     as: :new_clients
+    post "clientes",           action: :create_clients,  as: :create_clients
+    get  "clientes/plantilla", action: :client_template, as: :client_template
+  end
 end

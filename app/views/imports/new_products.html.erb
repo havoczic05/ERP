@@ -1,0 +1,19 @@
+<div class="page-head">
+  <h1>Importar productos</h1>
+  <p class="page-sub">Carga masiva desde CSV o Excel</p>
+</div>
+
+<%= render "shared/settings_nav" %>
+
+<div class="hub-body">
+  <div class="hub-main">
+    <section class="form-card">
+      <h2 class="form-card__title">Subir archivo de productos</h2>
+      <%= render "form",
+                 action_path: import_create_products_path,
+                 back_path: company_settings_path,
+                 error: @error,
+                 report: @report %>
+    </section>
+  </div>
+</div>
