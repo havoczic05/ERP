@@ -2676,9 +2676,12 @@ button.btn--sm {
         gap: var(--sp-1);
     }
 
-    /* --- Dashboard charts 1.5× + horizontal scroll (x-axis labels get room) --- */
+    /* --- Dashboard charts: grow TALL to fill the view + horizontal scroll --- */
     /* min-width:0 lets the grid track shrink to the viewport so the overflow is
-       contained in .chart-scroll instead of widening the whole page. */
+       contained in .chart-scroll instead of widening the whole page. The chart is
+       given a tall fixed height (vh); the SVG fills that height and its width is
+       derived from the viewBox aspect ratio — so the axis/value text scales up and
+       becomes legible, and the wide chart scrolls horizontally. */
     .chart {
         min-width: 0;
     }
@@ -2686,9 +2689,12 @@ button.btn--sm {
         min-width: 0;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
+        height: 42vh;
     }
     .chart-scroll svg {
-        width: 150%;
-        min-width: 32rem;
+        width: auto;
+        height: 100%;
+        min-width: 100%;
+        padding: var(--sp-4) var(--sp-3);
     }
 }
