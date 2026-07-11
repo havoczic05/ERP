@@ -21,6 +21,11 @@
   </div>
 <% end %>
 
+<%# Modal frame for inline client creation, plus the receiver where clients#create
+    appends the auto-select bridge (see client_autoselect_controller). %>
+<%= render "shared/modal_frame" %>
+<div id="sale-client-receiver"></div>
+
 <%# Stimulus sale-form controller scope — must enclose the client picker, the
     line items, and the installment plan (the controller acts on all three). %>
 <div data-controller="sale-form"
@@ -41,7 +46,14 @@
             search_path: search_clients_path,
             placeholder: 'Buscar cliente por nombre o documento…',
             wrapper_class: 'client-search',
-            select_action: 'combobox:select->sale-form#clientSelected combobox:clear->sale-form#clientCleared' %>
+            select_action: 'combobox:select->sale-form#clientSelected combobox:clear->sale-form#clientCleared' do %>
+        <% if policy(Client).new? %>
+          <%= link_to new_client_path(context: "sale"), class: "btn btn--ghost btn--sm combobox-add",
+                title: "Nuevo cliente", data: { turbo_frame: "modal" } do %>
+            <%= icon(:plus) %><span>Nuevo</span>
+          <% end %>
+        <% end %>
+      <% end %>
 
       <div class="field">
         <%= label_tag 'sale[warehouse_id]', 'Almacén' %>

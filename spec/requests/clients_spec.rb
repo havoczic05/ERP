@@ -161,6 +161,27 @@ RSpec.describe 'Clients', type: :request do
         expect(response.body).to include('Toast SA')
       end
     end
+
+    context 'as a Turbo Stream request from the sale form (context: sale)' do
+      let(:sale_params) do
+        { client: { full_name: 'Venta SA', document_type: 'ruc',
+                    document_number: '20111222333', phone: '988000111' },
+          context: 'sale' }
+      end
+      let(:turbo_headers) { { 'Accept' => 'text/vnd.turbo-stream.html' } }
+
+      it 'closes the modal and appends the auto-select bridge (no clients-table row)' do
+        post clients_path, params: sale_params, headers: turbo_headers
+
+        expect(Client.find_by(document_number: '20111222333')).to be_present
+        expect(response.media_type).to eq('text/vnd.turbo-stream.html')
+        expect(response.body).to include('action="update"', 'target="modal"')
+        expect(response.body).to include('action="append"', 'target="sale-client-receiver"')
+        expect(response.body).to include('client-autoselect')          # the bridge controller
+        expect(response.body).to include('Venta SA')
+        expect(response.body).not_to include('target="clients"')       # no clients-table prepend
+      end
+    end
   end
 
   # ---------------------------------------------------------------------------

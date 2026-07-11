@@ -1,4 +1,10 @@
 <%= form_with model: client, local: false do |f| %>
+    <%# Carries the "sale" context so create() responds with the auto-select
+        bridge instead of the clients-table row. Survives error re-renders. %>
+    <% if local_assigns[:context].present? %>
+      <%= hidden_field_tag :context, context %>
+    <% end %>
+
     <% if client.errors.any? %>
       <div id="error_explanation">
         <h2>No se pudo guardar el cliente. Corrija los siguientes errores:</h2>
