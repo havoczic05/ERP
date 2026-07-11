@@ -32,11 +32,12 @@
     </div>
 
     <% if current_user %>
-      <div class="app-shell">
+      <div class="app-shell" data-controller="nav">
         <%= render "layouts/sidebar" %>
         <main class="app-main">
           <%= yield %>
         </main>
+        <div class="nav-backdrop" data-action="click->nav#close" aria-hidden="true"></div>
       </div>
     <% else %>
       <main class="container">

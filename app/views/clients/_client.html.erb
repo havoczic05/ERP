@@ -1,12 +1,12 @@
 <tr id="<%= dom_id(client) %>">
-  <td><%= client.full_name %></td>
-  <td><%= client.document_type.upcase %></td>
-  <td><%= client.document_number %></td>
-  <td><%= client.phone %></td>
-  <td><%= client.direccion %></td>
-  <td><%= client.distrito %></td>
-  <td><%= client.provincia %></td>
-  <td><%= client.departamento %></td>
+  <td data-label="Nombre completo"><%= client.full_name %></td>
+  <td data-label="Tipo de documento"><%= client.document_type.upcase %></td>
+  <td data-label="Número de documento"><%= client.document_number %></td>
+  <td data-label="Teléfono"><%= client.phone %></td>
+  <td data-label="Dirección"><%= client.direccion %></td>
+  <td data-label="Distrito"><%= client.distrito %></td>
+  <td data-label="Provincia"><%= client.provincia %></td>
+  <td data-label="Departamento"><%= client.departamento %></td>
   <td class="col-actions">
     <div class="row-actions">
       <%= action_link 'Ver', client, icon: :eye, data: { turbo_frame: 'modal' } %>

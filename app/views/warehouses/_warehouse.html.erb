@@ -1,6 +1,6 @@
 <tr id="<%= dom_id(warehouse) %>">
-  <td><%= warehouse.name %></td>
-  <td><%= warehouse.location %></td>
+  <td data-label="Nombre"><%= warehouse.name %></td>
+  <td data-label="Ubicación"><%= warehouse.location %></td>
   <td class="col-actions">
     <div class="row-actions">
       <%= action_link 'Ver', warehouse, icon: :eye, data: { turbo_frame: 'modal' } %>

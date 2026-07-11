@@ -33,7 +33,7 @@
 </div>
 
 <% if @sales.any? %>
-  <table>
+  <table class="table-cards">
     <thead>
       <tr>
         <th>Correlativo</th>
@@ -48,12 +48,12 @@
     <tbody>
       <% @sales.each do |sale| %>
         <tr id="<%= dom_id(sale) %>">
-          <td><%= sale.correlative %></td>
-          <td class="col-date"><%= format_date(sale.created_at) %></td>
-          <td><%= document_type_label(sale.document_type) %></td>
-          <td><%= sale.client.full_name %></td>
-          <td><%= money(sale.total_usd) %></td>
-          <td><%= sale_status_badge(sale) %></td>
+          <td data-label="Correlativo"><%= sale.correlative %></td>
+          <td class="col-date" data-label="Fecha"><%= format_date(sale.created_at) %></td>
+          <td data-label="Tipo"><%= document_type_label(sale.document_type) %></td>
+          <td data-label="Cliente"><%= sale.client.full_name %></td>
+          <td data-label="Total (USD)"><%= money(sale.total_usd) %></td>
+          <td data-label="Estado"><%= sale_status_badge(sale) %></td>
           <td class="col-actions">
             <div class="row-actions">
               <%= action_link 'Ver', sale, icon: :eye %>
