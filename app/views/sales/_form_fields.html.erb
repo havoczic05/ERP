@@ -133,13 +133,13 @@
                       placeholder: 'Escriba el nombre del producto',
                       wrapper_class: 'product-search',
                       select_action: 'combobox:select->sale-form#productSelected' %></td>
-            <td><%= number_field_tag 'sale[items][][quantity]', (line[:quantity] || 1), min: 1,
+            <td data-label="Cantidad"><%= number_field_tag 'sale[items][][quantity]', (line[:quantity] || 1), min: 1,
                     data: { 'sale-form-target': 'quantity',
                             action: 'input->sale-form#recompute' } %></td>
-            <td><%= number_field_tag 'sale[items][][unit_price_usd]', (line[:unit_price] || '0.00'), step: '0.01',
+            <td data-label="Precio (USD)"><%= number_field_tag 'sale[items][][unit_price_usd]', (line[:unit_price] || '0.00'), step: '0.01',
                     data: { 'sale-form-target': 'unitPrice',
                             action: 'input->sale-form#recompute' } %></td>
-            <td class="col-total" data-sale-form-target="lineTotal">0.00</td>
+            <td class="col-total" data-label="Subtotal (USD)" data-sale-form-target="lineTotal">0.00</td>
             <td><button type="button" class="btn btn--ghost btn--sm btn--icon"
                     aria-label="Eliminar" data-action="sale-form#removeLine"><%= icon(:trash) %></button></td>
           </tr>

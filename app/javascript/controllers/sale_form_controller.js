@@ -169,13 +169,13 @@ export default class extends Controller {
     const row = document.createElement("tr")
     row.className = "installment-row"
     row.innerHTML = `
-      <td class="col-num num">${number}</td>
-      <td><input type="date" name="sale[installments][][due_date]" value="${this.isoDate(dueDate)}"
+      <td class="col-num num" data-label="Cuota">${number}</td>
+      <td data-label="Vencimiento"><input type="date" name="sale[installments][][due_date]" value="${this.isoDate(dueDate)}"
                  data-action="input->sale-form#validateInstallments"></td>
-      <td><input type="number" step="0.01" min="0" name="sale[installments][][amount_usd]"
+      <td data-label="Monto (USD)"><input type="number" step="0.01" min="0" name="sale[installments][][amount_usd]"
                  value="${amount.toFixed(2)}" data-sale-form-target="installmentAmount"
                  data-action="input->sale-form#validateInstallments"></td>
-      <td><span class="badge badge--warning">Pendiente</span></td>
+      <td data-label="Estado"><span class="badge badge--warning">Pendiente</span></td>
     `
     return row
   }

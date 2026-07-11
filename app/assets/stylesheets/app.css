@@ -2571,4 +2571,59 @@ button.btn--sm {
     .fab.is-armed > span {
         display: inline;
     }
+
+    /* --- Editable sale tables (líneas + cuotas) → stacked cards --- */
+    /* Scroll would clip the product combobox dropdown, so these stack instead. */
+    .line-items-table thead {
+        display: none;
+    }
+    .line-items-table,
+    .line-items-table tbody,
+    .line-items-table tbody tr,
+    .line-items-table td {
+        display: block;
+        width: auto;
+    }
+    .line-items-table tbody tr {
+        border: 1px solid var(--line-strong);
+        border-radius: var(--r);
+        padding: var(--sp-3);
+        margin-bottom: var(--sp-3);
+    }
+    .line-items-table td {
+        padding: var(--sp-1) 0;
+        border: none;
+    }
+    .line-items-table td[data-label]::before {
+        content: attr(data-label);
+        display: block;
+        font-size: var(--text-xs);
+        color: var(--muted);
+        margin-bottom: 2px;
+    }
+    .line-items-table input {
+        width: 100%;
+    }
+    .line-items-table td:last-child {
+        text-align: right;
+    }
+
+    /* --- Toolbars / filters / table footer → stack --- */
+    .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .filters .field input,
+    .filters .field select {
+        width: 100%;
+        min-width: 0;
+    }
+    .table-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
 }
