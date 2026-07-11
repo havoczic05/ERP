@@ -122,7 +122,7 @@
         <%= action_link 'Descargar PDF', sale_path(@sale, format: :pdf), variant: :primary, size: :md,
                         icon: :download, target: "_blank", rel: "noopener" %>
         <% if @sale.installments.any? %>
-          <%= action_link 'Descargar PDF sin cuotas', sale_path(@sale, format: :pdf, cuotas: false),
+          <%= action_link 'Descargar PDF/cuotas', sale_path(@sale, format: :pdf, cuotas: true),
                           size: :md, icon: :download, target: "_blank", rel: "noopener" %>
         <% end %>
 

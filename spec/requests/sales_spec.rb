@@ -329,14 +329,14 @@ RSpec.describe 'Sales', type: :request do
       expect(response).to redirect_to(login_path)
     end
 
-    it 'returns a PDF named "-sin-cuotas" when cuotas=false' do
+    it 'returns a PDF named "-cuotas" when cuotas=true' do
       login_as(admin_user)
-      get sale_path(sale, format: :pdf, cuotas: false)
+      get sale_path(sale, format: :pdf, cuotas: true)
 
       expect(response).to have_http_status(:ok)
       expect(response.media_type).to eq('application/pdf')
       expect(response.body).to start_with('%PDF')
-      expect(response.headers['Content-Disposition']).to include("#{sale.correlative}-sin-cuotas.pdf")
+      expect(response.headers['Content-Disposition']).to include("#{sale.correlative}-cuotas.pdf")
     end
   end
 
