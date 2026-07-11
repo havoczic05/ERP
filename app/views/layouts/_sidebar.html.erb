@@ -1,4 +1,18 @@
-<aside class="app-sidebar">
+<%# Mobile top bar (≤640px): hamburger toggle + brand. Hidden on desktop. %>
+<div class="app-topbar">
+  <button type="button" class="nav-toggle" data-action="nav#toggle" data-nav-target="toggle"
+          aria-controls="app-drawer" aria-expanded="false" aria-label="Abrir menú">
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <line x1="4" y1="7" x2="20" y2="7"/>
+      <line x1="4" y1="12" x2="20" y2="12"/>
+      <line x1="4" y1="17" x2="20" y2="17"/>
+    </svg>
+  </button>
+  <%= link_to "HGS ERP", root_path, class: "app-topbar__brand" %>
+</div>
+
+<aside id="app-drawer" class="app-sidebar" data-nav-target="drawer">
   <%= link_to root_path, class: "sidebar-brand" do %>
     <svg class="sidebar-brand__mark" viewBox="0 0 32 32" aria-hidden="true">
       <rect width="32" height="32" rx="9" fill="currentColor"/>

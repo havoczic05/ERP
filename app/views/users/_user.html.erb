@@ -1,7 +1,7 @@
 <tr id="<%= dom_id(user) %>">
-  <td><%= user.email %></td>
-  <td><%= user.role.humanize %></td>
-  <td><%= user.active? ? 'Sí' : 'No' %></td>
+  <td data-label="Correo electrónico"><%= user.email %></td>
+  <td data-label="Rol"><%= user.role.humanize %></td>
+  <td data-label="Activo"><%= user.active? ? 'Sí' : 'No' %></td>
   <td class="col-actions">
     <div class="row-actions">
       <%= action_link 'Ver', user_path(user), icon: :eye, data: { turbo_frame: 'modal' } %>

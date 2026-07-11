@@ -90,6 +90,10 @@
     --z-toast: 300;
 
     --container: 1100px;
+
+    /* Breakpoints in use (desktop-first, max-width). Custom properties can't be
+       used inside @media, so queries are written literally. Cuts: 896px (56rem,
+       sidebar → top strip) / 900px / 720px / 640px (phone: drawer, cards) / 480px. */
 }
 
 /* =============================================================================
@@ -304,6 +308,35 @@ small {
     max-width: var(--container);
     margin: 0 auto;
     padding: var(--sp-6) var(--sp-5) var(--sp-8);
+}
+
+/* Mobile top bar (hamburger + brand) and drawer backdrop — hidden on desktop,
+   revealed in the ≤640px block below. */
+.app-topbar,
+.nav-backdrop {
+    display: none;
+}
+.nav-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r);
+    background: var(--bg);
+    color: var(--ink-soft);
+    cursor: pointer;
+}
+.app-topbar__brand {
+    font-size: var(--text-md);
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+}
+.app-topbar__brand:hover {
+    text-decoration: none;
 }
 
 /* Collapse the sidebar to a top strip on narrow viewports (desktop-first app). */
@@ -2303,5 +2336,183 @@ button.btn--sm {
     *::after {
         transition-duration: 0.01ms !important;
         animation-duration: 0.01ms !important;
+    }
+}
+
+/* =============================================================================
+   Responsive — phone layer (≤640px). Reusable patterns (.table-cards opt-in,
+   .table-scroll wrapper) plus the off-canvas nav drawer. Placed last so it
+   overrides the ≤56rem top-strip rules where the two ranges overlap.
+   ========================================================================== */
+
+/* Horizontal-scroll wrapper for dense/editable tables (opt-in via markup). */
+.table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 640px) {
+    /* --- Nav: hamburger top bar + off-canvas drawer --- */
+    .app-shell {
+        grid-template-columns: 1fr;
+    }
+    .app-topbar {
+        display: flex;
+        align-items: center;
+        gap: var(--sp-3);
+        padding: var(--sp-3) var(--sp-4);
+        background: var(--bg);
+        border-bottom: 1px solid var(--line);
+    }
+
+    /* Sidebar becomes an off-canvas drawer; restore the vertical list layout the
+       ≤56rem top-strip rules flattened into a horizontal wrap. */
+    .app-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100dvh;
+        width: min(80vw, 18rem);
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: var(--sp-5);
+        border-right: 1px solid var(--line);
+        border-bottom: 0;
+        transform: translateX(-100%);
+        transition: transform 0.2s ease;
+        z-index: var(--z-modal);
+        overflow-y: auto;
+    }
+    .sidebar-nav {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: var(--sp-5);
+        overflow: visible;
+    }
+    .nav-group {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        gap: 2px;
+    }
+    .nav-group-label {
+        display: block;
+    }
+    .sidebar-foot {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--sp-3);
+        margin-left: 0;
+        padding-top: var(--sp-4);
+        border-top: 1px solid var(--line);
+    }
+    .sidebar-user {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--sp-1);
+    }
+    .btn--block {
+        width: 100%;
+    }
+
+    .nav-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(24, 24, 64, 0.4);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+        z-index: calc(var(--z-modal) - 1);
+    }
+    .app-shell.is-nav-open .app-sidebar {
+        transform: translateX(0);
+    }
+    .app-shell.is-nav-open .nav-backdrop {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* --- List tables → stacked cards (opt-in via .table-cards) --- */
+    table.table-cards {
+        border: none;
+        background: transparent;
+        overflow: visible;
+        font-size: var(--text-base);
+    }
+    table.table-cards thead {
+        display: none;
+    }
+    table.table-cards tbody,
+    table.table-cards tr,
+    table.table-cards td {
+        display: block;
+    }
+    /* Reset desktop column widths (e.g. .col-actions width:1%) in card mode. */
+    table.table-cards td {
+        width: auto;
+    }
+    table.table-cards tr {
+        background: var(--bg);
+        border: 1px solid var(--line-strong);
+        border-radius: var(--r-lg);
+        box-shadow: var(--shadow-sm);
+        padding: var(--sp-2) var(--sp-4);
+        margin-bottom: var(--sp-3);
+    }
+    table.table-cards tr:hover {
+        background: var(--bg);
+    }
+    table.table-cards td {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--sp-4);
+        padding: var(--sp-2) 0;
+        border-bottom: 1px solid var(--line);
+        text-align: right;
+    }
+    table.table-cards tr td:last-child {
+        border-bottom: none;
+    }
+    table.table-cards td::before {
+        content: attr(data-label);
+        color: var(--muted);
+        font-weight: var(--weight-medium);
+        text-align: left;
+        white-space: nowrap;
+    }
+    /* Cells without a data-label (e.g. the actions cell): no label, right-aligned. */
+    table.table-cards td:not([data-label])::before {
+        content: none;
+    }
+    table.table-cards td:not([data-label]) {
+        justify-content: flex-end;
+        padding-top: var(--sp-3);
+    }
+    /* Action buttons wrap inside the card instead of overflowing its edge. */
+    table.table-cards .row-actions {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        white-space: normal;
+    }
+
+    /* --- Dense/editable tables → force horizontal scroll inside .table-scroll --- */
+    .table-scroll > table,
+    .table-scroll > .line-items-table,
+    .table-scroll > .installments-table {
+        min-width: 40rem;
+    }
+
+    /* --- Inputs fit the viewport (override the desktop max-widths) --- */
+    input,
+    select,
+    textarea,
+    .combobox-results {
+        max-width: 100%;
+    }
+    .filters .field input,
+    .filters .field select {
+        min-width: 0;
     }
 }
