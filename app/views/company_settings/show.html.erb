@@ -4,7 +4,9 @@
     <p class="page-sub">Ajustes del negocio y de la cuenta</p>
   </div>
   <%= action_link "Editar configuración", edit_company_settings_path,
-                  variant: :primary, size: :md, icon: :pencil, data: { turbo_frame: "modal" } %>
+                  variant: :primary, size: :md, icon: :pencil, class: "fab",
+                  aria: { label: "Editar configuración" },
+                  data: { turbo_frame: "modal", controller: "fab", action: "fab#click" } %>
 </div>
 
 <%= render "shared/settings_nav" %>
