@@ -54,12 +54,21 @@ RSpec.describe SalePdf do
       text = text_of(described_class.new(sale, settings).render)
       expect(text).to include("Resistor 10k")
       expect(text).to include("3")               # quantity
-      expect(text).to include("USD 30.00")       # total
+      # Amounts render the "USD" prefix smaller than the number, so the PDF text
+      # layer emits them as separate runs — match with flexible whitespace.
+      expect(text).to match(/USD\s+30\.00/)      # total
     end
 
     it "does not render an Impuesto line" do
       text = text_of(described_class.new(sale, settings).render)
       expect(text).not_to include("Impuesto")
+    end
+
+    it "omits the client notes / observación block" do
+      sale.update!(notes: "Coordinar entrega en tienda")
+      text = text_of(described_class.new(sale, settings).render)
+      expect(text).not_to include("Coordinar entrega en tienda")
+      expect(text).not_to match(/OBSERVACI/i)
     end
   end
 
@@ -155,6 +164,15 @@ RSpec.describe SalePdf do
       text = text_of(described_class.new(sale, settings).render)
       expect(text).to include("BCP")
       expect(text).to include("193-9852295-1-39")
+    end
+
+    it "shows the bank name and currency in the card title bar (uppercased)" do
+      settings.bank_accounts.create!(bank: "BCP", currency_label: "Dólares",
+                                     interbank_number: "002-193-009852295139-15")
+      text = text_of(described_class.new(sale, settings).render)
+      expect(text).to match(/BCP\s+DÓLARES/)
+      expect(text).to include("CTA. INTERBANCARIA")
+      expect(text).to include("002-193-009852295139-15")
     end
 
     it "renders without bank accounts" do
