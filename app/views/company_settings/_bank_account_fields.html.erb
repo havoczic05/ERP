@@ -5,6 +5,9 @@
     <div class="field">
       <%= ba.label :bank, "Banco" %>
       <%= ba.text_field :bank %>
+      <% if ba.object.errors[:bank].any? %>
+        <span class="error"><%= ba.object.errors[:bank].join(", ") %></span>
+      <% end %>
     </div>
 
     <div class="field">

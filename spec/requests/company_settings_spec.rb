@@ -93,6 +93,29 @@ RSpec.describe "CompanySettings", type: :request do
       expect(CompanySettings.first.bank_accounts.first.bank).to eq("BCP")
     end
 
+    it "§PATCH does not silently drop a bank account missing only the bank name" do
+      patch company_settings_path,
+            params: { company_settings: { razon_social: "Mi Empresa", ruc: "20987654321",
+                                          bank_accounts_attributes: {
+                                            "0" => { bank: "", currency_label: "Soles",
+                                                     account_number: "193-9898120-0-08", position: "0" }
+                                          } } }
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include("no puede estar en blanco")
+      expect(BankAccount.count).to eq(0)
+    end
+
+    it "§PATCH ignores a completely blank bank account row" do
+      patch company_settings_path,
+            params: { company_settings: { razon_social: "Mi Empresa", ruc: "20987654321",
+                                          bank_accounts_attributes: {
+                                            "0" => { bank: "", currency_label: "", account_number: "",
+                                                     interbank_number: "", position: "0" }
+                                          } } }
+      expect(response).to have_http_status(:found)
+      expect(CompanySettings.first.bank_accounts.count).to eq(0)
+    end
+
     it "§PATCH removes a bank account via _destroy" do
       settings = create(:company_settings)
       account  = create(:bank_account, company_settings: settings)
