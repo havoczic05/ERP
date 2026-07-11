@@ -5,15 +5,21 @@ require "stringio"
 # Base class for the company's commercial PDFs (invoice/quotation and the
 # accounts-receivable report). Holds the shared branded header, the bank-account
 # footer and a brand-styled table helper, so both documents stay visually
-# consistent. Pure Ruby (Prawn, built-in AFM fonts) — runs in CI without Chrome.
+# consistent. Pure Ruby (Prawn, built-in AFM Helvetica) — runs in CI without Chrome.
+#
+# Palette mirrors the app design system (app/assets/stylesheets/app.css):
+# indigo brand, ink/muted text and the neutral line/surface tints.
 class BrandedPdf < Prawn::Document
-  # Botanical-green brand, approximated to sRGB hex from the app's
-  # oklch(0.46 0.11 160) design token (app/assets/stylesheets/app.css).
-  BRAND = "2E7D5B".freeze
-  BRAND_WEAK = "EAF4EF".freeze
-  INK = "2B2B2B".freeze
-  MUTED = "6B6B6B".freeze
-  LINE = "DDDDDD".freeze
+  BRAND = "3838EC".freeze        # --brand
+  BRAND_WEAK = "E7E7FC".freeze   # --brand-weak
+  INK = "1B1B2B".freeze          # --ink
+  INK_SOFT = "2C3140".freeze     # --ink-soft
+  MUTED = "8A8FA0".freeze        # --muted
+  LINE = "EDEEF2".freeze         # --line
+  LINE_STRONG = "E4E6EC".freeze  # --line-strong
+  SURFACE = "F7F8FA".freeze      # --surface (zebra)
+  WARNING_WEAK = "F9EFD9".freeze # --warning-weak (total highlight)
+  ON_BRAND = "FFFFFF".freeze
 
   def initialize(**opts)
     super({ page_size: "A4", margin: 40 }.merge(opts))
@@ -27,14 +33,15 @@ class BrandedPdf < Prawn::Document
     embed_logo(company)
 
     fill_color INK
-    text company.razon_social.to_s, size: 18, style: :bold
+    text company.razon_social.to_s, size: 19, style: :bold
 
     if company.subtitulo.present?
-      fill_color BRAND
-      text company.subtitulo, size: 10, style: :bold
+      fill_color INK_SOFT
+      text company.subtitulo, size: 11, style: :italic
     end
 
     fill_color MUTED
+    move_down 2
     text "RUC: #{company.ruc}", size: 9 if company.ruc.present?
     text company.direccion, size: 9 if company.direccion.present?
     text "Tel: #{company.telefono}", size: 9 if company.telefono.present?
@@ -61,7 +68,7 @@ class BrandedPdf < Prawn::Document
     float do
       bounding_box([ bounds.width - box_width, bounds.top ], width: box_width) do
         fill_color BRAND
-        text label, size: 15, style: :bold, align: :right
+        text label, size: 14, style: :bold, align: :right
         fill_color MUTED
         text "N° #{reference}", size: 10, align: :right if reference.present?
         text "Fecha: #{date}", size: 10, align: :right
@@ -70,53 +77,71 @@ class BrandedPdf < Prawn::Document
     end
   end
 
-  # Bank-account footer (BCP, etc.), flowed at the end of the document.
+  # Bank-account footer: one card per account, each a brand title bar (bank +
+  # currency) over the account/interbank lines. Flowed at the end of the document.
   def build_bank_footer(company)
     accounts = company.bank_accounts.to_a
     return if accounts.empty?
 
     move_down 16
-    brand_rule
-    move_down 6
+    stroke_color LINE_STRONG
+    stroke_horizontal_rule
+    stroke_color "000000"
+    move_down 10
 
-    fill_color BRAND
-    text "Cuentas bancarias", size: 10, style: :bold
-    fill_color INK
-    move_down 4
-
-    accounts.each do |account|
-      heading = [ account.bank, account.currency_label.presence ].compact.join(" — ")
-      details = []
-      details << "CTA. CTE.: #{account.account_number}" if account.account_number.present?
-      details << "CTA. INTERBANCARIO: #{account.interbank_number}" if account.interbank_number.present?
-      line = [ heading, details.join("   ") ].reject(&:blank?).join("   ")
-      text line, size: 9, leading: 4
-      move_down 4
-    end
+    accounts.each { |account| build_bank_card(account) }
   end
 
-  # A table with the brand-colored header row.
+  def build_bank_card(account)
+    heading = [ account.bank, account.currency_label.presence ].compact.join(" ").upcase
+    lines = []
+    lines << "CTA. CTE.:  #{account.account_number}" if account.account_number.present?
+    lines << "CTA. INTERBANCARIA:  #{account.interbank_number}" if account.interbank_number.present?
+
+    card = [
+      [ { content: heading, background_color: BRAND, text_color: ON_BRAND,
+          font_style: :bold, size: 8.5, padding: [ 5, 9 ], borders: [] } ],
+      [ { content: lines.join("\n"), text_color: INK_SOFT, size: 8, leading: 2,
+          padding: [ 6, 9 ], borders: [ :left, :right, :bottom ],
+          border_color: LINE, border_width: 1 } ]
+    ]
+
+    table(card, width: 280, position: :left)
+    move_down 8
+  end
+
+  # A table with the brand-colored header row and subtle zebra striping.
   def branded_table(rows, column_widths: nil, &block)
     options = { header: true, width: bounds.width }
     options[:column_widths] = column_widths if column_widths
     table(rows, options) do |t|
-      t.row(0).background_color = BRAND
-      t.row(0).text_color = "FFFFFF"
-      t.row(0).font_style = :bold
-      t.cells.padding = [ 4, 6 ]
+      t.cells.padding = [ 5, 6 ]
       t.cells.border_color = LINE
-      t.cells.size = 9
+      t.cells.size = 8
+      (1...rows.length).each { |i| t.row(i).background_color = SURFACE if i.even? }
+      t.row(0).background_color = BRAND
+      t.row(0).text_color = ON_BRAND
+      t.row(0).font_style = :bold
+      t.row(0).size = 7.5
       block&.call(t)
     end
   end
 
   def brand_rule
     stroke_color BRAND
+    self.line_width = 1.5
     stroke_horizontal_rule
+    self.line_width = 1
     stroke_color "000000"
   end
 
   def fmt(value)
     ActiveSupport::NumberHelper.number_to_currency(value, unit: "USD ")
+  end
+
+  # Number-only currency format (no unit) — used where the "USD" prefix is
+  # rendered separately (smaller) so the amount stands out.
+  def fmt_amount(value)
+    ActiveSupport::NumberHelper.number_to_currency(value, unit: "", format: "%n")
   end
 end
