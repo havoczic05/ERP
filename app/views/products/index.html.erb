@@ -27,6 +27,7 @@
   <% end %>
 </div>
 
+<div class="table-scroll">
 <table class="table-cards">
   <thead>
     <tr>
@@ -43,6 +44,7 @@
     <%= render @products %>
   </tbody>
 </table>
+</div>
 
 <% if @products.empty? %>
   <p id="no-products-message">No se encontraron productos</p>

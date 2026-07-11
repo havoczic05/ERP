@@ -2526,10 +2526,10 @@ button.btn--sm {
         white-space: normal;
     }
 
-    /* --- Dense/editable tables → force horizontal scroll inside .table-scroll --- */
-    .table-scroll > table,
-    .table-scroll > .line-items-table,
-    .table-scroll > .installments-table {
+    /* --- Dense tables → force horizontal scroll inside .table-scroll. Card
+       tables (.table-cards) are excluded: at ≤640px they stack, so they must NOT
+       be forced wide. --- */
+    .table-scroll > table:not(.table-cards) {
         min-width: 40rem;
     }
 

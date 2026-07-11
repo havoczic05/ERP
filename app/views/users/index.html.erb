@@ -10,6 +10,7 @@
 
 <%= render "shared/settings_nav" %>
 
+<div class="table-scroll">
 <table class="table-cards">
   <thead>
     <tr>
@@ -23,6 +24,7 @@
     <%= render @users %>
   </tbody>
 </table>
+</div>
 
 <% if @users.empty? %>
   <p id="no-users-message">No se encontraron usuarios.</p>
