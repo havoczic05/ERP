@@ -11,32 +11,35 @@
     <%# ---- Card: Líneas de producto ---------------------------------------- %>
     <section class="form-card">
       <h2 class="form-card__title">Líneas de producto</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th class="num">Cant.</th>
-            <th class="num">Precio unitario (USD)</th>
-            <th class="num">Subtotal (USD)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% @sale.sale_items.each do |item| %>
+      <div class="table-scroll">
+        <table>
+          <thead>
             <tr>
-              <td><%= item.product.name %></td>
-              <td class="num"><%= item.quantity %></td>
-              <td><%= money(item.unit_price_usd) %></td>
-              <td><%= money(item.line_total_usd) %></td>
+              <th>Producto</th>
+              <th class="num">Cant.</th>
+              <th class="num">Precio unitario (USD)</th>
+              <th class="num">Subtotal (USD)</th>
             </tr>
-          <% end %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <% @sale.sale_items.each do |item| %>
+              <tr>
+                <td><%= item.product.name %></td>
+                <td class="num"><%= item.quantity %></td>
+                <td><%= money(item.unit_price_usd) %></td>
+                <td><%= money(item.line_total_usd) %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
     </section>
 
     <%# ---- Card: Cuotas ----------------------------------------------------- %>
     <% if @sale.installments.any? %>
       <section class="form-card">
         <h2 class="form-card__title">Cuotas</h2>
+        <div class="table-scroll">
         <table>
           <thead>
             <tr>
@@ -74,6 +77,7 @@
             <% end %>
           </tbody>
         </table>
+        </div>
       </section>
     <% end %>
   </div>

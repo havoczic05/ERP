@@ -2627,4 +2627,15 @@ button.btn--sm {
         flex-direction: column;
         align-items: stretch;
     }
+
+    /* --- Larger tap targets on touch screens --- */
+    .row-actions .btn,
+    .pago-form .pago-monto,
+    .pago-form input[type="submit"] {
+        min-height: 40px;
+    }
+    .row-actions .btn {
+        padding-top: var(--sp-2);
+        padding-bottom: var(--sp-2);
+    }
 }
