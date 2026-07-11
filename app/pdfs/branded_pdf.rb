@@ -77,37 +77,52 @@ class BrandedPdf < Prawn::Document
     end
   end
 
-  # Bank-account footer: one card per account, each a brand title bar (bank +
-  # currency) over the account/interbank lines. Flowed at the end of the document.
+  # Bank-account footer: cards laid out two-per-row (side by side) and anchored to
+  # the bottom of the page. Each card is a brand title bar (bank + currency) over
+  # the account/interbank lines.
   def build_bank_footer(company)
     accounts = company.bank_accounts.to_a
     return if accounts.empty?
 
-    move_down 16
+    gutter = 16
+    col_w = (bounds.width - gutter) / 2.0
+    pairs = accounts.each_slice(2).to_a
+
+    # Push the footer to the bottom of the page when there is room for it above
+    # the current cursor (short documents); otherwise it just flows after content.
+    needed = 14 + (pairs.size * 52) + ((pairs.size - 1) * 10)
+    move_cursor_to(needed) if cursor > needed
+
     stroke_color LINE_STRONG
     stroke_horizontal_rule
     stroke_color "000000"
     move_down 10
 
-    accounts.each { |account| build_bank_card(account) }
+    pairs.each_with_index do |(left, right), index|
+      row = [ bank_card_cell(left, col_w), "", right ? bank_card_cell(right, col_w) : "" ]
+      table([ row ], width: bounds.width, column_widths: [ col_w, gutter, col_w ]) do |t|
+        t.cells.borders = []
+        t.cells.padding = 0
+        t.cells.valign = :top
+      end
+      move_down 10 unless index == pairs.size - 1
+    end
   end
 
-  def build_bank_card(account)
+  # A single bank card as a standalone table (used as a cell in the 2-column row).
+  def bank_card_cell(account, width)
     heading = [ account.bank, account.currency_label.presence ].compact.join(" ").upcase
     lines = []
     lines << "CTA. CTE.:  #{account.account_number}" if account.account_number.present?
     lines << "CTA. INTERBANCARIA:  #{account.interbank_number}" if account.interbank_number.present?
 
-    card = [
+    make_table([
       [ { content: heading, background_color: BRAND, text_color: ON_BRAND,
           font_style: :bold, size: 8.5, padding: [ 5, 9 ], borders: [] } ],
       [ { content: lines.join("\n"), text_color: INK_SOFT, size: 8, leading: 2,
           padding: [ 6, 9 ], borders: [ :left, :right, :bottom ],
           border_color: LINE, border_width: 1 } ]
-    ]
-
-    table(card, width: 280, position: :left)
-    move_down 8
+    ], width: width)
   end
 
   # A table with the brand-colored header row and subtle zebra striping.
