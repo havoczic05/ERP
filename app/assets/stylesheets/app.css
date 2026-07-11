@@ -250,7 +250,7 @@ small {
 
 .nav-group-label {
     margin: 0 0 var(--sp-1);
-    padding: 0 var(--sp-2);
+    padding: 0 var(--sp-3);
     font-size: var(--text-xs);
     font-weight: var(--weight-semi);
     letter-spacing: 0.05em;
@@ -259,12 +259,18 @@ small {
 }
 
 .nav-item {
-    display: block;
-    padding: var(--sp-2) var(--sp-2);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-2) var(--sp-3);
     border-radius: var(--r);
     font-size: var(--text-sm);
     font-weight: var(--weight-medium);
     color: var(--ink-soft);
+}
+.nav-item .icon {
+    flex: none;
+    color: var(--muted);
 }
 .nav-item:hover {
     background: var(--brand-weak);
@@ -276,6 +282,9 @@ small {
     color: var(--brand);
     font-weight: var(--weight-semi);
 }
+.nav-item.is-active .icon {
+    color: var(--brand);
+}
 
 .sidebar-foot {
     display: flex;
@@ -286,18 +295,37 @@ small {
 }
 .sidebar-user {
     display: flex;
-    flex-direction: column;
-    text-align: center;
-    gap: var(--sp-1);
+    align-items: center;
+    gap: var(--sp-3);
     padding: 0 var(--sp-2);
+}
+.sidebar-avatar {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--ink-soft);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semi);
+}
+.sidebar-user__info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
 }
 .sidebar-user-email {
     font-size: var(--text-sm);
     color: var(--ink-soft);
-    word-break: break-all;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
-.sidebar-foot .badge {
-    align-self: center;
+.sidebar-user-role {
+    font-size: var(--text-xs);
+    color: var(--muted);
 }
 .btn--block {
     width: 100%;
@@ -2407,9 +2435,9 @@ button.btn--sm {
         border-top: 1px solid var(--line);
     }
     .sidebar-user {
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
-        gap: var(--sp-1);
+        gap: var(--sp-3);
     }
     .btn--block {
         width: 100%;
@@ -2514,5 +2542,33 @@ button.btn--sm {
     .filters .field input,
     .filters .field select {
         min-width: 0;
+    }
+
+    /* --- Primary action → floating action button (double-tap via fab controller) --- */
+    .fab {
+        position: fixed;
+        right: var(--sp-4);
+        bottom: var(--sp-4);
+        z-index: var(--z-sticky);
+        width: 56px;
+        height: 56px;
+        padding: 0;
+        gap: 0;
+        justify-content: center;
+        border-radius: 999px;
+        box-shadow: var(--shadow);
+        transition: width 0.15s ease, padding 0.15s ease;
+    }
+    .fab > span {
+        display: none;
+    }
+    .fab.is-armed {
+        width: auto;
+        height: 52px;
+        padding: 0 var(--sp-5);
+        gap: var(--sp-2);
+    }
+    .fab.is-armed > span {
+        display: inline;
     }
 }
