@@ -10,6 +10,7 @@
 
 <%= render "shared/settings_nav" %>
 
+<div class="table-scroll">
 <table class="table-cards">
   <thead>
     <tr>
@@ -22,6 +23,7 @@
     <%= render @warehouses %>
   </tbody>
 </table>
+</div>
 
 <% if @warehouses.empty? %>
   <p id="no-warehouses-message">No se encontraron almacenes.</p>
