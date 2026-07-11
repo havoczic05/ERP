@@ -46,6 +46,13 @@ RSpec.describe "CompanySettings", type: :request do
       get edit_company_settings_path
       expect(response).to have_http_status(:forbidden)
     end
+
+    it "§renders Moneda as a select with Soles/Dólares options" do
+      get edit_company_settings_path
+      expect(response.body).to match(/<select[^>]*currency_label/)
+      expect(response.body).to include(">Soles</option>")
+      expect(response.body).to include(">Dólares</option>")
+    end
   end
 
   # ---------------------------------------------------------------------------

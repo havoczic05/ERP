@@ -9,7 +9,7 @@
 
     <div class="field">
       <%= ba.label :currency_label, "Moneda" %>
-      <%= ba.text_field :currency_label %>
+      <%= ba.select :currency_label, ["Soles", "Dólares"], include_blank: true %>
     </div>
   </div>
 
