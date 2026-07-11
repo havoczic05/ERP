@@ -19,8 +19,15 @@ class CompanySettings < ApplicationRecord
   # so the user can add/remove accounts from the settings form.
   # ---------------------------------------------------------------------------
   has_many :bank_accounts, -> { order(:position, :id) }, dependent: :destroy, inverse_of: :company_settings
+  # Only drop a row the user left ENTIRELY blank (position is a hidden field that
+  # always carries "0", so :all_blank never fires). A row with any real data but a
+  # missing bank name is kept, so `validates :bank` surfaces the error instead of
+  # silently swallowing the account.
+  BANK_ACCOUNT_CONTENT_FIELDS = %w[bank currency_label account_number interbank_number].freeze
   accepts_nested_attributes_for :bank_accounts, allow_destroy: true,
-                                                reject_if: ->(attributes) { attributes["bank"].blank? }
+                                                reject_if: ->(attributes) {
+                                                  BANK_ACCOUNT_CONTENT_FIELDS.all? { |field| attributes[field].blank? }
+                                                }
 
   # ---------------------------------------------------------------------------
   # Default warehouse (RF-DW-1) — preselected on new sales/products, nullified
