@@ -93,6 +93,36 @@ RSpec.describe "CompanySettings", type: :request do
       expect(CompanySettings.first.bank_accounts.first.bank).to eq("BCP")
     end
 
+    # Strong Parameters only permits nested-attributes rows whose key is an
+    # integer (/\A-?\d+\z/). The nested-form JS must emit integer indices for new
+    # rows (a timestamp), NOT "new_N", or the rows get silently dropped and the
+    # account is never created even though the update "succeeds".
+    it "§turbo update creates and re-renders a new account added with an integer index" do
+      patch company_settings_path,
+            headers: { "Accept" => "text/vnd.turbo-stream.html" },
+            params: { company_settings: { razon_social: "Mi Empresa", ruc: "20987654321",
+                                          bank_accounts_attributes: {
+                                            "1720000000000" => { bank: "BCP", currency_label: "Soles",
+                                                                 account_number: "193-9898120-0-08", position: "0" }
+                                          } } }
+      expect(CompanySettings.first.bank_accounts.count).to eq(1)
+      expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+      expect(response.body).to include("Cuentas bancarias")
+      expect(response.body).to include("BCP")
+      expect(response.body).to include("193-9898120-0-08")
+    end
+
+    it "§Strong Parameters drops a non-integer nested key (guards the JS contract)" do
+      patch company_settings_path,
+            params: { company_settings: { razon_social: "Mi Empresa", ruc: "20987654321",
+                                          bank_accounts_attributes: {
+                                            "new_1" => { bank: "BCP", account_number: "193-X", position: "0" }
+                                          } } }
+      # Documents Rails behavior: the non-integer "new_1" row never reaches the
+      # model, so nothing is created. The real fix lives in the nested-form JS.
+      expect(BankAccount.count).to eq(0)
+    end
+
     it "§PATCH does not silently drop a bank account missing only the bank name" do
       patch company_settings_path,
             params: { company_settings: { razon_social: "Mi Empresa", ruc: "20987654321",
