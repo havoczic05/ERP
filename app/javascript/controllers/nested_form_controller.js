@@ -35,9 +35,13 @@ export default class extends Controller {
     }
   }
 
-  // A monotonically-increasing index so each added row gets unique param names.
+  // A unique index for each added row's param names. MUST be integer-only:
+  // Rails Strong Parameters silently drops nested-attributes rows whose key is
+  // not an integer (/\A-?\d+\z/), so a "new_N" key would make the row vanish on
+  // submit. A timestamp plus a counter stays integer-only and collision-free
+  // (and never clashes with the 0..n indices of persisted rows).
   uniqueIndex() {
     this.counter = (this.counter || 0) + 1
-    return `new_${this.counter}`
+    return `${Date.now()}${this.counter}`
   }
 }
