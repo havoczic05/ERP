@@ -53,13 +53,17 @@
 
     <div class="chart">
       <h2>Ventas por Día</h2>
-      <%= area_chart_svg(@metrics.sales_count_by_day, label: "Cantidad de ventas por día", format: :count, show_values: true) %>
+      <div class="chart-scroll">
+        <%= area_chart_svg(@metrics.sales_count_by_day, label: "Cantidad de ventas por día", format: :count, show_values: true) %>
+      </div>
       <p class="chart-caption">Pico del período: <%= peak_count %> ventas en un día</p>
     </div>
 
     <div class="chart">
       <h2>Monto por Día (USD)</h2>
-      <%= area_chart_svg(@metrics.sales_total_by_day, label: "Monto de ventas en USD por día", format: :money, show_values: true) %>
+      <div class="chart-scroll">
+        <%= area_chart_svg(@metrics.sales_total_by_day, label: "Monto de ventas en USD por día", format: :money, show_values: true) %>
+      </div>
       <p class="chart-caption">Pico del período: <%= number_to_currency(peak_total, unit: 'USD ') %></p>
     </div>
   </section>

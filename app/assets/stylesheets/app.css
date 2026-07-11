@@ -2638,4 +2638,57 @@ button.btn--sm {
         padding-top: var(--sp-2);
         padding-bottom: var(--sp-2);
     }
+
+    /* --- Settings tabs (Empresa/Almacenes/Usuarios): scroll instead of squish --- */
+    .settings-nav {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        scrollbar-width: none;
+    }
+    .settings-nav::-webkit-scrollbar {
+        display: none;
+    }
+    .settings-nav__item {
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+    /* --- AR "Pago" cell in card mode: label above, form full-width below --- */
+    table.table-cards td.pago-cell {
+        display: block;
+        text-align: left;
+    }
+    table.table-cards td.pago-cell::before {
+        display: block;
+        margin-bottom: var(--sp-1);
+    }
+    table.table-cards .pago-form {
+        width: 100%;
+    }
+    table.table-cards .pago-inputs {
+        flex: 1;
+    }
+
+    /* --- KPI cards: value on its own line, trend below (consistent alignment) --- */
+    .kpi-value-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--sp-1);
+    }
+
+    /* --- Dashboard charts 1.5× + horizontal scroll (x-axis labels get room) --- */
+    /* min-width:0 lets the grid track shrink to the viewport so the overflow is
+       contained in .chart-scroll instead of widening the whole page. */
+    .chart {
+        min-width: 0;
+    }
+    .chart-scroll {
+        min-width: 0;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .chart-scroll svg {
+        width: 150%;
+        min-width: 32rem;
+    }
 }

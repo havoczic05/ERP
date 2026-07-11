@@ -26,8 +26,7 @@
   <% end %>
 </div>
 
-<div class="table-scroll">
-<table>
+<table class="table-cards">
   <thead>
     <tr>
       <th>Cliente</th>
@@ -44,15 +43,15 @@
   <tbody>
     <% @installments.each do |installment| %>
       <tr id="<%= dom_id(installment) %>">
-        <td><%= installment.sale.client.full_name %></td>
-        <td><%= link_to installment.sale.correlative, sale_path(installment.sale) %></td>
-        <td><%= "#{installment.installment_number}/#{@installment_totals[installment.sale_id]}" %></td>
-        <td><%= @overdue_counts[installment.sale_id] || 0 %></td>
-        <td><%= money(installment.amount_usd) %></td>
-        <td><%= money(@sale_balances[installment.sale_id]) %></td>
-        <td class="col-date"><%= format_date(installment.due_date) %></td>
-        <td><%= installment_status_badge(installment) %></td>
-        <td>
+        <td data-label="Cliente"><%= installment.sale.client.full_name %></td>
+        <td data-label="Venta"><%= link_to installment.sale.correlative, sale_path(installment.sale) %></td>
+        <td data-label="N° de cuota"><%= "#{installment.installment_number}/#{@installment_totals[installment.sale_id]}" %></td>
+        <td data-label="C. Vencidas"><%= @overdue_counts[installment.sale_id] || 0 %></td>
+        <td data-label="Cuota actual (USD)"><%= money(installment.amount_usd) %></td>
+        <td data-label="Saldo total (USD)"><%= money(@sale_balances[installment.sale_id]) %></td>
+        <td class="col-date" data-label="Vencimiento"><%= format_date(installment.due_date) %></td>
+        <td data-label="Estado"><%= installment_status_badge(installment) %></td>
+        <td class="pago-cell" data-label="Pago">
           <%= form_with url: installment_amortizations_path(installment), method: :post, class: "pago-form" do |f| %>
             <div class="pago-inputs">
               <%= f.number_field :amount_usd, step: '0.01', min: '0.01',
@@ -65,7 +64,6 @@
     <% end %>
   </tbody>
 </table>
-</div>
 
 <% if @installments.empty? %>
   <p id="no-installments-message">No hay cuotas pendientes.</p>
