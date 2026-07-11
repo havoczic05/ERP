@@ -41,7 +41,14 @@ class ClientsController < ApplicationController
 
     if @client.save
       respond_to do |format|
-        format.turbo_stream { render turbo_stream: client_saved_streams(@client, "Cliente creado correctamente.", prepend: true) }
+        format.turbo_stream do
+          streams = if params[:context] == "sale"
+                      client_saved_for_sale_streams(@client)
+          else
+                      client_saved_streams(@client, "Cliente creado correctamente.", prepend: true)
+          end
+          render turbo_stream: streams
+        end
         format.html { redirect_to @client, notice: "Cliente creado correctamente." }
       end
     else
@@ -107,6 +114,19 @@ class ClientsController < ApplicationController
       turbo_stream.update("modal", ""),
       row,
       turbo_stream.append("toasts", partial: "layouts/toast", locals: { kind: :notice, message: message })
+    ]
+  end
+
+  # Turbo Stream set for a client created FROM the sale form: close the modal and
+  # append the auto-select bridge (which selects the new client into the sale's
+  # combobox in place, so the half-entered sale is preserved). No clients-table
+  # row (that table isn't on the sale page).
+  def client_saved_for_sale_streams(client)
+    [
+      turbo_stream.update("modal", ""),
+      turbo_stream.append("sale-client-receiver", partial: "clients/sale_autoselect", locals: { client: client }),
+      turbo_stream.append("toasts", partial: "layouts/toast",
+                                    locals: { kind: :notice, message: "Cliente creado y seleccionado." })
     ]
   end
 

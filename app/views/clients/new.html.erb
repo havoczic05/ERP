@@ -1,3 +1,3 @@
 <%= render layout: "shared/modal", locals: { title: "Nuevo cliente" } do %>
-  <%= render "form", client: @client %>
+  <%= render "form", client: @client, context: params[:context] %>
 <% end %>

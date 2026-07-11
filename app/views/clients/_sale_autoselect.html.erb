@@ -1,0 +1,8 @@
+<%# Bridge element appended to the sale form (#sale-client-receiver) when a client
+    is created from the sale context. client_autoselect_controller reads these
+    values, auto-selects the client in the form's combobox, then removes this. %>
+<div data-controller="client-autoselect"
+     data-client-autoselect-id-value="<%= client.id %>"
+     data-client-autoselect-label-value="<%= client.full_name %>"
+     data-client-autoselect-document-value="<%= "#{client.document_type.upcase} #{client.document_number}" %>"
+     data-client-autoselect-edit-path-value="<%= edit_client_path(client) %>"></div>
