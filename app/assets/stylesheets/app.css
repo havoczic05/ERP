@@ -2129,6 +2129,26 @@ button.btn--sm {
     font-size: var(--text-sm);
 }
 
+/* Import card — one entry per entity (Productos / Clientes) */
+.import-entry + .import-entry {
+    margin-top: var(--sp-5);
+}
+.import-entry__label {
+    margin: 0 0 var(--sp-2);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semi);
+    color: var(--ink);
+}
+.import-entry__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-2);
+}
+.import-entry + .field-hint {
+    margin-top: var(--sp-4);
+}
+
 /* Documento: cliente / almacén / tipo on one row */
 .doc-grid {
     display: grid;

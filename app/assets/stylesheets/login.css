@@ -142,6 +142,7 @@
   font: inherit;
   font-size: 14.5px;
   font-weight: 600;
+  line-height: 1.2;
   cursor: pointer;
   transition: background-color 0.15s ease, transform 0.05s ease;
 }
