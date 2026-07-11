@@ -2403,6 +2403,7 @@ button.btn--sm {
         width: min(80vw, 18rem);
         flex-direction: column;
         flex-wrap: nowrap;
+        align-items: stretch;
         gap: var(--sp-5);
         border-right: 1px solid var(--line);
         border-bottom: 0;
