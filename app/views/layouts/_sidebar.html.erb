@@ -26,27 +26,30 @@
   <nav class="sidebar-nav" aria-label="Primary">
     <div class="nav-group">
       <p class="nav-group-label">Operaciones</p>
-      <%= nav_link_to "Ventas", sales_path, controllers: "sales" if policy(Sale).index? %>
-      <%= nav_link_to "Clientes", clients_path, controllers: "clients" if policy(Client).index? %>
-      <%= nav_link_to "Productos", products_path, controllers: "products" if policy(Product).index? %>
-      <%= nav_link_to "Cuentas por Cobrar", accounts_receivable_path, controllers: "accounts_receivable" if policy(Amortization).index? %>
+      <%= nav_link_to "Ventas", sales_path, controllers: "sales", icon: :receipt if policy(Sale).index? %>
+      <%= nav_link_to "Clientes", clients_path, controllers: "clients", icon: :users if policy(Client).index? %>
+      <%= nav_link_to "Productos", products_path, controllers: "products", icon: :package if policy(Product).index? %>
+      <%= nav_link_to "Cuentas por Cobrar", accounts_receivable_path, controllers: "accounts_receivable", icon: :wallet if policy(Amortization).index? %>
     </div>
 
     <% if current_user.admin? %>
       <div class="nav-group">
         <p class="nav-group-label">Administración</p>
-        <%= nav_link_to "Dashboard", dashboard_path, controllers: "dashboards" if policy(:dashboard).show? %>
+        <%= nav_link_to "Dashboard", dashboard_path, controllers: "dashboards", icon: "layout-grid" if policy(:dashboard).show? %>
         <%# Almacenes y Usuarios viven dentro de Configuración (ajustes del negocio) %>
         <%= nav_link_to "Configuración", company_settings_path,
-                        controllers: %w[company_settings warehouses users] %>
+                        controllers: %w[company_settings warehouses users], icon: :settings %>
       </div>
     <% end %>
   </nav>
 
   <div class="sidebar-foot">
     <div class="sidebar-user">
-      <span class="sidebar-user-email"><%= current_user.email %></span>
-      <span class="badge"><%= current_user.role.humanize %></span>
+      <span class="sidebar-avatar" aria-hidden="true"><%= current_user.email.first.upcase %></span>
+      <div class="sidebar-user__info">
+        <span class="sidebar-user-email"><%= current_user.email %></span>
+        <span class="sidebar-user-role"><%= current_user.role.humanize %></span>
+      </div>
     </div>
     <%= button_to "Cerrar sesión", logout_path, method: :delete, class: "btn--ghost btn--block" %>
   </div>

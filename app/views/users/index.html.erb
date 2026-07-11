@@ -4,7 +4,8 @@
     <p class="page-sub">Personas con acceso al sistema.</p>
   </div>
   <%= action_link 'Nuevo usuario', new_user_path, variant: :primary, size: :md, icon: :plus,
-                  data: { turbo_frame: 'modal' } %>
+                  class: "fab", aria: { label: "Nuevo usuario" },
+                  data: { turbo_frame: 'modal', controller: 'fab', action: 'fab#click' } %>
 </div>
 
 <%= render "shared/settings_nav" %>

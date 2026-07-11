@@ -29,7 +29,9 @@
     <%= clear_filters_link sales_path %>
   <% end %>
 
-  <%= action_link 'Nuevo documento', new_sale_path, variant: :primary, size: :md, icon: :plus %>
+  <%= action_link 'Nuevo documento', new_sale_path, variant: :primary, size: :md, icon: :plus,
+                  class: "fab", aria: { label: "Nuevo documento" },
+                  data: { controller: "fab", action: "fab#click" } %>
 </div>
 
 <% if @sales.any? %>

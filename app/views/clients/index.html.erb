@@ -14,7 +14,8 @@
 
   <% if policy(Client).new? %>
     <%= action_link 'Nuevo cliente', new_client_path, variant: :primary, size: :md, icon: :plus,
-                    data: { turbo_frame: 'modal' } %>
+                    class: "fab", aria: { label: "Nuevo cliente" },
+                    data: { turbo_frame: 'modal', controller: 'fab', action: 'fab#click' } %>
   <% end %>
 </div>
 
