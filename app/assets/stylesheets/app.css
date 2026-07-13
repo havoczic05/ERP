@@ -209,6 +209,13 @@ small {
     height: 100vh;
 }
 
+/* Sidebar header: brand (left) + collapse toggle (right) on the same row. */
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .sidebar-brand {
     display: flex;
     align-items: center;
@@ -386,8 +393,7 @@ small {
     color: var(--muted);
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
-    align-self: flex-end;
-    margin-bottom: -20px;
+    flex-shrink: 0;
 }
 .sidebar-toggle:hover {
     background: var(--brand-weak);
@@ -408,6 +414,10 @@ small {
     align-items: center;
     padding: var(--sp-5) var(--sp-2);
     overflow: hidden;
+}
+.is-sidebar-collapsed .sidebar-header {
+    flex-direction: column;
+    gap: var(--sp-2);
 }
 .is-sidebar-collapsed .sidebar-brand { justify-content: center; padding: 0; }
 .is-sidebar-collapsed .sidebar-brand__name { display: none; }
