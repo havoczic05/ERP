@@ -50,7 +50,7 @@ RSpec.describe 'Sales', type: :system do
     it 'shows a "Ver" link for each sale' do
       sale = create(:sale, client: client, warehouse: warehouse)
       visit sales_path
-      expect(page).to have_link('Ver', href: sale_path(sale))
+      expect(page).to have_link('Ver', href: sale_path(sale), visible: :all)
     end
 
     it 'offers a "Limpiar" link that resets the filters' do
@@ -119,7 +119,7 @@ RSpec.describe 'Sales', type: :system do
       venta = create(:sale, :venta, client: client, warehouse: warehouse,
                                     correlative: 'VTA-00001', status: 'confirmada')
       visit sales_path
-      expect(page).to have_button('Anular')
+      expect(page).to have_button('Anular', visible: :all)
     end
 
     it 'does not show "Anular" button for vendedor' do
@@ -130,7 +130,7 @@ RSpec.describe 'Sales', type: :system do
       venta = create(:sale, :venta, client: client, warehouse: warehouse,
                                     correlative: 'VTA-00001', status: 'confirmada')
       visit sales_path
-      expect(page).not_to have_button('Anular')
+      expect(page).not_to have_button('Anular', visible: :all)
     end
 
     context 'pagination' do

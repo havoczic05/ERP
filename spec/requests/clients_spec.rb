@@ -231,6 +231,25 @@ RSpec.describe 'Clients', type: :request do
         expect(response).to have_http_status(:unprocessable_entity)
       end
     end
+
+    context 'as a Turbo Stream request from the sale form (context: sale)' do
+      it 'closes the modal and appends the auto-select bridge (no clients-table row)' do
+        client = create(:client, :ruc_client, full_name: 'Old Name', document_number: '20111222333')
+        patch client_path(client),
+              params: { client: { full_name: 'Updated for Sale' }, context: 'sale' },
+              headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
+
+        expect(client.reload.full_name).to eq('Updated for Sale')
+        expect(response.media_type).to eq('text/vnd.turbo-stream.html')
+        expect(response.body).to include('action="update"', 'target="modal"')
+        expect(response.body).to include('action="append"', 'target="sale-client-receiver"')
+        expect(response.body).to include('client-autoselect')
+        expect(response.body).to include('Updated for Sale')
+        expect(response.body).to include('Cliente actualizado y seleccionado.')
+        expect(response.body).not_to include('target="clients"')
+        expect(response.body).not_to include(%(target="client_#{client.id}"))
+      end
+    end
   end
 
   # ---------------------------------------------------------------------------

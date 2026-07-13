@@ -75,7 +75,12 @@
 
     <div class="form-actions">
       <%= submit_button f, client.persisted? ? 'Actualizar cliente' : 'Crear cliente' %>
+      <% if local_assigns[:context] == "sale" %>
+      <%= action_link 'Volver', '#', variant: :ghost, size: :md,
+                      icon: 'arrow-left', data: { action: "click->modal#dismiss" } %>
+    <% else %>
       <%= action_link 'Volver a clientes', clients_path, variant: :ghost, size: :md,
                       icon: 'arrow-left', data: { turbo_frame: '_top' } %>
+    <% end %>
     </div>
   <% end %>

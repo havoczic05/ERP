@@ -2,12 +2,12 @@
   <td data-label="Nombre"><%= warehouse.name %></td>
   <td data-label="Ubicación"><%= warehouse.location %></td>
   <td class="col-actions">
-    <div class="row-actions">
+    <%= render layout: "shared/actions_menu" do %>
       <%= action_link 'Ver', warehouse, icon: :eye, data: { turbo_frame: 'modal' } %>
       <%= action_link 'Editar', edit_warehouse_path(warehouse), icon: :pencil,
                       data: { turbo_frame: 'modal' } %>
       <%= action_button 'Eliminar', warehouse, method: :delete, icon: :trash,
                         confirm: '¿Eliminar este almacén?' %>
-    </div>
+    <% end %>
   </td>
 </tr>

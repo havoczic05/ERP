@@ -40,13 +40,13 @@ RSpec.describe 'Users', type: :system do
 
     it 'shows "Editar" link for each user' do
       within("#user_#{admin.id}") do
-        expect(page).to have_link('Editar')
+        expect(page).to have_link('Editar', visible: :all)
       end
     end
 
     it 'shows "Desactivar" button for active users' do
       within("#user_#{vendedor.id}") do
-        expect(page).to have_button('Desactivar')
+        expect(page).to have_button('Desactivar', visible: :all)
       end
     end
 
@@ -68,7 +68,7 @@ RSpec.describe 'Users', type: :system do
 
     it 'does not show "Desactivar" for inactive users' do
       within("#user_#{inactive_vendedor.id}") do
-        expect(page).not_to have_button('Desactivar')
+        expect(page).not_to have_button('Desactivar', visible: :all)
       end
     end
   end
@@ -138,7 +138,7 @@ RSpec.describe 'Users', type: :system do
       visit users_path
 
       within("#user_#{vendedor.id}") do
-        click_button 'Desactivar'
+        find_button('Desactivar', visible: :all).click
       end
 
       expect(page).to have_text('Usuario desactivado correctamente.')
@@ -153,7 +153,7 @@ RSpec.describe 'Users', type: :system do
       visit users_path
 
       within("#user_#{admin.id}") do
-        click_button 'Desactivar'
+        find_button('Desactivar', visible: :all).click
       end
 
       expect(page).to have_text('No puede desactivar su propia cuenta.')
@@ -174,7 +174,7 @@ RSpec.describe 'Users', type: :system do
       visit users_path
 
       within("#user_#{sole_admin.id}") do
-        click_button 'Desactivar'
+        find_button('Desactivar', visible: :all).click
       end
 
       expect(page).to have_text('No se puede desactivar al último administrador activo.')

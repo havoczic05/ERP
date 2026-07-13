@@ -313,7 +313,8 @@ export default class extends Controller {
     const { label, document: doc, editPath } = event.detail
     if (this.hasClientNameTarget) this.clientNameTarget.textContent = label || ""
     if (this.hasClientDocTarget) this.clientDocTarget.textContent = doc || ""
-    if (this.hasClientEditTarget && editPath) this.clientEditTarget.href = editPath
+    // context=sale so the edit modal's save refreshes the strip in place (not a new tab).
+    if (this.hasClientEditTarget && editPath) this.clientEditTarget.href = `${editPath}?context=sale`
     if (this.hasClientStripTarget) this.clientStripTarget.hidden = false
   }
 

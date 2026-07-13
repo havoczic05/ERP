@@ -195,7 +195,7 @@ RSpec.describe 'Clients', type: :system do
       # Click the Archive button for this specific client row.
       # dom_id is an ActionView helper; build the CSS id manually here.
       within("#client_#{client.id}") do
-        click_button 'Archivar'
+        find_button('Archivar', visible: :all).click
       end
 
       expect(client.reload.discarded?).to be true
@@ -215,9 +215,9 @@ RSpec.describe 'Clients', type: :system do
       visit clients_path
 
       within('table tbody') do
-        expect(page).to have_link('Ver')
-        expect(page).not_to have_link('Editar')
-        expect(page).not_to have_button('Archivar')
+        expect(page).to have_link('Ver', visible: :all)
+        expect(page).not_to have_link('Editar', visible: :all)
+        expect(page).not_to have_button('Archivar', visible: :all)
       end
       expect(page).to have_link('Nuevo cliente')
     end

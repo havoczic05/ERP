@@ -87,10 +87,9 @@
       </div>
       <% if policy(Client).edit? %>
         <%= content_tag :a, safe_join([ icon(:pencil), content_tag(:span, 'Editar cliente') ]),
-              target: "_blank", rel: "noopener",
-              href: (selected_client ? edit_client_path(selected_client) : nil),
+              href: (selected_client ? edit_client_path(selected_client, context: "sale") : nil),
               class: "btn btn--ghost btn--sm", title: "Editar cliente",
-              data: { "sale-form-target": "clientEdit" } %>
+              data: { turbo_frame: "modal", "sale-form-target": "clientEdit" } %>
       <% end %>
     </div>
 
@@ -233,7 +232,7 @@
 
   <div class="action-bar">
     <%= f.submit submit_label %>
-    <%= link_to back_label, back_path %>
+    <%= action_link back_label, back_path, size: :md, icon: "arrow-left" %>
   </div>
 <% end %>
 </div>

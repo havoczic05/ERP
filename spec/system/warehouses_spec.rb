@@ -106,7 +106,7 @@ RSpec.describe 'Warehouses', type: :system do
         visit warehouses_path
 
         within("#warehouse_#{wh.id}") do
-          click_button 'Eliminar'
+          find_button('Eliminar', visible: :all).click
         end
 
         expect(page).to have_current_path(warehouses_path)
@@ -121,7 +121,7 @@ RSpec.describe 'Warehouses', type: :system do
         create(:product, warehouse: wh)
 
         visit warehouses_path
-        within("#warehouse_#{wh.id}") { click_button 'Eliminar' }
+        within("#warehouse_#{wh.id}") { find_button('Eliminar', visible: :all).click }
 
         expect(page).to have_content('No se puede eliminar este almacén porque tiene productos o ventas asociadas.')
         expect(page).to have_current_path(warehouses_path)
