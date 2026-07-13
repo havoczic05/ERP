@@ -58,13 +58,13 @@
           <td data-label="Total (USD)"><%= money(sale.total_usd) %></td>
           <td data-label="Estado"><%= sale_status_badge(sale) %></td>
           <td class="col-actions">
-            <div class="row-actions">
+            <%= render layout: "shared/actions_menu" do %>
               <%= action_link 'Ver', sale, icon: :eye %>
               <% if policy(sale).annul? && sale.confirmada? && sale.venta? %>
                 <%= action_button 'Anular', annul_sale_path(sale), method: :post, icon: :ban,
                                   confirm: '¿Anular esta venta? Esta acción no se puede deshacer.' %>
               <% end %>
-            </div>
+            <% end %>
           </td>
         </tr>
       <% end %>

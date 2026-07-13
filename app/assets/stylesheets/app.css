@@ -186,6 +186,7 @@ small {
     display: grid;
     grid-template-columns: 15rem 1fr;
     min-height: 100vh;
+    transition: grid-template-columns 0.2s ease;
 }
 
 .app-main {
@@ -367,6 +368,69 @@ small {
     text-decoration: none;
 }
 
+/* =============================================================================
+   Sidebar toggle — collapsible sidebar (desktop ≥897px)
+   ========================================================================== */
+
+/* Toggle button matches the sidebar aesthetic. */
+.sidebar-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: var(--r);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    align-self: flex-end;
+    margin-bottom: -20px;
+}
+.sidebar-toggle:hover {
+    background: var(--brand-weak);
+    color: var(--ink-soft);
+}
+.sidebar-toggle svg {
+    transition: transform 0.2s ease;
+}
+.is-sidebar-collapsed .sidebar-toggle svg {
+    transform: rotate(180deg);
+}
+
+/* Collapsed sidebar — only above the 56rem breakpoint (desktop sidebar). */
+.app-shell.is-sidebar-collapsed {
+    grid-template-columns: 3.5rem 1fr;
+}
+.is-sidebar-collapsed .app-sidebar {
+    align-items: center;
+    padding: var(--sp-5) var(--sp-2);
+    overflow: hidden;
+}
+.is-sidebar-collapsed .sidebar-brand { justify-content: center; padding: 0; }
+.is-sidebar-collapsed .sidebar-brand__name { display: none; }
+.is-sidebar-collapsed .nav-group-label { display: none; }
+.is-sidebar-collapsed .nav-item {
+    justify-content: center;
+    padding: var(--sp-2);
+}
+.is-sidebar-collapsed .nav-item > span { display: none; }
+.is-sidebar-collapsed .sidebar-user { justify-content: center; }
+.is-sidebar-collapsed .sidebar-user__info { display: none; }
+.is-sidebar-collapsed .sidebar-foot {
+    align-items: center;
+    gap: var(--sp-2);
+}
+.is-sidebar-collapsed .sidebar-logout {
+    width: auto;
+    padding: var(--sp-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+}
+.is-sidebar-collapsed .sidebar-logout__label { display: none; }
+
 /* Collapse the sidebar to a top strip on narrow viewports (desktop-first app). */
 @media (max-width: 56rem) {
     .app-shell {
@@ -413,6 +477,26 @@ small {
     .btn--block {
         width: auto;
     }
+
+    /* Toggle button doesn't apply when the sidebar is a top strip. */
+    .sidebar-toggle { display: none; }
+
+    /* Reset any collapsed state — the sidebar is a top strip here. */
+    .app-shell.is-sidebar-collapsed {
+        grid-template-columns: 1fr;
+    }
+    .is-sidebar-collapsed .app-sidebar {
+        align-items: center;
+        overflow: visible;
+    }
+    .is-sidebar-collapsed .sidebar-brand__name,
+    .is-sidebar-collapsed .nav-group-label,
+    .is-sidebar-collapsed .nav-item > span,
+    .is-sidebar-collapsed .sidebar-user__info,
+    .is-sidebar-collapsed .sidebar-logout__label { display: revert; }
+    .is-sidebar-collapsed .nav-item { justify-content: flex-start; }
+    .is-sidebar-collapsed .sidebar-user { justify-content: flex-start; }
+    .is-sidebar-collapsed .sidebar-logout { width: auto; padding: 0; border: 0; }
 }
 
 /* =============================================================================
@@ -859,6 +943,36 @@ dialog.modal::backdrop {
 }
 .modal-details dd:last-of-type {
     margin-bottom: 0;
+}
+
+/* =============================================================================
+   Confirm dialog — custom confirm replacement for data-turbo-confirm
+   ========================================================================== */
+
+dialog.confirm-dialog {
+    border: 0;
+    border-radius: var(--r-lg);
+    padding: 0;
+    width: min(90vw, 24rem);
+    background: var(--bg);
+    color: var(--ink);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.22);
+}
+dialog.confirm-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.45);
+}
+.confirm-dialog__msg {
+    margin: 0;
+    padding: var(--sp-5) var(--sp-5) var(--sp-4);
+    font-size: var(--text-base);
+    line-height: 1.45;
+    color: var(--ink);
+}
+.confirm-dialog__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--sp-2);
+    padding: var(--sp-3) var(--sp-5) var(--sp-4);
 }
 
 /* =============================================================================
@@ -1519,6 +1633,75 @@ button.btn--sm {
     white-space: nowrap;
 }
 .row-actions form {
+    margin: 0;
+}
+
+/* =============================================================================
+   Dropdown — kebab menu for row actions
+   ========================================================================== */
+
+.dropdown {
+    position: relative;
+    display: inline-flex;
+}
+
+.dropdown-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-sm);
+    background: var(--bg);
+    color: var(--muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.dropdown-toggle:hover,
+.dropdown-toggle[aria-expanded="true"] {
+    background: var(--brand-weak);
+    color: var(--ink-soft);
+}
+.dropdown-toggle .icon {
+    flex: none;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: var(--z-dropdown);
+    min-width: 10rem;
+    padding: var(--sp-1);
+    background: var(--bg);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r);
+    box-shadow: 0 8px 24px rgba(24, 24, 64, 0.14);
+}
+.dropdown-menu:not([hidden]) {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* Menu items: style action links and buttons as flat menu options. */
+.dropdown-menu .btn {
+    justify-content: flex-start;
+    width: 100%;
+    border: 0;
+    border-radius: var(--r-sm);
+    font-weight: var(--weight-normal);
+}
+.dropdown-menu .btn:hover {
+    background: var(--surface-2);
+}
+.dropdown-menu .btn--danger:hover {
+    background: var(--danger-weak);
+}
+.dropdown-menu form,
+.dropdown-menu .button_to {
     margin: 0;
 }
 
@@ -2629,6 +2812,15 @@ button.btn--sm {
     }
 
     /* --- Larger tap targets on touch screens --- */
+    .dropdown-toggle {
+        width: 40px;
+        height: 40px;
+    }
+    .dropdown-menu .btn {
+        min-height: 40px;
+        padding-top: var(--sp-2);
+        padding-bottom: var(--sp-2);
+    }
     .row-actions .btn,
     .pago-form .pago-monto,
     .pago-form input[type="submit"] {

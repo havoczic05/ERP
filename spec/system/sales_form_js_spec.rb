@@ -125,14 +125,14 @@ RSpec.describe "Sale form (JS)", type: :system, js: true do
       expect(page).to have_no_css("button.picker-option")
 
       # The strip reveals the client name + document, and the edit link points at
-      # the client's edit page in a new tab.
+      # the client's edit page inside the turbo-frame modal.
       within("[data-sale-form-target='clientStrip']") do
         expect(page).to have_text("ACME Corp")
         expect(page).to have_text("RUC #{client.document_number}")
       end
       edit = find("[data-sale-form-target='clientEdit']")
-      expect(edit[:href]).to end_with(edit_client_path(client))
-      expect(edit[:target]).to eq("_blank")
+      expect(edit[:href]).to end_with("#{edit_client_path(client)}?context=sale")
+      expect(edit["data-turbo-frame"]).to eq("modal")
 
       # Editing the search text clears the selection → strip hidden again.
       set_and_fire(find_field("q"), "AC", "input")

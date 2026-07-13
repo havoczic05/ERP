@@ -1,0 +1,9 @@
+<div class="dropdown" data-controller="dropdown">
+  <button type="button" class="dropdown-toggle" data-action="dropdown#toggle"
+          aria-label="Acciones" aria-haspopup="true" aria-expanded="false">
+    <%= icon("more-vertical") %>
+  </button>
+  <div class="dropdown-menu" data-dropdown-target="menu" hidden>
+    <%= yield %>
+  </div>
+</div>

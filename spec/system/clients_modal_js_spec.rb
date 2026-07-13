@@ -59,7 +59,10 @@ RSpec.describe "Clients modal (JS)", type: :system, js: true do
     visit clients_path
     wait_until_js_booted
 
-    within("##{ActionView::RecordIdentifier.dom_id(client)}") { click_link "Editar" }
+    within("##{ActionView::RecordIdentifier.dom_id(client)}") do
+      find(".dropdown-toggle").click
+      click_link "Editar"
+    end
 
     expect(page).to have_css("dialog.modal[open]", wait: MODAL_WAIT)
     within("dialog.modal") do
@@ -79,7 +82,10 @@ RSpec.describe "Clients modal (JS)", type: :system, js: true do
     visit clients_path
     wait_until_js_booted
 
-    within("##{ActionView::RecordIdentifier.dom_id(client)}") { click_link "Ver" }
+    within("##{ActionView::RecordIdentifier.dom_id(client)}") do
+      find(".dropdown-toggle").click
+      click_link "Ver"
+    end
 
     expect(page).to have_css("dialog.modal[open]", wait: MODAL_WAIT)
     within("dialog.modal") do

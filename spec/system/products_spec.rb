@@ -203,7 +203,7 @@ RSpec.describe 'Products', type: :system do
         visit products_path
 
         within("#product_#{product.id}") do
-          click_button 'Eliminar'
+          find_button('Eliminar', visible: :all).click
         end
 
         expect(page).to have_current_path(products_path)
@@ -218,7 +218,7 @@ RSpec.describe 'Products', type: :system do
         create(:sale_item, product: product)
 
         visit products_path
-        within("#product_#{product.id}") { click_button 'Eliminar' }
+        within("#product_#{product.id}") { find_button('Eliminar', visible: :all).click }
 
         expect(page).to have_content('No se puede eliminar este producto porque tiene ítems de venta asociados.')
         expect(page).to have_current_path(products_path)
@@ -240,9 +240,9 @@ RSpec.describe 'Products', type: :system do
       visit products_path
 
       within('table tbody') do
-        expect(page).to have_link('Ver')
-        expect(page).not_to have_link('Editar')
-        expect(page).not_to have_button('Eliminar')
+        expect(page).to have_link('Ver', visible: :all)
+        expect(page).not_to have_link('Editar', visible: :all)
+        expect(page).not_to have_button('Eliminar', visible: :all)
       end
       expect(page).not_to have_link('Nuevo producto')
     end

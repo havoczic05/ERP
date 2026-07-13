@@ -6,7 +6,7 @@
   <td data-label="Stock"><%= product.stock %></td>
   <td data-label="Precio base (USD)"><%= money(product.base_price_usd) %></td>
   <td class="col-actions">
-    <div class="row-actions">
+    <%= render layout: "shared/actions_menu" do %>
       <%= action_link 'Ver', product, icon: :eye, data: { turbo_frame: 'modal' } %>
       <% if policy(product).edit? %>
         <%= action_link 'Editar', edit_product_path(product), icon: :pencil,
@@ -16,6 +16,6 @@
         <%= action_button 'Eliminar', product, method: :delete, icon: :trash,
                           confirm: '¿Eliminar este producto?' %>
       <% end %>
-    </div>
+    <% end %>
   </td>
 </tr>

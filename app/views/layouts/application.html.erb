@@ -32,7 +32,7 @@
     </div>
 
     <% if current_user %>
-      <div class="app-shell" data-controller="nav">
+      <div class="app-shell" data-controller="nav sidebar">
         <%= render "layouts/sidebar" %>
         <main class="app-main">
           <%= yield %>
@@ -44,5 +44,13 @@
         <%= yield %>
       </main>
     <% end %>
+
+    <dialog class="confirm-dialog" data-controller="confirm">
+      <p class="confirm-dialog__msg" data-confirm-target="message"></p>
+      <div class="confirm-dialog__actions">
+        <button type="button" class="btn btn--ghost btn--md" data-action="confirm#cancel">Cancelar</button>
+        <button type="button" class="btn btn--danger btn--md" data-confirm-target="actionBtn" data-action="confirm#proceed"></button>
+      </div>
+    </dialog>
   </body>
 </html>

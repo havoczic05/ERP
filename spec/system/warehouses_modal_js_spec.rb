@@ -44,7 +44,10 @@ RSpec.describe "Warehouses modal (JS)", type: :system, js: true do
     warehouse = create(:warehouse, name: "Antes")
     visit warehouses_path
 
-    within("##{ActionView::RecordIdentifier.dom_id(warehouse)}") { click_link "Editar" }
+    within("##{ActionView::RecordIdentifier.dom_id(warehouse)}") do
+      find(".dropdown-toggle").click
+      click_link "Editar"
+    end
 
     expect(page).to have_css("dialog.modal[open]", wait: 10)
     within("dialog.modal") do
@@ -63,7 +66,10 @@ RSpec.describe "Warehouses modal (JS)", type: :system, js: true do
     warehouse = create(:warehouse, name: "Ver Me Depot")
     visit warehouses_path
 
-    within("##{ActionView::RecordIdentifier.dom_id(warehouse)}") { click_link "Ver" }
+    within("##{ActionView::RecordIdentifier.dom_id(warehouse)}") do
+      find(".dropdown-toggle").click
+      click_link "Ver"
+    end
 
     expect(page).to have_css("dialog.modal[open]", wait: 10)
     within("dialog.modal") do
