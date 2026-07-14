@@ -209,16 +209,11 @@ small {
     height: 100vh;
 }
 
-/* Sidebar collapse row: contains the toggle button above the header */
-.sidebar-collapse-row {
-    display: flex;
-    justify-content: flex-end;
-}
-
-/* Sidebar header: brand */
+/* Sidebar header: brand + toggle */
 .sidebar-header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
 }
 
 .sidebar-brand {
@@ -421,9 +416,6 @@ small {
     padding: var(--sp-5) var(--sp-2);
     overflow: hidden;
 }
-.is-sidebar-collapsed .sidebar-collapse-row {
-    justify-content: center;
-}
 .is-sidebar-collapsed .sidebar-header {
     flex-direction: column;
     gap: var(--sp-2);
@@ -498,7 +490,6 @@ small {
     }
 
     /* Toggle button doesn't apply when the sidebar is a top strip. */
-    .sidebar-collapse-row { display: none; }
     .sidebar-toggle { display: none; }
 
     /* Reset any collapsed state — the sidebar is a top strip here. */
