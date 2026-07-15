@@ -21,7 +21,7 @@ class BackupService
 
   def self.call
     unless pg_dump_available?
-      return Result.failure(nil, [PG_DUMP_MISSING])
+      return Result.failure(nil, [ PG_DUMP_MISSING ])
     end
 
     stdout, stderr, status = Open3.capture3(env, "pg_dump", *pg_dump_args)
@@ -29,7 +29,7 @@ class BackupService
     if status.success?
       Result.success(stdout)
     else
-      Result.failure(nil, [sanitize_error(stderr)])
+      Result.failure(nil, [ sanitize_error(stderr) ])
     end
   end
 
@@ -51,12 +51,12 @@ class BackupService
     end
 
     def pg_dump_args
-      args = ["--format=plain", "--no-owner", "--no-acl", "--no-password"]
+      args = [ "--format=plain", "--no-owner", "--no-acl", "--no-password" ]
       config = db_config
 
-      args += ["--host",     config["host"]]     if config["host"].present?
-      args += ["--port",     config["port"].to_s] if config["port"].present?
-      args += ["--username", config["username"]]  if config["username"].present?
+      args += [ "--host",     config["host"] ]     if config["host"].present?
+      args += [ "--port",     config["port"].to_s ] if config["port"].present?
+      args += [ "--username", config["username"] ]  if config["username"].present?
       args << config["database"]
 
       args
