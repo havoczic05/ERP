@@ -1,0 +1,23 @@
+<div class="page-head">
+  <h1>Respaldo de base de datos</h1>
+  <p class="page-sub">Descarga una copia completa de la base de datos PostgreSQL</p>
+</div>
+
+<%= render "shared/settings_nav" %>
+
+<div class="hub-body">
+  <div class="hub-main">
+    <section class="form-card">
+      <h2 class="form-card__title">Crear respaldo</h2>
+      <p>Se generará un archivo <strong>.sql</strong> con el esquema y los datos actuales de la base de datos. La descarga puede tardar unos segundos.</p>
+
+      <%= form_with url: backup_create_path, method: :post, local: true do |f| %>
+        <div class="form-actions">
+          <%= f.submit "Crear respaldo", class: "btn btn--primary" %>
+        </div>
+      <% end %>
+
+      <p class="field-hint">Solo disponible para administradores &middot; formato SQL plano</p>
+    </section>
+  </div>
+</div>

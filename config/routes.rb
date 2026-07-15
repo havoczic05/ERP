@@ -60,4 +60,10 @@ Rails.application.routes.draw do
     post "clientes",           action: :create_clients,  as: :create_clients
     get  "clientes/plantilla", action: :client_template, as: :client_template
   end
+
+  # Backup (pg_dump) — admin-only, scoped under /config/respaldo
+  scope "/config/respaldo", controller: :backups, as: :backup do
+    get  "/", action: :new,    as: :new
+    post "/", action: :create, as: :create
+  end
 end

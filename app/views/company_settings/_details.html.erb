@@ -96,6 +96,14 @@
           <p class="field-hint">Formatos: CSV, XLSX &middot; máx 500 filas</p>
         </section>
       </div>
+      <div id="hub_backup">
+        <section class="form-card">
+          <h2 class="form-card__title">Respaldo</h2>
+          <p class="field-hint">Descarga una copia completa de la base de datos en formato SQL.</p>
+          <%= action_link "Crear respaldo", backup_new_path,
+                          variant: :secondary, size: :sm, icon: :download %>
+        </section>
+      </div>
     </aside>
   </div>
 </div>
