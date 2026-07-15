@@ -20,7 +20,7 @@ RSpec.describe BackupService do
 
       before do
         allow(described_class).to receive(:system).with("pg_dump --version").and_return(true)
-        allow(Open3).to receive(:capture3).and_return([dump_output, "", double(success?: true)])
+        allow(Open3).to receive(:capture3).and_return([ dump_output, "", double(success?: true) ])
       end
 
       it "returns success with the SQL dump string as record" do
@@ -34,7 +34,7 @@ RSpec.describe BackupService do
           expect(args).to include("--format=plain")
           expect(args).to include("--no-owner")
           expect(args).to include("--no-acl")
-          [dump_output, "", double(success?: true)]
+          [ dump_output, "", double(success?: true) ]
         end
 
         described_class.call
@@ -46,7 +46,7 @@ RSpec.describe BackupService do
 
       before do
         allow(described_class).to receive(:system).with("pg_dump --version").and_return(true)
-        allow(Open3).to receive(:capture3).and_return(["", stderr_output, double(success?: false)])
+        allow(Open3).to receive(:capture3).and_return([ "", stderr_output, double(success?: false) ])
       end
 
       it "returns failure with error message" do
@@ -63,7 +63,7 @@ RSpec.describe BackupService do
 
       before do
         allow(described_class).to receive(:system).with("pg_dump --version").and_return(true)
-        allow(Open3).to receive(:capture3).and_return([dump_output, dirty_stderr, double(success?: true)])
+        allow(Open3).to receive(:capture3).and_return([ dump_output, dirty_stderr, double(success?: true) ])
       end
 
       it "sanitizes the password from the error message even on success (stderr is logged but not surfaced)" do

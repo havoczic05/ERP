@@ -20,7 +20,7 @@ RSpec.describe "erp:backup:create", type: :task do
 
   it "invokes BackupService.call and outputs failure" do
     allow(BackupService).to receive(:call).and_return(
-      Result.failure(nil, ["pg_dump no está disponible en el sistema"])
+      Result.failure(nil, [ "pg_dump no está disponible en el sistema" ])
     )
     expect { Rake::Task["erp:backup:create"].invoke }
       .to output(/Error/).to_stdout
