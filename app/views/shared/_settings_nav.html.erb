@@ -3,7 +3,8 @@
 <nav class="settings-nav" aria-label="Configuración">
   <% [["Empresa", company_settings_path, "company_settings"],
       ["Almacenes", warehouses_path, "warehouses"],
-      ["Usuarios", users_path, "users"]].each do |label, path, ctrl| %>
+      ["Usuarios", users_path, "users"],
+      ["Respaldo", backup_new_path, "backups"]].each do |label, path, ctrl| %>
     <%= link_to label, path,
                 class: class_names("settings-nav__item", "is-active" => controller_name == ctrl),
                 aria: { current: (controller_name == ctrl ? "page" : nil) } %>
