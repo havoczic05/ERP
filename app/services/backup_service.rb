@@ -33,6 +33,50 @@ class BackupService
     end
   end
 
+  # Write pg_dump output to a .sql file on disk, streaming via Open3.popen3
+  # to avoid holding the entire dump in RAM.
+  def self.dump_to_file(dir = backup_dir)
+    unless pg_dump_available?
+      return Result.failure(nil, [ PG_DUMP_MISSING ])
+    end
+
+    FileUtils.mkdir_p(dir)
+    filename = "erp-#{Time.current.strftime('%Y-%m-%d-%H%M')}.sql"
+    filepath = File.join(dir, filename)
+
+    Open3.popen3(env, "pg_dump", *pg_dump_args) do |stdin, stdout, stderr, wait_thr|
+      stdin.close
+      File.open(filepath, "w") { |f| IO.copy_stream(stdout, f) }
+      unless wait_thr.value.success?
+        File.delete(filepath) rescue nil
+        return Result.failure(nil, [ sanitize_error(stderr.read) ])
+      end
+    end
+
+    Result.success(filepath)
+  end
+
+  # Return recent .sql backup files sorted by mtime descending.
+  def self.list_recent(dir = backup_dir, limit: 20)
+    return [] unless Dir.exist?(dir)
+
+    Dir.glob(File.join(dir, "*.sql"))
+       .map { |f| { filename: File.basename(f), size: File.size(f), mtime: File.mtime(f) } }
+       .sort_by { |h| h[:mtime] }
+       .reverse
+       .first(limit)
+  end
+
+  # Delete .sql backup files older than +days+ days.
+  def self.prune_old(days: 14, dir: backup_dir)
+    return unless Dir.exist?(dir)
+
+    threshold = Time.current - days.days
+    Dir.glob(File.join(dir, "*.sql")).each do |file|
+      File.delete(file) if File.mtime(file) < threshold
+    end
+  end
+
   def self.sanitize_error(message)
     return "" if message.nil?
 
@@ -70,7 +114,11 @@ class BackupService
     def db_config
       @db_config ||= ActiveRecord::Base.connection_db_config.configuration_hash.with_indifferent_access
     end
+
+    def backup_dir
+      Rails.root.join("db", "backups").to_s
+    end
   end
 
-  private_class_method :pg_dump_available?, :pg_dump_args, :env, :db_config
+  private_class_method :pg_dump_available?, :pg_dump_args, :env, :db_config, :backup_dir
 end

@@ -11,7 +11,7 @@
       <h2 class="form-card__title">Crear respaldo</h2>
       <p>Se generará un archivo <strong>.sql</strong> con el esquema y los datos actuales de la base de datos. La descarga puede tardar unos segundos.</p>
 
-      <%= form_with url: backup_create_path, method: :post, local: true do |f| %>
+      <%= form_with url: backup_create_path, method: :post, data: { turbo: false } do |f| %>
         <div class="form-actions">
           <%= f.submit "Crear respaldo", class: "btn btn--primary" %>
         </div>
@@ -19,5 +19,35 @@
 
       <p class="field-hint">Solo disponible para administradores &middot; formato SQL plano</p>
     </section>
+
+    <% if @backups&.any? %>
+      <section class="form-card">
+        <h2 class="form-card__title">Respaldos recientes</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Archivo</th>
+              <th>Tamaño</th>
+              <th>Fecha</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @backups.each do |backup| %>
+              <tr>
+                <td><%= backup[:filename] %></td>
+                <td><%= number_to_human_size(backup[:size]) %></td>
+                <td><%= l backup[:mtime].in_time_zone("America/Lima"), format: :long %></td>
+                <td>
+                  <%= link_to "Descargar",
+                      backup_download_path(filename: backup[:filename]),
+                      class: "btn btn--secondary" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </section>
+    <% end %>
   </div>
 </div>

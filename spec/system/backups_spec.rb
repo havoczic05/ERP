@@ -88,4 +88,38 @@ RSpec.describe "Backups", type: :system do
       expect(response_headers["Content-Disposition"]).to include(".sql")
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # Recent backups table — REQ-BKP-003
+  # ---------------------------------------------------------------------------
+  describe "recent backups table" do
+    let(:backup_dir) { Rails.root.join("db", "backups") }
+
+    before do
+      FileUtils.mkdir_p(backup_dir)
+    end
+
+    after do
+      FileUtils.rm_rf(backup_dir)
+    end
+
+    it "shows 'Respaldos recientes' table with file info when backups exist" do
+      file = backup_dir.join("erp-2026-07-15-0300.sql")
+      File.write(file, "-- test dump\n")
+      File.utime(Time.new(2026, 7, 15, 3, 0, 0), Time.new(2026, 7, 15, 3, 0, 0), file)
+
+      visit backup_new_path
+
+      expect(page).to have_content("Respaldos recientes")
+      expect(page).to have_content("erp-2026-07-15-0300.sql")
+      expect(page).to have_link("Descargar")
+    end
+
+    it "does NOT show the recent backups section when no backup files exist" do
+      visit backup_new_path
+
+      expect(page).to have_content("Respaldo de base de datos")
+      expect(page).to have_no_content("Respaldos recientes")
+    end
+  end
 end
