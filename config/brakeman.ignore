@@ -1,6 +1,29 @@
 {
   "ignored_warnings": [
     {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "5737268ec6d0d98896a6fb06225de75bf20a6435cc11a8ae4c55103077367d11",
+      "check_name": "SendFile",
+      "message": "Parameter value used in file name",
+      "file": "app/controllers/backups_controller.rb",
+      "line": 44,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "send_file(Rails.root.join(\"db\", \"backups\", File.basename(params[:filename].to_s)), :type => \"application/sql\", :disposition => \"attachment\", :filename => File.basename(params[:filename].to_s))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "BackupsController",
+        "method": "download"
+      },
+      "user_input": "params[:filename].to_s",
+      "confidence": "Weak",
+      "cwe_id": [
+        22
+      ],
+      "note": "False positive: params[:filename] is validated against FILENAME_REGEX (/\\Aerp-\\d{4}-\\d{2}-\\d{2}-\\d{4}\\.sql\\z/) before reaching send_file, and additionally sanitized with File.basename. No path traversal possible — only filenames matching the exact erp-YYYY-MM-DD-HHMM.sql pattern are accepted. Non-matching or non-existent files return 400/404 before send_file is called."
+    },
+    {
       "warning_type": "Mass Assignment",
       "warning_code": 105,
       "fingerprint": "fce86571dd7dea16bdfbf73073ed01c237781ae3b772013f107e68ea398a0180",

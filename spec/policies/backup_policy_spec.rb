@@ -36,4 +36,24 @@ RSpec.describe BackupPolicy, type: :policy do
       expect(subject.new(nil, :backup).create?).to be false
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # download? — REQ-BKP-103
+  # ---------------------------------------------------------------------------
+  describe "download?" do
+    # SCEN-103-a
+    it "grants administrador download?" do
+      expect(subject.new(administrador, :backup).download?).to be true
+    end
+
+    # SCEN-103-b
+    it "denies vendedor download?" do
+      expect(subject.new(vendedor, :backup).download?).to be false
+    end
+
+    # SCEN-103-c
+    it "denies nil user download?" do
+      expect(subject.new(nil, :backup).download?).to be false
+    end
+  end
 end

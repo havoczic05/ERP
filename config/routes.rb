@@ -65,5 +65,6 @@ Rails.application.routes.draw do
   scope "/config/respaldo", controller: :backups, as: :backup do
     get  "/", action: :new,    as: :new
     post "/", action: :create, as: :create
+    get  "download", action: :download, as: :download
   end
 end

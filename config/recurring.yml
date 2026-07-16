@@ -1,0 +1,7 @@
+production:
+  scheduled_backup_0300:
+    class: Backups::ScheduledBackupJob
+    schedule: "0 3 * * * America/Lima"
+  scheduled_backup_1500:
+    class: Backups::ScheduledBackupJob
+    schedule: "0 15 * * * America/Lima"

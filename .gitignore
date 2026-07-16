@@ -40,3 +40,6 @@
 /.atl/
 /.codegraph/
 
+# Backup dump files — never commit database dumps.
+/db/backups/
+

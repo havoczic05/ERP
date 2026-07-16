@@ -4,6 +4,7 @@ class BackupPolicy < ApplicationPolicy
   # Backup actions are admin-only (mirrors ImportPolicy).
   def new?    = admin?
   def create? = admin?
+  def download? = admin?
 
   private
 
