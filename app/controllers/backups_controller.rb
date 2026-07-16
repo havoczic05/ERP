@@ -30,11 +30,13 @@ class BackupsController < ApplicationController
   def download
     authorize :backup, :download?
 
-    unless params[:filename].to_s.match?(FILENAME_REGEX)
+    raw = params[:filename].to_s
+    unless raw.match?(FILENAME_REGEX)
       return head :bad_request
     end
 
-    filepath = Rails.root.join("db", "backups", params[:filename])
+    filename = File.basename(raw)
+    filepath = Rails.root.join("db", "backups", filename)
     unless File.exist?(filepath)
       return head :not_found
     end
@@ -42,6 +44,6 @@ class BackupsController < ApplicationController
     send_file filepath,
               type: "application/sql",
               disposition: "attachment",
-              filename: params[:filename]
+              filename: filename
   end
 end
