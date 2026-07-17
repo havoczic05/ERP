@@ -1,0 +1,7 @@
+<%# Inline field error: renders red error text directly beside a form input.
+    Locals: messages — array of error strings for this field. %>
+<% if Array(messages).any? %>
+  <% Array(messages).each do |msg| %>
+    <div class="field-error"><%= msg %></div>
+  <% end %>
+<% end %>
