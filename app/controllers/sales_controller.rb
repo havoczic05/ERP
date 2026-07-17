@@ -25,7 +25,7 @@ class SalesController < ApplicationController
   def new
     @sale = Sale.new
     authorize @sale
-    @payment_method = 'contado'
+    @payment_method = "contado"
     @products = product_options
     @warehouses = Warehouse.order(:name)
   end
@@ -43,7 +43,7 @@ class SalesController < ApplicationController
       @sale = result.sale || Sale.new
       @errors = result.errors
       @error_groups = SaleErrorHelper.classify(@errors, @sale)
-      @payment_method = params[:payment_method] || 'contado'
+      @payment_method = params[:payment_method] || "contado"
       @products = product_options
       @warehouses = Warehouse.order(:name)
       render :new, status: :unprocessable_entity
@@ -77,7 +77,7 @@ class SalesController < ApplicationController
     reason = conversion_block_reason(@sale)
     return redirect_to(@sale, alert: reason) if reason
 
-    @payment_method = 'contado'
+    @payment_method = "contado"
     load_convert_form
     render :convert
   end
@@ -175,7 +175,7 @@ class SalesController < ApplicationController
 
   def render_convert_form
     load_convert_form
-    @payment_method = params[:payment_method] || 'contado'
+    @payment_method = params[:payment_method] || "contado"
     render :convert, status: :unprocessable_entity
   end
 
