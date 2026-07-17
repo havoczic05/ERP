@@ -132,7 +132,7 @@ RSpec.describe 'SaleCreationService.convert (cotizacion to venta)', type: :servi
     it 'returns failure Result' do
       result = SaleCreationService.convert(cotizacion, conversion_params)
       expect(result.success?).to be false
-      expect(result.errors.first).to include('already been converted')
+      expect(result.errors.first).to include('ya fue convertida')
     end
 
     it 'does not create another venta' do

@@ -31,6 +31,7 @@ export default class extends Controller {
     "installmentsBody",
     "installmentsValidation",
     "installmentsSum",
+    "documentType",
   ]
 
   static values = { productSearchUrl: String }
@@ -89,6 +90,33 @@ export default class extends Controller {
         cb.classList.remove("is-open")
       }
     })
+  }
+
+  // -------------------------------------------------------------------------
+  // Document type: Cotización hides the Cuotas toggle entirely because
+  // cotizaciones carry no installments (REQ-SF-001). Switching to Venta
+  // restores the normal toggle behavior.
+  // -------------------------------------------------------------------------
+  documentTypeChanged() {
+    const docType = this.hasDocumentTypeTarget ? this.documentTypeTarget.value : ""
+    const isCotizacion = docType === "cotizacion"
+
+    if (!this.hasInstallmentsSectionTarget) return
+
+    if (isCotizacion) {
+      this.installmentsSectionTarget.hidden = true
+      this.setInstallmentsEnabled(false)
+
+      // Force Contado radio
+      const contado = this.element.querySelector("input[name='payment_method'][value='contado']")
+      if (contado) {
+        contado.checked = true
+        contado.dispatchEvent(new Event("change", { bubbles: true }))
+      }
+    } else {
+      // Venta: restore normal toggle behavior — check the current radio state
+      this.togglePaymentMode()
+    }
   }
 
   // -------------------------------------------------------------------------

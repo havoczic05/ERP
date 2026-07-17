@@ -36,7 +36,7 @@ class SaleCreationService
     source_cotizacion_id = @params[:source_cotizacion_id].presence
     if source_cotizacion_id &&
        Sale.kept.where(source_cotizacion_id: source_cotizacion_id).exists?
-      return Result.failure(nil, [ "This cotizacion has already been converted to a venta" ])
+      return Result.failure(nil, [ "Esta cotización ya fue convertida a una venta" ])
     end
 
     ActiveRecord::Base.transaction do
@@ -44,14 +44,14 @@ class SaleCreationService
 
       # Step 1: validate inputs (items present, quantities > 0)
       if items_data.empty?
-        @stock_errors = [ "At least one line item is required" ]
+        @stock_errors = [ "Se requiere al menos una línea de producto" ]
         raise ActiveRecord::Rollback
       end
 
       items_data.each do |item|
         qty = item[:quantity].to_i
         if qty <= 0
-          @stock_errors = [ "Item quantity must be greater than 0" ]
+          @stock_errors = [ "La cantidad debe ser mayor a 0" ]
           raise ActiveRecord::Rollback
         end
       end
@@ -64,7 +64,7 @@ class SaleCreationService
 
       # Validate all products exist
       if products.size != product_ids.uniq.size
-        @stock_errors = [ "One or more products do not exist" ]
+        @stock_errors = [ "Uno o más productos no existen" ]
         raise ActiveRecord::Rollback
       end
 
@@ -86,7 +86,7 @@ class SaleCreationService
                               .sum { |i| i[:quantity].to_i }
 
             if qty_for_product > product.stock
-              @stock_errors << "Insufficient stock for #{product.name}: available #{product.stock}, requested #{qty_for_product}"
+              @stock_errors << "Stock insuficiente para #{product.name}: disponible #{product.stock}, solicitado #{qty_for_product}"
             end
           end
         end
@@ -186,7 +186,7 @@ class SaleCreationService
               sale.sale_items.where(product_id: pid).sum(:quantity)
 
         if qty > product.stock
-          stock_errors << "Insufficient stock for #{product.name}: available #{product.stock}, requested #{qty}"
+          stock_errors << "Stock insuficiente para #{product.name}: disponible #{product.stock}, solicitado #{qty}"
         end
       end
     end
@@ -218,13 +218,13 @@ class SaleCreationService
   def convert_from(cotizacion)
     # Guard: this is already a venta
     if cotizacion.venta?
-      return Result.failure(cotizacion, [ "This document is already a venta" ])
+      return Result.failure(cotizacion, [ "Este documento ya es una venta" ])
     end
 
     # Guard: already converted (a LIVE venta referencing this cotizacion exists).
     # Uses kept so an annulled (soft-deleted) venta frees the cotizacion for re-conversion.
     if Sale.kept.where(source_cotizacion_id: cotizacion.id).exists?
-      return Result.failure(cotizacion, [ "This cotizacion has already been converted to a venta" ])
+      return Result.failure(cotizacion, [ "Esta cotización ya fue convertida a una venta" ])
     end
 
     @stock_errors = []
@@ -342,7 +342,7 @@ class SaleCreationService
     # Assert SUM == total before persisting
     actual_sum = installment_amounts.sum
     unless actual_sum == total
-      @stock_errors = [ "Installment sum mismatch: #{actual_sum} != #{total}" ]
+      @stock_errors = [ "La suma de cuotas no coincide: #{actual_sum} != #{total}" ]
       raise ActiveRecord::Rollback
     end
 
@@ -364,13 +364,13 @@ class SaleCreationService
   # within 1..MAX_INSTALLMENTS and its amounts sum exactly to the sale total.
   def create_explicit_installments!(sale, installments)
     if installments.size > MAX_INSTALLMENTS
-      return fail_installments!("A sale cannot have more than #{MAX_INSTALLMENTS} installments")
+      return fail_installments!("Una venta no puede tener más de #{MAX_INSTALLMENTS} cuotas")
     end
 
     total      = BigDecimal(sale.total_usd.to_s)
     actual_sum = installments.sum { |i| i[:amount_usd] }
     unless actual_sum == total
-      return fail_installments!("Installment sum mismatch: #{actual_sum} != #{total}")
+      return fail_installments!("La suma de cuotas no coincide: #{actual_sum} != #{total}")
     end
 
     installments.each_with_index do |installment, index|
@@ -396,14 +396,14 @@ class SaleCreationService
       raw_date = row[:due_date].to_s.strip
 
       if raw_date.blank? || amount <= 0
-        return fail_installments!("Each installment needs a due date and a positive amount")
+        return fail_installments!("Cada cuota necesita una fecha de vencimiento y un monto positivo")
       end
 
       { amount_usd: amount, due_date: Date.parse(raw_date) }
     end
   rescue ArgumentError
     # Raised by an unparseable date OR a non-numeric amount (BigDecimal("")).
-    fail_installments!("Each installment needs a valid due date and a positive numeric amount")
+    fail_installments!("Cada cuota necesita una fecha de vencimiento válida y un monto numérico positivo")
   end
 
   # Records an installment-plan validation error and rolls the transaction back,
@@ -415,7 +415,7 @@ class SaleCreationService
 
   def build_failure_result(extra_errors = [])
     errors = Array(@stock_errors) + Array(extra_errors)
-    errors = [ "Sale could not be created" ] if errors.empty?
+    errors = [ "No se pudo crear el documento" ] if errors.empty?
     Result.failure(nil, errors)
   end
 end

@@ -6,23 +6,14 @@
       warehouses           — collection for the almacén select
       show_document_type   — render the Cotización/Venta selector (new) vs. force venta (convert)
       line_items           — array of { product_query:, product_id:, quantity:, unit_price: };
-                             at least one row (a single blank row for new)
+                              at least one row (a single blank row for new)
       selected_client      — preloaded Client to reveal in the strip, or nil
       back_label, back_path — the "volver" link text and target
       errors               — array of error strings, or nil %>
 
-<% if errors.present? %>
-  <div id="sale-errors" class="flash-alert">
-    <ul>
-      <% errors.each do |error| %>
-        <li><%= error %></li>
-      <% end %>
-    </ul>
-  </div>
-<% end %>
+<%# Classify flat error strings into contextual buckets for inline display. %>
+<% error_groups = SaleErrorHelper.classify(errors, sale) %>
 
-<%# Modal frame for inline client creation, plus the receiver where clients#create
-    appends the auto-select bridge (see client_autoselect_controller). %>
 <%= render "shared/modal_frame" %>
 <div id="sale-client-receiver"></div>
 
@@ -55,20 +46,26 @@
         <% end %>
       <% end %>
 
+      <%= render "sales/field_error", messages: error_groups[:cliente] %>
+
       <div class="field">
         <%= label_tag 'sale[warehouse_id]', 'Almacén' %>
         <%= select_tag 'sale[warehouse_id]',
             options_for_select(warehouses.map { |w| [w.name, w.id] }, preselected_warehouse_id(sale)),
             include_blank: 'Seleccione un almacén',
-            data: { 'sale-form-target': 'warehouse', action: 'change->sale-form#warehouseChanged' } %>
+             data: { 'sale-form-target': 'warehouse', action: 'change->sale-form#warehouseChanged' } %>
       </div>
+
+      <%= render "sales/field_error", messages: error_groups[:almacen] %>
 
       <% if show_document_type %>
         <div class="field">
           <%= label_tag 'sale[document_type]', 'Tipo de documento' %>
           <%= select_tag 'sale[document_type]',
               options_for_select([['Cotización', 'cotizacion'], ['Venta', 'venta']],
-                                 sale.document_type) %>
+                                 sale.document_type),
+              data: { 'sale-form-target': 'documentType',
+                      action: 'change->sale-form#documentTypeChanged' } %>
         </div>
       <% else %>
         <%= hidden_field_tag 'sale[document_type]', 'venta' %>
@@ -99,12 +96,12 @@
       <legend>Forma de pago</legend>
       <div class="payment-segments">
         <label class="payment-segment">
-          <%= radio_button_tag 'payment_method', 'contado', true,
+          <%= radio_button_tag 'payment_method', 'contado', @payment_method != 'cuotas',
                 data: { action: 'change->sale-form#togglePaymentMode' } %>
           <span>Contado</span>
         </label>
         <label class="payment-segment">
-          <%= radio_button_tag 'payment_method', 'cuotas', false,
+          <%= radio_button_tag 'payment_method', 'cuotas', @payment_method == 'cuotas',
                 data: { action: 'change->sale-form#togglePaymentMode' } %>
           <span>Cuotas</span>
         </label>
@@ -184,6 +181,8 @@
       <span class="badge badge--brand">Pago en cuotas</span>
     </div>
 
+    <%= render "sales/section_error", messages: error_groups[:cuotas] %>
+
     <div class="installments-generator">
       <div class="field">
         <%= label_tag 'sale[num_installments]', 'N° de cuotas' %>
@@ -231,6 +230,7 @@
   </section>
 
   <div class="action-bar">
+    <%= render "sales/field_error", messages: error_groups[:general] %>
     <%= f.submit submit_label %>
     <%= action_link back_label, back_path, size: :md, icon: "arrow-left" %>
   </div>

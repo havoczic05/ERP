@@ -1,0 +1,17 @@
+<%# Section-level error banner for the Cuotas card.
+    Renders when installment-plan errors (sum mismatch, zero amount, malformed
+    date) require multi-row context instead of a single-field inline error.
+    Locals: messages — array of error strings for this section. %>
+<% if Array(messages).any? %>
+  <div class="section-error-banner">
+    <span class="section-error-banner__icon" aria-hidden="true">⚠</span>
+    <div class="section-error-banner__body">
+      <strong>Error en plan de cuotas</strong>
+      <ul>
+        <% Array(messages).each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+<% end %>

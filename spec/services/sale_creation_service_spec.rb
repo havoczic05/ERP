@@ -403,6 +403,32 @@ RSpec.describe SaleCreationService, type: :service do
       expect(Sale.count).to eq(0)
     end
 
+    it 'rejects an installment with a zero amount and returns a Spanish error' do
+      installments = [ { due_date: '2026-08-01', amount_usd: '0.00' } ]
+
+      result = described_class.call(explicit_params(installments: installments))
+
+      expect(result.success?).to be false
+      expect(Sale.count).to eq(0)
+      # REQ-SC-002: error message MUST be in Spanish (no English)
+      expect(result.errors.first).to be_a(String)
+      expect(result.errors.first).not_to match(/amount/i)
+      expect(result.errors.first).not_to match(/installment/i)
+      expect(result.errors.first).to match(/monto|cuota|positivo|fecha|válida/i)
+    end
+
+    it 'rejects an installment with a negative amount and returns a Spanish error' do
+      installments = [ { due_date: '2026-08-01', amount_usd: '-50.00' } ]
+
+      result = described_class.call(explicit_params(installments: installments))
+
+      expect(result.success?).to be false
+      expect(Sale.count).to eq(0)
+      # REQ-SC-002: error message MUST be in Spanish (no English)
+      expect(result.errors.first).not_to match(/amount/i)
+      expect(result.errors.first).to match(/monto|cuota|positivo|fecha|válida/i)
+    end
+
     it 'ignores an empty installments array and falls back to auto-generation' do
       result = described_class.call(explicit_params(installments: []))
 
@@ -420,6 +446,132 @@ RSpec.describe SaleCreationService, type: :service do
 
       expect(result.success?).to be true
       expect(result.sale.installments.count).to eq(0)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # 16. All error messages are in Spanish (REQ-SC-003)
+  # ---------------------------------------------------------------------------
+  describe 'all error messages are in Spanish' do
+    # Whitelist of English patterns that MUST NOT appear in any error message.
+    # Uses word boundaries or specific English phrases to avoid false positives
+    # on Spanish cognates (e.g., "producto" ≠ "product", "documento" ≠ "document").
+    let(:english_patterns) do
+      [
+        /\binstallment\b/i, /\bamount\b/i, /\bmismatch\b/i, /\binsufficient\b/i,
+        /\brequired\b/i, /\bgreater than\b/i, /\bdoes not exist\b/i,
+        /\bcannot have\b/i, /\balready been converted\b/i, /\balready a venta\b/i,
+        /\bconverted to a venta\b/i, /\bavailable\b.*\brequested\b/i,
+        /\bline item\b/i, /\bquantity\b/i, /\bcould not be created\b/i,
+        /\bpositive amount\b/i, /\bvalid due date\b/i, /\bnumeric amount\b/i,
+        /\bdue date\b/i, /\bsale\b/i
+      ]
+    end
+
+    let(:product) { create(:product, stock: 50, base_price_usd: 100.00, warehouse: warehouse) }
+
+    def assert_spanish(result)
+      return if result.success?
+
+      result.errors.each do |msg|
+        english_patterns.each do |pat|
+          expect(msg).not_to match(pat),
+            "error \"#{msg}\" matched English pattern #{pat.inspect}"
+        end
+      end
+    end
+
+    # Line ~39: source cotizacion already converted
+    it 'has no English in the "already converted" guard' do
+      cot = create(:sale, client: client, warehouse: warehouse,
+                         document_type: 'cotizacion', status: 'confirmada',
+                         subtotal_usd: 10.00, total_usd: 10.00)
+      params = sale_params(
+        document_type: 'venta',
+        items: [ item_attrs(product: product, quantity: 1, unit_price: 10.00) ],
+        source_cotizacion_id: cot.id
+      )
+      described_class.call(params) # first call succeeds
+      result = described_class.call(params) # second call should fail
+      assert_spanish(result)
+    end
+
+    # Line ~47: no items
+    it 'has no English when no items are provided' do
+      params = sale_params(document_type: 'venta', items: [])
+      result = described_class.call(params)
+      assert_spanish(result)
+    end
+
+    # Line ~54: zero/negative quantity
+    it 'has no English when item quantity is zero' do
+      params = sale_params(document_type: 'venta',
+                           items: [ item_attrs(product: product, quantity: 0) ])
+      result = described_class.call(params)
+      assert_spanish(result)
+    end
+
+    # Line ~67: non-existent product
+    it 'has no English when a product does not exist' do
+      params = sale_params(document_type: 'venta',
+                           items: [ { product_id: 999_999, quantity: 1, unit_price_usd: 10.00 } ])
+      result = described_class.call(params)
+      assert_spanish(result)
+    end
+
+    # Line ~89: insufficient stock
+    it 'has no English in stock errors' do
+      p = create(:product, stock: 5, base_price_usd: 10.00, warehouse: warehouse)
+      params = sale_params(document_type: 'venta',
+                           items: [ item_attrs(product: p, quantity: 20, unit_price: 10.00) ])
+      result = described_class.call(params)
+      assert_spanish(result)
+    end
+
+    # Line ~221: already a venta
+    it 'has no English in convert_from "already a venta" guard' do
+      venta = create(:sale, :venta, client: client, warehouse: warehouse,
+                                    total_usd: 10.00)
+      result = described_class.convert(venta, {})
+      assert_spanish(result)
+    end
+
+    # Line ~227: convert_from "already converted" guard
+    it 'has no English in convert_from "already converted" guard' do
+      cot = create(:sale, client: client, warehouse: warehouse,
+                         document_type: 'cotizacion', status: 'confirmada',
+                         subtotal_usd: 10.00, total_usd: 10.00)
+      described_class.convert(cot, { num_installments: 1, interval_days: 30 })
+      result = described_class.convert(cot, { num_installments: 1, interval_days: 30 })
+      assert_spanish(result)
+    end
+
+    # Line ~345: auto installment sum mismatch (check via explicit edge)
+    # Line ~373: explicit installment sum mismatch
+    it 'has no English in installment sum mismatch errors' do
+      installments = [
+        { due_date: '2026-08-01', amount_usd: '40.00' },
+        { due_date: '2026-09-01', amount_usd: '40.00' } # 80 != 100
+      ]
+      params = sale_params(
+        document_type: 'venta',
+        items: [ item_attrs(product: product, quantity: 1, unit_price: 100.00) ],
+        installments: installments
+      )
+      result = described_class.call(params)
+      assert_spanish(result)
+    end
+
+    # Line ~367: too many installments
+    it 'has no English in max installments error' do
+      installments = (1..5).map { |m| { due_date: format('2026-0%d-01', m), amount_usd: '20.00' } }
+      params = sale_params(
+        document_type: 'venta',
+        items: [ item_attrs(product: product, quantity: 1, unit_price: 100.00) ],
+        installments: installments
+      )
+      result = described_class.call(params)
+      assert_spanish(result)
     end
   end
 
@@ -458,7 +610,7 @@ RSpec.describe SaleCreationService, type: :service do
       result = described_class.call(linked_params)
 
       expect(result.success?).to be false
-      expect(result.errors.first).to include('already been converted')
+      expect(result.errors.first).to include('ya fue convertida')
     end
 
     it 'allows creation again after the prior linked venta was annulled' do
