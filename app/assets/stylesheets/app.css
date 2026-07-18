@@ -2282,6 +2282,30 @@ button.btn--sm {
     width: 10%;
 }
 
+/* ---- Stock validation hints & errors ----------------------------------- */
+.stock-hint {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+.stock-error {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--danger, #dc3545);
+    margin-top: 2px;
+}
+
+/* Row-level over-stock state */
+tr.line-item.is-over {
+    background: color-mix(in srgb, var(--danger, #dc3545) 6%, transparent);
+}
+
+tr.line-item.is-over td {
+    border-color: var(--danger, #dc3545);
+}
+
 /* Totals summary under the line items */
 .totals-bar {
     display: flex;

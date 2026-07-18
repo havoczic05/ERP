@@ -23,7 +23,7 @@ class SalesController < ApplicationController
 
   # GET /sales/new
   def new
-    @sale = Sale.new
+    @sale = Sale.new(document_type: "venta")
     authorize @sale
     @payment_method = "contado"
     @products = product_options
