@@ -220,6 +220,64 @@ RSpec.describe 'Sales', type: :request do
   end
 
   # ---------------------------------------------------------------------------
+  # POST /sales — item preservation on failure (stock-validation SC-01, SC-04)
+  # ---------------------------------------------------------------------------
+  describe 'POST /sales (item preservation on failure)' do
+    before { login_as(admin_user) }
+
+    it 'preserves submitted line items on re-render (SC-01)' do
+      low_product = create(:product, stock: 1, base_price_usd: 50.00,
+                            warehouse: warehouse, name: 'Laptop', sku: 'LP-001')
+      params = venta_params(items: [ { product_id: low_product.id, quantity: 100,
+                                       unit_price_usd: '1500.00' } ])
+
+      post sales_path, params: params
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      # product_query repopulated via line_items_from_params
+      expect(response.body).to include('Laptop (LP-001)')
+      # product_id hidden field preserved
+      expect(response.body).to include("value=\"#{low_product.id}\"")
+      # quantity preserved
+      expect(response.body).to include('value="100"')
+    end
+
+    it 'repopulates product_query as "Name (SKU)" (SC-03)' do
+      low_product = create(:product, stock: 1, base_price_usd: 10.00,
+                            warehouse: warehouse, name: 'Teclado', sku: 'KEY-999')
+      params = venta_params(items: [ { product_id: low_product.id, quantity: 50,
+                                       unit_price_usd: '99.00' } ])
+
+      post sales_path, params: params
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      # product_query must be "Teclado (KEY-999)"
+      input_html = response.body.match(
+        /name="sale\[items\]\[\]\[product_query\]"[^>]*value="([^"]*)"/
+      )
+      expect(input_html).not_to be_nil
+      expect(input_html[1]).to eq("Teclado (KEY-999)")
+    end
+
+    it 'returns items structure compatible with _form_fields partial (SC-04)' do
+      low_product = create(:product, stock: 1, base_price_usd: 10.00,
+                            warehouse: warehouse, name: 'Mouse', sku: 'MOU-999')
+      params = venta_params(items: [ { product_id: low_product.id, quantity: 3,
+                                       unit_price_usd: '25.00' } ])
+
+      post sales_path, params: params
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      # The partial iterates line_items — must find product_id hidden field,
+      # product_query input, quantity input, and unit_price input for the item.
+      expect(response.body).to include("value=\"#{low_product.id}\"")
+      expect(response.body).to include('Mouse (MOU-999)')
+      expect(response.body).to include('value="3"')
+      expect(response.body).to include('value="25.00"')
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # POST /sales — create cotizacion
   # ---------------------------------------------------------------------------
   describe 'POST /sales (create cotizacion)' do
@@ -463,6 +521,20 @@ RSpec.describe 'Sales', type: :request do
         post convert_to_sale_sale_path(cotizacion), params: conversion_payload
 
         expect(flash[:alert]).to be_present
+      end
+
+      it 'preserves submitted items on convert_to_sale failure (SC-02)' do
+        scarce = create(:product, stock: 1, base_price_usd: 50.00,
+                        warehouse: warehouse, name: 'Scarce Item', sku: 'SCA-001')
+        overstock_params = conversion_payload(
+          items: [ { product_id: scarce.id, quantity: 100, unit_price_usd: '50.00' } ]
+        )
+
+        post convert_to_sale_sale_path(cotizacion), params: overstock_params
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.body).to include('Scarce Item (SCA-001)')
+        expect(response.body).to include('value="100"')
       end
     end
   end
