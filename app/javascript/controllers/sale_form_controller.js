@@ -32,6 +32,9 @@ export default class extends Controller {
     "installmentsValidation",
     "installmentsSum",
     "documentType",
+    "submitButton",
+    "stockHint",
+    "stockError",
   ]
 
   static values = { productSearchUrl: String }
@@ -117,6 +120,9 @@ export default class extends Controller {
       // Venta: restore normal toggle behavior — check the current radio state
       this.togglePaymentMode()
     }
+
+    // Re-validate stock on document-type change (cotización clears, venta re-checks).
+    this.validateAllStock()
   }
 
   // -------------------------------------------------------------------------
@@ -294,6 +300,67 @@ export default class extends Controller {
     if (lineTotalCell) lineTotalCell.textContent = this.formatAmount(qty * price)
 
     this.updateGrandTotal()
+    this.validateStock(row)
+  }
+
+  // -------------------------------------------------------------------------
+  // Stock validation — per-row and global checks (only for ventas).
+  // -------------------------------------------------------------------------
+
+  // Validate a single row's quantity against its available stock.
+  // When skipGlobal is true, validateAllStock is NOT called (avoids recursion
+  // when validateAllStock itself is the caller).
+  validateStock(row, skipGlobal = false) {
+    if (!row || !this.hasDocumentTypeTarget) return
+
+    const docType = this.documentTypeTarget.value
+    // Cotizaciones are exempt from all stock validation.
+    if (docType !== "venta") return
+
+    const qtyInput = row.querySelector("[data-sale-form-target='quantity']")
+    const qty = parseFloat(qtyInput?.value) || 0
+    const stock = parseInt(row.dataset.stock, 10)
+
+    // No product selected → nothing to validate.
+    if (isNaN(stock)) return
+
+    const errorEl = row.querySelector("[data-sale-form-target='stockError']")
+    const over = qty > stock
+
+    if (over) {
+      row.classList.add("is-over")
+      if (errorEl) {
+        errorEl.textContent = `Cantidad excede stock disponible (${stock})`
+        errorEl.hidden = false
+      }
+    } else {
+      row.classList.remove("is-over")
+      if (errorEl) {
+        errorEl.textContent = ""
+        errorEl.hidden = true
+      }
+    }
+    if (!skipGlobal) this.validateAllStock()
+  }
+
+  // Re-validate every row individually, then enable/disable the submit.
+  validateAllStock() {
+    if (!this.hasSubmitButtonTarget) return
+
+    const docType = this.hasDocumentTypeTarget ? this.documentTypeTarget.value : ""
+    if (docType !== "venta") {
+      this.submitButtonTarget.disabled = false
+      return
+    }
+
+    if (!this.hasLineItemsBodyTarget) return
+    const rows = this.lineItemsBodyTarget.querySelectorAll("tr.line-item")
+
+    // Re-validate each row (skipGlobal=true to avoid recursion).
+    rows.forEach((row) => this.validateStock(row, true))
+
+    const blocked = Array.from(rows).some((row) => row.classList.contains("is-over"))
+    this.submitButtonTarget.disabled = blocked
   }
 
   // "1,250.00" — thousands-separated, always 2 decimals, no currency. Used in
@@ -354,7 +421,7 @@ export default class extends Controller {
     if (this.hasClientStripTarget) this.clientStripTarget.hidden = true
   }
 
-  // Product picker: autofill the row's unit price, then recompute.
+  // Product picker: autofill the row's unit price, display stock, validate.
   productSelected(event) {
     const row = event.target.closest("tr.line-item")
     if (!row) return
@@ -363,6 +430,22 @@ export default class extends Controller {
     if (priceInput && event.detail.price) {
       priceInput.value = parseFloat(event.detail.price).toFixed(2)
     }
+
+    // Store stock and paint the per-row hint.
+    const stock = event.detail.stock
+    row.dataset.stock = stock ?? "0"
+
+    const hintEl = row.querySelector("[data-sale-form-target='stockHint']")
+    if (hintEl) {
+      hintEl.textContent = `Stock disponible: ${stock ?? "0"}`
+    }
+
+    // Set max attribute on the quantity input as soft UX.
+    const qtyInput = row.querySelector("[data-sale-form-target='quantity']")
+    if (qtyInput && stock != null) {
+      qtyInput.max = stock
+    }
+
     this.recomputeRow(row)
   }
 }

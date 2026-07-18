@@ -13,7 +13,7 @@
       sale: cotizacion,
       warehouses: @warehouses,
       show_document_type: false,
-      line_items: cotizacion.sale_items.includes(:product).map { |item|
+      line_items: @line_items.presence || cotizacion.sale_items.includes(:product).map { |item|
         {
           product_id:    item.product_id,
           product_query: ("#{item.product.name} (#{item.product.sku})" if item.product),

@@ -9,7 +9,7 @@
       sale: @sale,
       warehouses: @warehouses,
       show_document_type: true,
-      line_items: [ {} ],
+      line_items: @line_items || [ {} ],
       selected_client: nil,
       back_label: "Volver a ventas",
       back_path: sales_path %>
