@@ -47,6 +47,7 @@ class SalesController < ApplicationController
       @payment_method = params[:payment_method] || "contado"
       @products = product_options
       @warehouses = Warehouse.order(:name)
+      @line_items = line_items_from_params.presence || [ {} ]
       render :new, status: :unprocessable_entity
     end
   end
@@ -108,6 +109,7 @@ class SalesController < ApplicationController
       all_errors = Array(result.errors)
       all_errors += Array(result.sale.errors.full_messages) if result.sale&.errors&.any?
       flash.now[:alert] = all_errors.uniq.join("; ")
+      @line_items = line_items_from_params
       render_convert_form
     end
   end
@@ -248,5 +250,23 @@ class SalesController < ApplicationController
   # Products for the new-sale datalist (name-based search). Ordered by name.
   def product_options
     Product.kept.order(:name)
+  end
+
+  # Rebuild @line_items from params[:sale][:items] on validation failure so the
+  # re-rendered form preserves every row the user entered (product_query, qty,
+  # unit_price) instead of wiping them with a hardcoded empty row.
+  def line_items_from_params
+    Array(params.dig(:sale, :items))
+      .select { |item| item.respond_to?(:to_h) }
+      .map do |item|
+        pid     = item[:product_id].presence
+        product = pid ? Product.kept.find_by(id: pid) : nil
+        {
+          product_id:    pid,
+          product_query: product ? "#{product.name} (#{product.sku})" : item[:product_query],
+          quantity:      item[:quantity],
+          unit_price:    item[:unit_price_usd]
+        }
+      end
   end
 end
