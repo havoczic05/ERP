@@ -8,11 +8,7 @@
       line_items           — array of { product_query:, product_id:, quantity:, unit_price: };
                               at least one row (a single blank row for new)
       selected_client      — preloaded Client to reveal in the strip, or nil
-      back_label, back_path — the "volver" link text and target
-      errors               — array of error strings, or nil %>
-
-<%# Classify flat error strings into contextual buckets for inline display. %>
-<% error_groups = SaleErrorHelper.classify(errors, sale) %>
+      back_label, back_path — the "volver" link text and target %>
 
 <%= render "shared/modal_frame" %>
 <div id="sale-client-receiver"></div>
@@ -46,8 +42,6 @@
         <% end %>
       <% end %>
 
-      <%= render "sales/field_error", messages: error_groups[:cliente] %>
-
       <div class="field">
         <%= label_tag 'sale[warehouse_id]', 'Almacén' %>
         <%= select_tag 'sale[warehouse_id]',
@@ -55,8 +49,6 @@
             include_blank: 'Seleccione un almacén',
              data: { 'sale-form-target': 'warehouse', action: 'change->sale-form#warehouseChanged' } %>
       </div>
-
-      <%= render "sales/field_error", messages: error_groups[:almacen] %>
 
       <% if show_document_type %>
         <div class="field">
@@ -181,8 +173,6 @@
       <span class="badge badge--brand">Pago en cuotas</span>
     </div>
 
-    <%= render "sales/section_error", messages: error_groups[:cuotas] %>
-
     <div class="installments-generator">
       <div class="field">
         <%= label_tag 'sale[num_installments]', 'N° de cuotas' %>
@@ -230,7 +220,6 @@
   </section>
 
   <div class="action-bar">
-    <%= render "sales/field_error", messages: error_groups[:general] %>
     <%= f.submit submit_label %>
     <%= action_link back_label, back_path, size: :md, icon: "arrow-left" %>
   </div>

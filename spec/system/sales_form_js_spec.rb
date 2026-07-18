@@ -353,7 +353,7 @@ RSpec.describe "Sale form (JS)", type: :system, js: true do
   end
 
   # ---------------------------------------------------------------------------
-  # 10. Error display: inline + section banners, no flat list (REQ-SFE-001/002/003)
+  # 10. Error display: toast--alert via flash system (R1/R4/R6)
   # ---------------------------------------------------------------------------
   describe "error display" do
     before do
@@ -375,7 +375,7 @@ RSpec.describe "Sale form (JS)", type: :system, js: true do
       expect(page).to have_no_css("#sale-errors")
     end
 
-    it "renders a field-level error beside the Cliente combobox (REQ-SFE-001)" do
+    it "renders a toast--alert and no inline field-error after failed submit (R1, R6)" do
       visit new_sale_path
 
       select warehouse.name, from: "sale[warehouse_id]"
@@ -385,30 +385,9 @@ RSpec.describe "Sale form (JS)", type: :system, js: true do
 
       click_button "Crear documento"
 
-      expect(page).to have_css(".field-error")
-    end
-
-    it "renders a section-level banner inside the Cuotas card for installment errors (REQ-SFE-002)" do
-      visit new_sale_path
-
-      # Verify the section error partial infrastructure exists when errors are present.
-      # The view spec tests the partial rendering; this test verifies end-to-end
-      # that the partial is wired into the form.
-      page.execute_script(
-        "document.querySelector(\"input[name='sale[client_id]']\").value = arguments[0]",
-        client.id.to_s
-      )
-      select warehouse.name, from: "sale[warehouse_id]"
-      fill_in "sale[items][][product_query]", with: "#{product.name} (#{product.sku})"
-      fill_in "sale[items][][quantity]", with: "1"
-      fill_in "sale[items][][unit_price_usd]", with: "10.00"
-
-      pick_payment("cuotas")
-
-      # Verify the section structure exists
-      expect(page).to have_css("#installments-plan", visible: :visible)
-      # The _section_error partial renders empty when no cuotas errors (its guard clause).
-      # This confirms the partial is wired in and the form structure is correct.
+      expect(page).to have_css(".toast--alert")
+      expect(page).to have_no_css(".field-error")
+      expect(page).to have_no_css(".section-error-banner")
     end
   end
 end

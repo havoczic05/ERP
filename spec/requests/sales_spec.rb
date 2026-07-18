@@ -208,6 +208,15 @@ RSpec.describe 'Sales', type: :request do
       expect(response).to have_http_status(:unprocessable_entity)
       expect(Sale.count).to eq(0)
     end
+
+    it 'sets flash[:alert] with the error message (R1)' do
+      low_product = create(:product, stock: 1, base_price_usd: 10.00, warehouse: warehouse)
+      params = venta_params(items: [ { product_id: low_product.id, quantity: 100, unit_price_usd: '10.00' } ])
+
+      post sales_path, params: params
+
+      expect(flash[:alert]).to be_present
+    end
   end
 
   # ---------------------------------------------------------------------------
@@ -246,6 +255,19 @@ RSpec.describe 'Sales', type: :request do
       post sales_path, params: params
       expect(response).to have_http_status(:unprocessable_entity)
       expect(Sale.count).to eq(0)
+    end
+
+    it 'sets flash[:alert] when no items are submitted (R1, R2)' do
+      params = {
+        sale: {
+          client_id:     client.id,
+          warehouse_id:  warehouse.id,
+          document_type: 'venta',
+          items:         []
+        }
+      }
+      post sales_path, params: params
+      expect(flash[:alert]).to be_present
     end
   end
 
@@ -433,6 +455,14 @@ RSpec.describe 'Sales', type: :request do
 
         expect(response).to have_http_status(:unprocessable_content)
         expect(response.body).to include('ya')
+      end
+
+      it 'sets flash[:alert] when conversion is blocked (R4)' do
+        SaleCreationService.call(conversion_payload[:sale].merge(source_cotizacion_id: cotizacion.id))
+
+        post convert_to_sale_sale_path(cotizacion), params: conversion_payload
+
+        expect(flash[:alert]).to be_present
       end
     end
   end
