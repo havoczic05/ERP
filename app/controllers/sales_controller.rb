@@ -41,8 +41,9 @@ class SalesController < ApplicationController
       redirect_to result.sale, notice: "Documento creado correctamente."
     else
       @sale = result.sale || Sale.new
-      @errors = result.errors
-      @error_groups = SaleErrorHelper.classify(@errors, @sale)
+      all_errors = Array(result.errors)
+      all_errors += Array(@sale.errors.full_messages) unless @sale.errors.empty?
+      flash.now[:alert] = all_errors.uniq.join("; ")
       @payment_method = params[:payment_method] || "contado"
       @products = product_options
       @warehouses = Warehouse.order(:name)
@@ -91,7 +92,7 @@ class SalesController < ApplicationController
 
     reason = conversion_block_reason(@sale)
     if reason
-      @errors = [ reason ]
+      flash.now[:alert] = reason
       return render_convert_form
     end
 
@@ -104,7 +105,9 @@ class SalesController < ApplicationController
     if result.success?
       redirect_to result.sale, notice: "Cotización convertida a venta correctamente."
     else
-      @errors = result.errors
+      all_errors = Array(result.errors)
+      all_errors += Array(result.sale.errors.full_messages) if result.sale&.errors&.any?
+      flash.now[:alert] = all_errors.uniq.join("; ")
       render_convert_form
     end
   end
