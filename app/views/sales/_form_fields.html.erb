@@ -133,9 +133,14 @@
                       placeholder: 'Escriba el nombre del producto',
                       wrapper_class: 'product-search',
                       select_action: 'combobox:select->sale-form#productSelected' %></td>
-            <td data-label="Cantidad"><%= number_field_tag 'sale[items][][quantity]', (line[:quantity] || 1), min: 1,
+            <td data-label="Cantidad">
+              <%= number_field_tag 'sale[items][][quantity]', (line[:quantity] || 1), min: 1,
                     data: { 'sale-form-target': 'quantity',
-                            action: 'input->sale-form#recompute' } %></td>
+                            action: 'input->sale-form#recompute' } %>
+              <span data-sale-form-target="stockHint" class="stock-hint"></span>
+              <span data-sale-form-target="stockError" class="stock-error"
+                    role="alert" aria-live="polite" hidden></span>
+            </td>
             <td data-label="Precio (USD)"><%= number_field_tag 'sale[items][][unit_price_usd]', (line[:unit_price] || '0.00'), step: '0.01',
                     data: { 'sale-form-target': 'unitPrice',
                             action: 'input->sale-form#recompute' } %></td>
@@ -220,7 +225,7 @@
   </section>
 
   <div class="action-bar">
-    <%= f.submit submit_label %>
+    <%= f.submit submit_label, data: { 'sale-form-target': 'submitButton' } %>
     <%= action_link back_label, back_path, size: :md, icon: "arrow-left" %>
   </div>
 <% end %>
