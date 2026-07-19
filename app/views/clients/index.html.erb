@@ -1,4 +1,11 @@
-<div class="page-head"><h1>Clientes</h1></div>
+<div class="page-head page-head--with-action">
+  <h1>Clientes</h1>
+  <% if policy(Client).new? %>
+    <%= action_link 'Nuevo cliente', new_client_path, variant: :primary, size: :md, icon: :plus,
+                    class: "fab", aria: { label: "Nuevo cliente" },
+                    data: { turbo_frame: 'modal', controller: 'fab', action: 'fab#click' } %>
+  <% end %>
+</div>
 
 <div class="toolbar">
   <%= form_with url: clients_path, method: :get, local: true, class: "filters" do |f| %>
@@ -10,12 +17,6 @@
     </div>
     <%= submit_button f, 'Buscar' %>
     <%= clear_filters_link clients_path %>
-  <% end %>
-
-  <% if policy(Client).new? %>
-    <%= action_link 'Nuevo cliente', new_client_path, variant: :primary, size: :md, icon: :plus,
-                    class: "fab", aria: { label: "Nuevo cliente" },
-                    data: { turbo_frame: 'modal', controller: 'fab', action: 'fab#click' } %>
   <% end %>
 </div>
 
