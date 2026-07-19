@@ -442,73 +442,7 @@ small {
 }
 .is-sidebar-collapsed .sidebar-logout__label { display: none; }
 
-/* Collapse the sidebar to a top strip on narrow viewports (desktop-first app). */
-@media (max-width: 56rem) {
-    .app-shell {
-        grid-template-columns: 1fr;
-    }
-    .app-sidebar {
-        position: static;
-        height: auto;
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: var(--sp-3) var(--sp-4);
-        border-right: 0;
-        border-bottom: 1px solid var(--line);
-    }
-    .sidebar-nav {
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: var(--sp-3) var(--sp-4);
-        overflow: visible;
-    }
-    .nav-group {
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 2px var(--sp-1);
-    }
-    .nav-group-label {
-        display: none;
-    }
-    .sidebar-foot {
-        flex-direction: row;
-        align-items: center;
-        gap: var(--sp-3);
-        margin-left: auto;
-        padding-top: 0;
-        border-top: 0;
-    }
-    .sidebar-user {
-        flex-direction: row;
-        align-items: center;
-        gap: var(--sp-2);
-    }
-    .btn--block {
-        width: auto;
-    }
 
-    /* Toggle button doesn't apply when the sidebar is a top strip. */
-    .sidebar-toggle { display: none; }
-
-    /* Reset any collapsed state — the sidebar is a top strip here. */
-    .app-shell.is-sidebar-collapsed {
-        grid-template-columns: 1fr;
-    }
-    .is-sidebar-collapsed .app-sidebar {
-        align-items: center;
-        overflow: visible;
-    }
-    .is-sidebar-collapsed .sidebar-brand__name,
-    .is-sidebar-collapsed .nav-group-label,
-    .is-sidebar-collapsed .nav-item > span,
-    .is-sidebar-collapsed .sidebar-user__info,
-    .is-sidebar-collapsed .sidebar-logout__label { display: revert; }
-    .is-sidebar-collapsed .nav-item { justify-content: flex-start; }
-    .is-sidebar-collapsed .sidebar-user { justify-content: flex-start; }
-    .is-sidebar-collapsed .sidebar-logout { width: auto; padding: 0; border: 0; }
-}
 
 /* =============================================================================
    Description lists (detail views) & dashboard metric grids
@@ -2597,11 +2531,34 @@ tr.line-item.is-over td {
     -webkit-overflow-scrolling: touch;
 }
 
-@media (max-width: 640px) {
+/* =============================================================================
+   Responsive — Tablet layer (≤900px). Off-canvas nav drawer + filter grid.
+   ========================================================================== */
+
+@media (max-width: 900px) {
     /* --- Nav: hamburger top bar + off-canvas drawer --- */
-    .app-shell {
+    .app-shell,
+    .app-shell.is-sidebar-collapsed {
         grid-template-columns: 1fr;
     }
+
+    /* Reset desktop collapsed styles when in tablet/mobile drawer mode */
+    .is-sidebar-collapsed .app-sidebar {
+        align-items: stretch;
+        padding: 0;
+        overflow-y: auto;
+    }
+    .is-sidebar-collapsed .sidebar-brand__name,
+    .is-sidebar-collapsed .nav-group-label,
+    .is-sidebar-collapsed .nav-item > span,
+    .is-sidebar-collapsed .sidebar-user__info,
+    .is-sidebar-collapsed .sidebar-logout__label { display: revert; }
+    .is-sidebar-collapsed .nav-item { justify-content: flex-start; }
+    .is-sidebar-collapsed .sidebar-user { justify-content: flex-start; }
+    .is-sidebar-collapsed .sidebar-logout { width: 100%; border: 1px solid var(--line); }
+
+    .sidebar-toggle { display: none; }
+
     .app-topbar {
         display: flex;
         align-items: center;
@@ -2618,7 +2575,8 @@ tr.line-item.is-over td {
         top: 0;
         left: 0;
         height: 100dvh;
-        width: min(80vw, 18rem);
+        width: 15rem;
+        max-width: 85vw;
         flex-direction: column;
         flex-wrap: nowrap;
         align-items: stretch;
@@ -2680,6 +2638,39 @@ tr.line-item.is-over td {
         visibility: visible;
     }
 
+    /* --- Tablet filters: strict CSS Grid instead of flex-wrap staircase --- */
+    .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .filters {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--sp-3);
+        align-items: flex-end;
+    }
+    .filters .field {
+        margin: 0;
+    }
+    .filters .field input,
+    .filters .field select {
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+    }
+    .filters input[type="submit"],
+    .filters .btn--ghost {
+        justify-self: stretch;
+        width: 100%;
+    }
+
+    /* --- Reduce page padding on tablet to reclaim horizontal space --- */
+    .app-main {
+        padding: var(--sp-5) var(--sp-5) var(--sp-6);
+    }
+}
+
+@media (max-width: 640px) {
     /* --- List tables → stacked cards (opt-in via .table-cards) --- */
     table.table-cards {
         border: none;
@@ -2833,6 +2824,7 @@ tr.line-item.is-over td {
         align-items: stretch;
     }
     .filters {
+        display: flex;
         flex-direction: column;
         align-items: stretch;
     }

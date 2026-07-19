@@ -1,5 +1,8 @@
-<div class="page-head">
+<div class="page-head page-head--with-action">
   <h1>Ventas</h1>
+  <%= action_link 'Nuevo documento', new_sale_path, variant: :primary, size: :md, icon: :plus,
+                  class: "fab", aria: { label: "Nuevo documento" },
+                  data: { controller: "fab", action: "fab#click" } %>
 </div>
 
 <div class="toolbar">
@@ -28,10 +31,6 @@
     <%= submit_button f, 'Buscar' %>
     <%= clear_filters_link sales_path %>
   <% end %>
-
-  <%= action_link 'Nuevo documento', new_sale_path, variant: :primary, size: :md, icon: :plus,
-                  class: "fab", aria: { label: "Nuevo documento" },
-                  data: { controller: "fab", action: "fab#click" } %>
 </div>
 
 <% if @sales.any? %>
