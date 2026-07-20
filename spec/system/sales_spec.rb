@@ -34,6 +34,15 @@ RSpec.describe 'Sales', type: :system do
       expect(page).to have_link('Nuevo documento', href: new_sale_path)
     end
 
+    context 'filter toggle visibility' do
+      before { driven_by(:headless_chrome) }
+
+      it 'hides the filter toggle on desktop viewports' do
+        visit sales_path
+        expect(page).not_to have_css('.filter-toggle', visible: true)
+      end
+    end
+
     it 'lists existing sales with correlative, type, client, total, status' do
       sale = create(:sale, client: client, warehouse: warehouse,
                            total_usd: 150.00, correlative: 'COT-00001',
