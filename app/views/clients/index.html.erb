@@ -9,12 +9,22 @@
 
 <div class="toolbar">
   <%= form_with url: clients_path, method: :get, local: true, class: "filters" do |f| %>
-    <%= search_field placeholder: 'Nombre o número de documento' %>
-    <div class="field">
-      <%= f.label :document_type, 'Tipo de documento' %>
+    <%= index_search_field(placeholder: 'Nombre o número de documento') %>
+
+    <%= link_to filters_clients_path(request.query_parameters),
+                class: "btn btn--ghost filter-toggle",
+                data: { turbo_frame: "modal" },
+                aria: { label: "Filtros" } do %>
+      <%= icon("filter") %>
+      <span>Filtros</span>
+    <% end %>
+
+    <div class="field filter-modal-field">
+      <%= label_tag :document_type, 'Tipo de documento' %>
       <%= select_tag :document_type,
             options_for_select([['Todos', ''], ['DNI', 'dni'], ['RUC', 'ruc']], params[:document_type]) %>
     </div>
+
     <%= submit_button f, 'Buscar' %>
     <%= clear_filters_link clients_path %>
   <% end %>
