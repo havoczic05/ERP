@@ -41,6 +41,12 @@ RSpec.describe 'Sales', type: :system do
         visit sales_path
         expect(page).not_to have_css('.filter-toggle', visible: true)
       end
+
+      it 'shows the filter toggle on tablet viewports (<=900px)' do
+        page.driver.browser.manage.window.resize_to(800, 900)
+        visit sales_path
+        expect(page).to have_css('.filter-toggle', visible: true)
+      end
     end
 
     it 'lists existing sales with correlative, type, client, total, status' do

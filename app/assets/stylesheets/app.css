@@ -2680,9 +2680,11 @@ tr.line-item.is-over td {
     }
 }
 
-/* Filter toggle: hidden on desktop, visible on mobile */
-a.filter-toggle {
-    display: none;
+/* Filter toggle: hidden on desktop (>900px) */
+@media (min-width: 901px) {
+    a.filter-toggle {
+        display: none;
+    }
 }
 
 @media (max-width: 640px) {

@@ -6,9 +6,9 @@
   <%= form_with url: accounts_receivable_path, method: :get, class: "filters" do |f| %>
     <%= index_search_field(placeholder: 'Cliente o correlativo') %>
 
-    <%= link_to accounts_receivable_filters_path(request.query_parameters),
+    <%= link_to "#",
                 class: "btn btn--ghost filter-toggle",
-                data: { turbo_frame: "modal" },
+                data: { turbo_frame: "modal", turbo: false },
                 aria: { label: "Filtros" } do %>
       <%= icon("filter") %>
       <span>Filtros</span>
