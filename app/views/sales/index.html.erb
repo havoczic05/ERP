@@ -11,7 +11,9 @@
 
     <%= link_to filters_sales_path,
                 class: "btn btn--ghost filter-toggle",
-                data: { turbo_frame: "modal", turbo: false },
+                data: { controller: "filter-dialog",
+                        action: "click->filter-dialog#load",
+                        turbo_frame: "modal", turbo: false },
                 aria: { label: "Filtros" } do %>
       <%= icon("filter") %>
       <span>Filtros</span>

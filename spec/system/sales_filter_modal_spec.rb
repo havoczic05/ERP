@@ -13,6 +13,10 @@ RSpec.describe 'Sales filter modal', type: :system, js: true do
       page.driver.browser.manage.window.resize_to(375, 800)
     end
 
+    after do
+      page.driver.browser.manage.window.resize_to(1400, 1400)
+    end
+
     it 'opens a dialog with filter fields when Filtros is tapped' do
       visit sales_path
       wait_until_js_booted
