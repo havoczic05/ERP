@@ -51,6 +51,7 @@ Rails.application.routes.draw do
   end
 
   get "accounts_receivable", to: "accounts_receivable#index", as: :accounts_receivable
+  get "accounts_receivable/filters", to: "accounts_receivable#filters", as: :filters_accounts_receivable
 
   get "dashboard", to: "dashboards#show", as: :dashboard
 
