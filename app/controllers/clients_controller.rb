@@ -26,6 +26,12 @@ class ClientsController < ApplicationController
     render partial: "clients/results"
   end
 
+  # GET /clients/filters
+  def filters
+    authorize Client, :index?
+    render partial: "shared/filter_modal", layout: false, locals: { resource: "client", q: params[:q] }
+  end
+
   def show
     authorize @client
   end
