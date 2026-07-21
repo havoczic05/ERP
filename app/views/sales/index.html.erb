@@ -9,7 +9,7 @@
   <%= form_with url: sales_path, method: :get, class: "filters" do |f| %>
     <%= index_search_field(placeholder: 'Cliente o correlativo') %>
 
-    <%= link_to filters_sales_path,
+    <%= link_to filters_sales_path(q: params[:q]),
                 class: "btn btn--ghost filter-toggle",
                 data: { controller: "filter-dialog",
                         action: "click->filter-dialog#load",
