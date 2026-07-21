@@ -60,5 +60,25 @@ RSpec.describe 'Sales filter modal', type: :system, js: true do
       expect(query).to include('document_type=venta')
       expect(query).to include('status=confirmada')
     end
+
+    it 'closes the modal when the X button is clicked' do
+      visit sales_path
+      wait_until_js_booted
+      click_link 'Filtros'
+
+      expect(page).to have_css('dialog[open]')
+      find('button[aria-label="Cerrar"]').click
+      expect(page).not_to have_css('dialog[open]')
+    end
+
+    it 'closes the modal when Escape is pressed' do
+      visit sales_path
+      wait_until_js_booted
+      click_link 'Filtros'
+
+      expect(page).to have_css('dialog[open]')
+      find('dialog').send_keys(:escape)
+      expect(page).not_to have_css('dialog[open]')
+    end
   end
 end

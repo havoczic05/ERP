@@ -2,9 +2,10 @@
 <% q ||= params[:q] %>
 
 <%= turbo_frame_tag "modal" do %>
-  <dialog class="modal filter-modal" data-filter-dialog-target="dialog">
+  <dialog class="modal filter-modal" data-filter-dialog-target="dialog" data-action="keydown.esc->filter-dialog#close">
     <div class="modal__head">
       <h2 class="modal__title">Filtros</h2>
+      <button type="button" class="modal__close" data-action="filter-dialog#close" aria-label="Cerrar">&times;</button>
     </div>
     <div class="modal__body">
       <%= form_with url: (resource == "client" ? clients_path : resource == "account_receivable" ? accounts_receivable_path : sales_path),
