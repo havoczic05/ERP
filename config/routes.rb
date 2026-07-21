@@ -34,6 +34,10 @@ Rails.application.routes.draw do
   end
 
   resources :sales do
+    collection do
+      get :filters
+    end
+
     member do
       post :annul
       get  :convert

@@ -21,6 +21,13 @@ class SalesController < ApplicationController
     end
   end
 
+  # GET /sales/filters
+  # Renders the mobile/tablet filter modal into the persistent turbo-frame#modal.
+  def filters
+    authorize Sale, :index?
+    render partial: "shared/filter_modal", layout: false, locals: { resource: "sale", q: params[:q] }
+  end
+
   # GET /sales/new
   def new
     @sale = Sale.new(document_type: "venta")
