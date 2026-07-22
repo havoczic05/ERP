@@ -1,26 +1,40 @@
 <div class="page-head"><h1>Cuentas por Cobrar</h1></div>
 
+<%= render "shared/modal_frame" %>
+
 <div class="toolbar">
   <%= form_with url: accounts_receivable_path, method: :get, class: "filters" do |f| %>
-    <%= search_field placeholder: 'Cliente o correlativo' %>
-    <div class="field">
+    <%= index_search_field(placeholder: 'Cliente o correlativo') %>
+
+    <%= link_to filters_accounts_receivable_path(q: params[:q]),
+                class: "btn btn--ghost filter-toggle",
+                data: { controller: "filter-dialog",
+                        action: "click->filter-dialog#load",
+                        turbo_frame: "modal", turbo: false },
+                aria: { label: "Filtros" } do %>
+      <%= icon("filter") %>
+      <span>Filtros</span>
+    <% end %>
+
+    <div class="field filter-modal-field">
       <%= label_tag :status, 'Estado' %>
       <%= select_tag :status,
             options_for_select([ [ 'Todos', '' ], [ 'Pendiente', 'pendiente' ], [ 'Vencida', 'vencida' ] ],
                                params[:status]) %>
     </div>
-    <div class="field">
+    <div class="field filter-modal-field">
       <%= label_tag :due_within, 'Vence en' %>
       <%= select_tag :due_within, options_for_select(DateRange::DUE_OPTIONS, params[:due_within]) %>
     </div>
-    <div class="field">
+    <div class="field filter-modal-field">
       <%= label_tag :date_range, 'Vencimiento' %>
       <%= select_tag :date_range, options_for_select(DateRange::OPTIONS, params[:date_range]) %>
     </div>
-    <div class="field">
+    <div class="field filter-modal-field">
       <%= label_tag :on, 'Día específico' %>
       <%= date_field_tag :on, params[:on] %>
     </div>
+
     <%= submit_button f, 'Buscar' %>
     <%= clear_filters_link accounts_receivable_path %>
   <% end %>

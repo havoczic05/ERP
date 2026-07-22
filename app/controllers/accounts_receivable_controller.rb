@@ -35,6 +35,12 @@ class AccountsReceivableController < ApplicationController
     end
   end
 
+  # GET /accounts_receivable/filters
+  def filters
+    authorize Amortization, :index?
+    render partial: "shared/filter_modal", layout: false, locals: { resource: "account_receivable", q: params[:q] }
+  end
+
   private
 
   # Total number of installments per sale, in ONE grouped query (for the "N°

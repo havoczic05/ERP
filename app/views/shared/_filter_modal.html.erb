@@ -1,0 +1,72 @@
+<% resource ||= "sale" %>
+<% q ||= params[:q] %>
+
+<%= turbo_frame_tag "modal" do %>
+  <dialog class="modal filter-modal" data-filter-dialog-target="dialog" data-action="keydown.esc->filter-dialog#close">
+    <div class="modal__head">
+      <h2 class="modal__title">Filtros</h2>
+      <button type="button" class="modal__close" data-action="filter-dialog#close" aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="modal__body">
+      <%= form_with url: (resource == "client" ? clients_path : resource == "account_receivable" ? accounts_receivable_path : sales_path),
+                    method: :get,
+                    data: { turbo_frame: "_top" } do |f| %>
+        <%= hidden_field_tag :q, q %>
+
+        <% case resource %>
+        <% when "sale" %>
+          <div class="field">
+            <%= label_tag :date_range, 'Fecha' %>
+            <%= select_tag :date_range, options_for_select(DateRange::OPTIONS, params[:date_range]) %>
+          </div>
+          <div class="field">
+            <%= label_tag :on, 'Día específico' %>
+            <%= date_field_tag :on, params[:on] %>
+          </div>
+          <div class="field">
+            <%= label_tag :document_type, 'Tipo' %>
+            <%= select_tag :document_type,
+                  options_for_select([['Todos', ''], ['Cotización', 'cotizacion'], ['Venta', 'venta']],
+                                     params[:document_type]) %>
+          </div>
+          <div class="field">
+            <%= label_tag :status, 'Estado' %>
+            <%= select_tag :status,
+                  options_for_select([['Todos', ''], ['Confirmada', 'confirmada'], ['Anulada', 'anulada']],
+                                     params[:status]) %>
+          </div>
+        <% when "client" %>
+          <div class="field">
+            <%= label_tag :document_type, 'Tipo de documento' %>
+            <%= select_tag :document_type,
+                  options_for_select([['Todos', ''], ['DNI', 'dni'], ['RUC', 'ruc']],
+                                     params[:document_type]) %>
+          </div>
+        <% when "account_receivable" %>
+          <div class="field">
+            <%= label_tag :due_within, 'Vence en' %>
+            <%= select_tag :due_within, options_for_select(DateRange::DUE_OPTIONS, params[:due_within]) %>
+          </div>
+          <div class="field">
+            <%= label_tag :status, 'Estado' %>
+            <%= select_tag :status,
+                  options_for_select([['Todos', ''], ['Pendiente', 'pendiente'], ['Vencida', 'vencida']],
+                                     params[:status]) %>
+          </div>
+          <div class="field">
+            <%= label_tag :date_range, 'Vencimiento' %>
+            <%= select_tag :date_range, options_for_select(DateRange::OPTIONS, params[:date_range]) %>
+          </div>
+          <div class="field">
+            <%= label_tag :on, 'Día específico' %>
+            <%= date_field_tag :on, params[:on] %>
+          </div>
+        <% end %>
+
+        <div class="form-actions">
+          <%= submit_button f, 'Aplicar filtros' %>
+        </div>
+      <% end %>
+    </div>
+  </dialog>
+<% end %>

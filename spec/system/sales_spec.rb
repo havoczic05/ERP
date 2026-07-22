@@ -34,6 +34,29 @@ RSpec.describe 'Sales', type: :system do
       expect(page).to have_link('Nuevo documento', href: new_sale_path)
     end
 
+    context 'filter toggle visibility' do
+      before { driven_by(:headless_chrome) }
+
+      # Reset viewport after each example so a leaked tablet/mobile size does
+      # not contaminate subsequent `js: true` specs (Capybara session reuse
+      # would otherwise leave the "Cerrar sesión" button hidden at <900px and
+      # break system_login_as in downstream files).
+      after do
+        page.driver.browser.manage.window.resize_to(1400, 1400)
+      end
+
+      it 'hides the filter toggle on desktop viewports' do
+        visit sales_path
+        expect(page).not_to have_css('.filter-toggle', visible: true)
+      end
+
+      it 'shows the filter toggle on tablet viewports (<=900px)' do
+        page.driver.browser.manage.window.resize_to(800, 900)
+        visit sales_path
+        expect(page).to have_css('.filter-toggle', visible: true)
+      end
+    end
+
     it 'lists existing sales with correlative, type, client, total, status' do
       sale = create(:sale, client: client, warehouse: warehouse,
                            total_usd: 150.00, correlative: 'COT-00001',

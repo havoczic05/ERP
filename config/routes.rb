@@ -22,6 +22,7 @@ Rails.application.routes.draw do
   resources :clients do
     collection do
       get :search
+      get :filters
     end
   end
 
@@ -34,6 +35,10 @@ Rails.application.routes.draw do
   end
 
   resources :sales do
+    collection do
+      get :filters
+    end
+
     member do
       post :annul
       get  :convert
@@ -46,6 +51,7 @@ Rails.application.routes.draw do
   end
 
   get "accounts_receivable", to: "accounts_receivable#index", as: :accounts_receivable
+  get "accounts_receivable/filters", to: "accounts_receivable#filters", as: :filters_accounts_receivable
 
   get "dashboard", to: "dashboards#show", as: :dashboard
 

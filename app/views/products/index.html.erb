@@ -9,7 +9,7 @@
 
 <div class="toolbar">
   <%= form_with url: products_path, method: :get, local: true, class: "filters" do |f| %>
-    <%= search_field placeholder: 'Nombre o SKU' %>
+    <%= index_search_field placeholder: 'Nombre o SKU' %>
 
     <div class="field">
       <label for="warehouse_id">Almacén</label>

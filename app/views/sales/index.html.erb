@@ -7,31 +7,45 @@
 
 <div class="toolbar">
   <%= form_with url: sales_path, method: :get, class: "filters" do |f| %>
-    <%= search_field placeholder: 'Cliente o correlativo' %>
-    <div class="field">
+    <%= index_search_field(placeholder: 'Cliente o correlativo') %>
+
+    <%= link_to filters_sales_path(q: params[:q]),
+                class: "btn btn--ghost filter-toggle",
+                data: { controller: "filter-dialog",
+                        action: "click->filter-dialog#load",
+                        turbo_frame: "modal", turbo: false },
+                aria: { label: "Filtros" } do %>
+      <%= icon("filter") %>
+      <span>Filtros</span>
+    <% end %>
+
+    <div class="field filter-modal-field">
       <%= label_tag :date_range, 'Fecha' %>
       <%= select_tag :date_range, options_for_select(DateRange::OPTIONS, params[:date_range]) %>
     </div>
-    <div class="field">
+    <div class="field filter-modal-field">
       <%= label_tag :on, 'Día específico' %>
       <%= date_field_tag :on, params[:on] %>
     </div>
-    <div class="field">
+    <div class="field filter-modal-field">
       <%= label_tag :document_type, 'Tipo' %>
       <%= select_tag :document_type,
             options_for_select([['Todos', ''], ['Cotización', 'cotizacion'], ['Venta', 'venta']],
                                params[:document_type]) %>
     </div>
-    <div class="field">
+    <div class="field filter-modal-field">
       <%= label_tag :status, 'Estado' %>
       <%= select_tag :status,
             options_for_select([['Todos', ''], ['Confirmada', 'confirmada'], ['Anulada', 'anulada']],
                                params[:status]) %>
     </div>
+
     <%= submit_button f, 'Buscar' %>
     <%= clear_filters_link sales_path %>
   <% end %>
 </div>
+
+<%= render "shared/modal_frame" %>
 
 <% if @sales.any? %>
   <div class="table-scroll">

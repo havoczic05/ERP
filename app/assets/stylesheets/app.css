@@ -2642,6 +2642,8 @@ tr.line-item.is-over td {
     .toolbar {
         flex-direction: column;
         align-items: stretch;
+        margin-bottom: 0;
+        gap: var(--sp-2);
     }
     .filters {
         display: grid;
@@ -2664,9 +2666,24 @@ tr.line-item.is-over td {
         width: 100%;
     }
 
+    /* Show filter toggle button, hide the inline filter fields on tablet */
+    a.filter-toggle {
+        display: inline-flex;
+    }
+    .filter-modal-field {
+        display: none;
+    }
+
     /* --- Reduce page padding on tablet to reclaim horizontal space --- */
     .app-main {
         padding: var(--sp-5) var(--sp-5) var(--sp-6);
+    }
+}
+
+/* Filter toggle: hidden on desktop (>900px) */
+@media (min-width: 901px) {
+    a.filter-toggle {
+        display: none;
     }
 }
 
@@ -2915,5 +2932,43 @@ tr.line-item.is-over td {
         height: 100%;
         min-width: 100%;
         padding: var(--sp-4) var(--sp-3);
+    }
+
+    /* Toolbar search + filter toggle + buttons on one row */
+    .toolbar {
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: var(--sp-2);
+    }
+    .filters {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: var(--sp-2);
+        width: 100%;
+    }
+    .filters input[type="search"] {
+        flex: 1;
+        min-width: 0;
+        margin-bottom: 0;
+        order: 1;
+    }
+    .filters .filter-toggle {
+        flex-shrink: 0;
+        order: 4;
+    }
+    .filters input[type="submit"] {
+        flex-shrink: 0;
+        width: auto;
+        padding: var(--sp-2) var(--sp-3);
+        order: 2;
+        height: var(--control-h);
+    }
+    .filters .btn--ghost:not(.filter-toggle) {
+        flex-shrink: 0;
+        width: auto;
+        padding: var(--sp-2) var(--sp-3);
+        order: 3;
     }
 }
