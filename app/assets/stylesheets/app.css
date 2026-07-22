@@ -1486,6 +1486,37 @@ turbo-frame {
     font-variant-numeric: tabular-nums;
 }
 
+/* Floating action button — circular primary action (used on all 6 index
+   pages: sales, clients, products, warehouses, users, company_settings).
+   The Stimulus fab controller double-taps on mobile, single-clicks on
+   desktop, so this is a circular FAB on every breakpoint. */
+.fab {
+    position: fixed;
+    right: var(--sp-4);
+    bottom: var(--sp-4);
+    z-index: var(--z-sticky);
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    gap: 0;
+    justify-content: center;
+    border-radius: 999px;
+    box-shadow: var(--shadow);
+    transition: width 0.15s ease, padding 0.15s ease;
+}
+.fab > span {
+    display: none;
+}
+.fab.is-armed {
+    width: auto;
+    height: 52px;
+    padding: 0 var(--sp-5);
+    gap: var(--sp-2);
+}
+.fab.is-armed > span {
+    display: inline;
+}
+
 /* Table footer: pagination (left) · subtotal (center) · export (right) */
 .table-footer {
     display: flex;
@@ -2769,34 +2800,6 @@ tr.line-item.is-over td {
     .filters .field input,
     .filters .field select {
         min-width: 0;
-    }
-
-    /* --- Primary action → floating action button (double-tap via fab controller) --- */
-    .fab {
-        position: fixed;
-        right: var(--sp-4);
-        bottom: var(--sp-4);
-        z-index: var(--z-sticky);
-        width: 56px;
-        height: 56px;
-        padding: 0;
-        gap: 0;
-        justify-content: center;
-        border-radius: 999px;
-        box-shadow: var(--shadow);
-        transition: width 0.15s ease, padding 0.15s ease;
-    }
-    .fab > span {
-        display: none;
-    }
-    .fab.is-armed {
-        width: auto;
-        height: 52px;
-        padding: 0 var(--sp-5);
-        gap: var(--sp-2);
-    }
-    .fab.is-armed > span {
-        display: inline;
     }
 
     /* --- Editable sale tables (líneas + cuotas) → stacked cards --- */
