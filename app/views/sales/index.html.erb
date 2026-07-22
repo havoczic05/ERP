@@ -87,9 +87,6 @@
 
   <div class="table-footer">
     <%= pagination_nav(@pagy) %>
-    <p class="footer-subtotal">
-      Subtotal: <strong><%= number_to_currency(@subtotal, unit: 'USD ') %></strong>
-    </p>
     <%= export_link 'Descargar Excel',
           sales_path(request.query_parameters.except('page').merge(format: 'csv')) %>
   </div>
