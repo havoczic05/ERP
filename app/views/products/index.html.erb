@@ -2,8 +2,10 @@
   <h1>Productos</h1>
   <% if policy(Product).new? %>
     <%= action_link 'Nuevo producto', new_product_path, variant: :primary, size: :md, icon: :plus,
+                    data: { turbo_frame: 'modal' } %>
+    <%= action_link 'Nuevo producto', new_product_path, variant: :primary, icon: :plus,
                     class: "fab", aria: { label: "Nuevo producto" },
-                    data: { turbo_frame: 'modal', controller: 'fab', action: 'fab#click' } %>
+                    data: { turbo_frame: 'modal' } %>
   <% end %>
 </div>
 

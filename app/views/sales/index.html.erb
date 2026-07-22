@@ -1,8 +1,8 @@
 <div class="page-head page-head--with-action">
   <h1>Ventas</h1>
-  <%= action_link 'Nuevo documento', new_sale_path, variant: :primary, size: :md, icon: :plus,
-                  class: "fab", aria: { label: "Nuevo documento" },
-                  data: { controller: "fab", action: "fab#click" } %>
+  <%= action_link 'Nuevo documento', new_sale_path, variant: :primary, size: :md, icon: :plus %>
+  <%= action_link 'Nuevo documento', new_sale_path, variant: :primary, icon: :plus,
+                  class: "fab", aria: { label: "Nuevo documento" } %>
 </div>
 
 <div class="toolbar">
@@ -93,6 +93,5 @@
 <% else %>
   <div class="empty-state">
     <p id="no-sales-message">No se encontraron ventas.</p>
-    <%= action_link 'Nuevo documento', new_sale_path, variant: :primary, size: :md, icon: :plus %>
   </div>
 <% end %>

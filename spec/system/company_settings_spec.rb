@@ -32,6 +32,11 @@ RSpec.describe "CompanySettings", type: :system do
       expect(page).to have_link("Editar configuración", href: edit_company_settings_path)
     end
 
+    it "does not render the FAB (circular floating button)" do
+      visit company_settings_path
+      expect(page).not_to have_css(".fab")
+    end
+
     it "shows the import card in the hub sidebar" do
       visit company_settings_path
 

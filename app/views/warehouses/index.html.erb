@@ -4,8 +4,7 @@
     <p class="page-sub">Ubicaciones donde se almacena el inventario.</p>
   </div>
   <%= action_link 'Nuevo almacén', new_warehouse_path, variant: :primary, size: :md, icon: :plus,
-                  class: "fab", aria: { label: "Nuevo almacén" },
-                  data: { turbo_frame: 'modal', controller: 'fab', action: 'fab#click' } %>
+                  data: { turbo_frame: 'modal' } %>
 </div>
 
 <%= render "shared/settings_nav" %>

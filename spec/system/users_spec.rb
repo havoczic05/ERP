@@ -53,6 +53,10 @@ RSpec.describe 'Users', type: :system do
     it 'shows "Nuevo usuario" link' do
       expect(page).to have_link('Nuevo usuario')
     end
+
+    it 'does not render the FAB (circular floating button)' do
+      expect(page).not_to have_css('.fab')
+    end
   end
 
   describe 'index page — inactive user' do

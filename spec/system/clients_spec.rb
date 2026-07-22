@@ -47,6 +47,44 @@ RSpec.describe 'Clients', type: :system do
       expect(page).to have_link('Nuevo cliente', href: new_client_path)
     end
 
+    it 'renders the FAB (circular floating button) for create action' do
+      visit clients_path
+      expect(page).to have_css('.fab')
+    end
+
+    it 'positions the FAB on mobile/tablet and shows inline button on desktop', :js do
+      driven_by(:headless_chrome)
+
+      begin
+        # Mobile (375px): FAB visible + fixed, inline button hidden
+        page.driver.browser.manage.window.resize_to(375, 800)
+        visit clients_path
+        fab = find('.fab', visible: :all)
+        expect(fab.native.style('position')).to eq('fixed')
+        expect(fab.native.style('display')).not_to eq('none')
+        inline = find('.page-head--with-action > a.btn:not(.fab)', visible: :all)
+        expect(inline.native.style('display')).to eq('none')
+
+        # Boundary: tablet 768px ≤ 1024px — still FAB visible
+        page.driver.browser.manage.window.resize_to(768, 800)
+        visit clients_path
+        fab = find('.fab', visible: :all)
+        expect(fab.native.style('display')).not_to eq('none')
+        inline = find('.page-head--with-action > a.btn:not(.fab)', visible: :all)
+        expect(inline.native.style('display')).to eq('none')
+
+        # Desktop (1366px): inline visible, FAB hidden
+        page.driver.browser.manage.window.resize_to(1366, 900)
+        visit clients_path
+        fab = find('.fab', visible: :all)
+        expect(fab.native.style('display')).to eq('none')
+        inline = find('.page-head--with-action > a.btn:not(.fab)', visible: :all)
+        expect(inline.native.style('display')).not_to eq('none')
+      ensure
+        page.driver.browser.manage.window.resize_to(1400, 1400)
+      end
+    end
+
     it 'offers a "Limpiar" link that resets the filters' do
       visit clients_path(q: 'Acme')
       expect(page).to have_link('Limpiar', href: clients_path)

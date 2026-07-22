@@ -34,6 +34,11 @@ RSpec.describe 'Warehouses', type: :system do
       visit warehouses_path
       expect(page).to have_content('No se encontraron almacenes.')
     end
+
+    it 'does not render the FAB (circular floating button)' do
+      visit warehouses_path
+      expect(page).not_to have_css('.fab')
+    end
   end
 
   # ---------------------------------------------------------------------------
