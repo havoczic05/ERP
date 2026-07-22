@@ -1486,35 +1486,44 @@ turbo-frame {
     font-variant-numeric: tabular-nums;
 }
 
-/* Floating action button — circular primary action (used on all 6 index
-   pages: sales, clients, products, warehouses, users, company_settings).
-   The Stimulus fab controller double-taps on mobile, single-clicks on
-   desktop, so this is a circular FAB on every breakpoint. */
+/* Floating action button — mobile/tablet only (≤1024px). Two elements always
+   in the page-head DOM: an inline .btn (desktop CTA) and a .fab (mobile FAB).
+   CSS-only visibility toggle; the Stimulus fab_controller is removed. */
 .fab {
-    position: fixed;
-    right: var(--sp-4);
-    bottom: var(--sp-4);
-    z-index: var(--z-sticky);
     width: 56px;
     height: 56px;
     padding: 0;
     gap: 0;
     justify-content: center;
     border-radius: 999px;
-    box-shadow: var(--shadow);
     transition: width 0.15s ease, padding 0.15s ease;
 }
+
+/* FAB is hidden on desktop (>1024px). Use a.btn.fab so this beats the a.btn
+   display rule (higher specificity). */
+a.btn.fab {
+    display: none;
+}
+
+/* FAB label stays hidden — icon-only button */
 .fab > span {
     display: none;
 }
-.fab.is-armed {
-    width: auto;
-    height: 52px;
-    padding: 0 var(--sp-5);
-    gap: var(--sp-2);
-}
-.fab.is-armed > span {
-    display: inline;
+
+@media (max-width: 1024px) {
+    a.btn.fab {
+        display: inline-flex;
+        position: fixed;
+        right: var(--sp-4);
+        bottom: var(--sp-4);
+        z-index: var(--z-sticky);
+        box-shadow: var(--shadow);
+    }
+
+    /* Hide the page-head inline primary button on mobile/tablet */
+    .page-head--with-action > a.btn:not(.fab) {
+        display: none;
+    }
 }
 
 /* Table footer: pagination (left) · subtotal (center) · export (right) */
