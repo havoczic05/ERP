@@ -37,6 +37,14 @@ RSpec.describe 'Sales', type: :system do
     context 'filter toggle visibility' do
       before { driven_by(:headless_chrome) }
 
+      # Reset viewport after each example so a leaked tablet/mobile size does
+      # not contaminate subsequent `js: true` specs (Capybara session reuse
+      # would otherwise leave the "Cerrar sesión" button hidden at <900px and
+      # break system_login_as in downstream files).
+      after do
+        page.driver.browser.manage.window.resize_to(1400, 1400)
+      end
+
       it 'hides the filter toggle on desktop viewports' do
         visit sales_path
         expect(page).not_to have_css('.filter-toggle', visible: true)
