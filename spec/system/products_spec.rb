@@ -31,6 +31,11 @@ RSpec.describe 'Products', type: :system do
       expect(page).to have_link('Nuevo producto', href: new_product_path)
     end
 
+    it 'renders the FAB (circular floating button) for create action' do
+      visit products_path
+      expect(page).to have_css('.fab')
+    end
+
     it 'shows a no-results message when no kept products match' do
       visit products_path(q: 'ZZZNOMATCH')
       expect(page).to have_content('No se encontraron productos')

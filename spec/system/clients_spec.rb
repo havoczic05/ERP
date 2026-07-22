@@ -47,6 +47,11 @@ RSpec.describe 'Clients', type: :system do
       expect(page).to have_link('Nuevo cliente', href: new_client_path)
     end
 
+    it 'renders the FAB (circular floating button) for create action' do
+      visit clients_path
+      expect(page).to have_css('.fab')
+    end
+
     it 'offers a "Limpiar" link that resets the filters' do
       visit clients_path(q: 'Acme')
       expect(page).to have_link('Limpiar', href: clients_path)

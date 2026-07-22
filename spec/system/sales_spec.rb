@@ -34,6 +34,11 @@ RSpec.describe 'Sales', type: :system do
       expect(page).to have_link('Nuevo documento', href: new_sale_path)
     end
 
+    it 'renders the FAB (circular floating button) for create action' do
+      visit sales_path
+      expect(page).to have_css('.fab')
+    end
+
     context 'filter toggle visibility' do
       before { driven_by(:headless_chrome) }
 
