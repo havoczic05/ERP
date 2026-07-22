@@ -12,7 +12,6 @@ class SalesController < ApplicationController
     # Sort by creation date; direction toggled from the "Fecha" header (default desc).
     dir   = params[:dir] == "asc" ? :asc : :desc
     scope = filter_sales(Sale.kept.or(Sale.anulada).order(created_at: dir))
-    @subtotal = scope.sum(:total_usd) # subtotal of the FILTERED set (not the page)
 
     respond_to do |format|
       # 10 rows so the pagination/footer fits on screen without much scrolling.

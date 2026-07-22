@@ -98,12 +98,6 @@ RSpec.describe 'Sales', type: :request do
         expect(response.body).to include('VTA-F001')
       end
 
-      it 'shows the subtotal of the filtered set' do
-        get sales_path(status: 'confirmada') # VTA-F001 (100) + COT-F001 (50) = 150
-        expect(response.body).to include('Subtotal:')
-        expect(response.body).to include('USD 150.00')
-      end
-
       it 'exports the filtered set as CSV (respects filters)' do
         get sales_path(format: :csv, q: 'Acme')
         expect(response.media_type).to eq('text/csv')
