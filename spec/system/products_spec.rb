@@ -31,9 +31,11 @@ RSpec.describe 'Products', type: :system do
       expect(page).to have_link('Nuevo producto', href: new_product_path)
     end
 
-    it 'renders the FAB (circular floating button) for create action' do
+    it 'renders the FAB (pill-shaped floating button) for create action' do
       visit products_path
       expect(page).to have_css('.fab')
+      expect(page).to have_css('.fab span', text: 'Nuevo producto')
+      expect(page).to have_no_css('.fab[aria-label]')
     end
 
     it 'positions the FAB on mobile/tablet and shows inline button on desktop', :js do
@@ -46,6 +48,8 @@ RSpec.describe 'Products', type: :system do
         fab = find('.fab', visible: :all)
         expect(fab.native.style('position')).to eq('fixed')
         expect(fab.native.style('display')).not_to eq('none')
+        expect(fab).to have_text('Nuevo producto')
+        expect(page).to have_no_css('.fab[aria-label]')
         inline = find('.page-head--with-action > a.btn:not(.fab)', visible: :all)
         expect(inline.native.style('display')).to eq('none')
 
@@ -54,6 +58,8 @@ RSpec.describe 'Products', type: :system do
         visit products_path
         fab = find('.fab', visible: :all)
         expect(fab.native.style('display')).not_to eq('none')
+        expect(fab).to have_text('Nuevo producto')
+        expect(page).to have_no_css('.fab[aria-label]')
         inline = find('.page-head--with-action > a.btn:not(.fab)', visible: :all)
         expect(inline.native.style('display')).to eq('none')
 
