@@ -1490,10 +1490,9 @@ turbo-frame {
    in the page-head DOM: an inline .btn (desktop CTA) and a .fab (mobile FAB).
    CSS-only visibility toggle; the Stimulus fab_controller is removed. */
 .fab {
-    width: 56px;
     height: 56px;
-    padding: 0;
-    gap: 0;
+    padding: 0 var(--sp-4);
+    gap: var(--sp-2);
     justify-content: center;
     border-radius: 999px;
     transition: width 0.15s ease, padding 0.15s ease;
@@ -1505,10 +1504,6 @@ a.btn.fab {
     display: none;
 }
 
-/* FAB label stays hidden — icon-only button */
-.fab > span {
-    display: none;
-}
 
 @media (max-width: 1024px) {
     a.btn.fab {
