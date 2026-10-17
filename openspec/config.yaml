@@ -1,0 +1,86 @@
+# openspec/config.yaml
+schema: spec-driven
+
+context: |
+  Tech stack: Rails 8.1, PostgreSQL, Hotwire (Turbo + Stimulus + Importmap), Propshaft (CSS asset pipeline), Pundit (authz), Pagy (pagination), Prawn (PDF), Roo (spreadsheets).
+  Architecture: Standard Rails MVC with service objects (app/services/), Pundit policies (app/policies/), and PDF generation (app/pdfs/). CSS-first responsive design (no Tailwind/component lib) with breakpoints at 56rem/900px/720px/640px.
+  Testing: RSpec (models, requests, system specs, jobs, services, policies) via Capybara + Selenium for E2E. FactoryBot for fixtures. DatabaseCleaner for JS spec truncation. rspec-retry for flaky browser tests.
+  Style: Spanish UI (Peruvian ERP), hardcoded text, no i18n. English for technical artifacts. Validation messages via per-model message: overrides. RuboCop (rails-omakase) for linting. No type checker (Ruby).
+
+strict_tdd: true
+
+testing:
+  runner:
+    command: bundle exec rspec
+    framework: RSpec
+  layers:
+    unit:
+      available: true
+      tools:
+        - RSpec models (spec/models/)
+        - RSpec jobs (spec/jobs/)
+        - RSpec services (spec/services/)
+        - RSpec policies (spec/policies/)
+        - RSpec tasks (spec/tasks/)
+        - RSpec PDFs (spec/pdfs/)
+    integration:
+      available: true
+      tools:
+        - RSpec requests (spec/requests/)
+    e2e:
+      available: true
+      tools:
+        - Capybara + Selenium system specs (spec/system/)
+        - rspec-retry for flaky specs
+        - DatabaseCleaner for JS/truncation specs
+  coverage:
+    available: false
+  quality:
+    linter:
+      name: RuboCop (rails-omakase)
+      command: bin/rubocop
+      available: true
+    type_checker:
+      command: ""
+      available: false
+    formatter:
+      command: ""
+      available: false
+    security:
+      - Brakeman (bin/brakeman)
+      - Bundler-audit (bin/bundler-audit)
+      - Importmap audit (bin/importmap audit)
+
+rules:
+  proposal:
+    - Include scope boundaries (in/out)
+    - State approach with rationale
+    - Note rollback strategy for risky changes
+  specs:
+    - Requirements use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+    - Scenarios use Given/When/Then format
+    - Delta specs follow ADDED/MODIFIED/REMOVED/RENAMED sections
+  design:
+    - Document architecture decisions with rationale
+    - Include sequence diagrams for complex flows
+    - Reference existing patterns (service objects, policies, PDFs)
+  tasks:
+    - Group by logical phase
+    - Each task completable in one session
+    - Use hierarchical numbering (1., 1.1, 1.2)
+  apply:
+    guidelines:
+      - Follow existing code patterns (Spanish UI, hardcoded text)
+      - Create or update specs alongside implementation
+      - Keep views in app/views/{domain}/
+      - CSS in app/assets/stylesheets/app.css
+      - Keep responsive breakpoints consistent
+    tdd: true
+    test_command: bundle exec rspec
+  verify:
+    test_command: bundle exec rspec
+    build_command: ""
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas
+    - Move change folder to archive/YYYY-MM-DD-{change-name}/
