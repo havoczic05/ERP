@@ -7,6 +7,18 @@ financial values are in **USD**.
 📐 **Architecture:** see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the
 stack, domain model, and the conventions all modules follow.
 
+## Key Screens
+
+> *Data shown is generated from deterministic local fixture seeds (`db/seeds.rb`), containing no confidential client data.*
+
+| Dashboard & Metrics | Accounts Receivable & Amortizations |
+| :---: | :---: |
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Accounts Receivable](docs/screenshots/accounts-receivable.png) |
+
+| Sales & Quotations | Multi-Warehouse Inventory |
+| :---: | :---: |
+| ![Sales](docs/screenshots/sales.png) | ![Inventory](docs/screenshots/inventory.png) |
+
 ## Tech stack
 
 - **Ruby** 3.4.9 / **Rails** 8.1
